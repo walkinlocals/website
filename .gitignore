@@ -1,0 +1,29 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+
+# environment — NEVER commit secrets
+.env
+.env.local
+.env.*.local
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# os / editor
+.DS_Store
+*.pem
+.idea
+.vscode
+
+# typescript
+*.tsbuildinfo
