@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: "Walkinlocals — Dublin",
   description:
     "A curated marketplace connecting travelers with local Dublin hosts for storytelling experiences over tea, coffee, and traditional treats.",
+  // This tells Google and all other search engine bots they are completely allowed to read and index your page
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
