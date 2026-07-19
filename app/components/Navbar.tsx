@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { pingActivity } from "@/lib/activity-client";
 import { LogOut, Loader2 } from "lucide-react";
 
 type Role = "Host" | "Guest" | "Admin";
@@ -15,6 +16,9 @@ interface NavProfile {
   is_active: boolean;
 }
 
+const NAV_LINK_CLASS =
+  "hidden sm:block text-sm font-medium text-slate-650 hover:text-[#002FA7] transition";
+
 export default function Navbar() {
   const router = useRouter();
   const supabase = createClient();
@@ -23,14 +27,13 @@ export default function Navbar() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [profile, setProfile] = useState<NavProfile | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const [syncTrigger, setSyncTrigger] = useState(0);
 
   useEffect(() => {
     let active = true;
 
     async function load() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!active) return;
 
       if (!user) {
@@ -54,53 +57,76 @@ export default function Navbar() {
         avatar_url: data?.avatar_url ?? null,
         is_active: data?.is_active ?? false,
       });
+      pingActivity();
       setLoading(false);
     }
 
     load();
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => load());
+
+    const matchesChannel = supabase
+      .channel("navbar-live-sync")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "matches" },
+        () => {
+          router.refresh();
+          setSyncTrigger((prev) => prev + 1);
+        }
+      )
+      .subscribe();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => load());
 
     return () => {
       active = false;
       subscription.unsubscribe();
+      supabase.removeChannel(matchesChannel);
     };
-  }, [supabase]);
+  }, [supabase, router, syncTrigger]);
 
   async function handleSignOut() {
     setSigningOut(true);
     await supabase.auth.signOut();
+    setIsAuthed(false);
+    setProfile(null);
     router.push("/");
     router.refresh();
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-150 bg-slate-50/80 backdrop-blur">
+    <header
+      id="site-navbar"
+      className="sticky top-0 z-40 border-b border-slate-150 bg-slate-50/80 backdrop-blur"
+    >
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-
-        {/* Brand Link with integrated small logo.png */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-950 transition-colors hover:text-[#002FA7]"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/logo.png"
-            alt="WalkIn Locals Logo"
-            className="h-5 w-5 object-contain shrink-0 rounded-md"
-          />
-          <span>
-            WalkIn<span className="text-[#002FA7]"> Locals </span>
-          </span>
+        {/* Always visible brand identity */}
+        <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-950 transition-colors hover:text-[#002FA7]">
+          <img src="/images/logo.png" alt="WalkIn Locals Logo" className="h-5 w-5 object-contain shrink-0 rounded-md" />
+          <span>WalkIn<span className="text-[#002FA7]"> Locals </span></span>
         </Link>
 
-        <div className="flex items-center gap-2 sm:gap-5">
+        {/* Dynamic actions wrapper */}
+        <div className="flex items-center gap-3 sm:gap-5">
           {loading ? (
             <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
           ) : !isAuthed ? (
-            <LoggedOut />
+            /* FIX: Instead of returning null, show Sign In and Sign Up buttons if logged out */
+            <div className="flex items-center gap-3">
+              <Link
+                href="/login"
+                className="text-sm font-medium text-slate-650 hover:text-[#002FA7] transition"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/login?mode=signup"
+                className="rounded-full bg-[#002FA7] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#001e6c] transition"
+              >
+                Sign Up
+              </Link>
+            </div>
           ) : (
+            /* Revealed immediately when user session resolves successfully */
             <ActiveLinks
               profile={profile ?? { role: null, full_name: null, avatar_url: null, is_active: false }}
               signingOut={signingOut}
@@ -113,102 +139,38 @@ export default function Navbar() {
   );
 }
 
-function LoggedOut() {
+function ActiveLinks({ profile, signingOut, onSignOut }: { profile: NavProfile; signingOut: boolean; onSignOut: () => void }) {
   return (
     <>
-      {/*
-        Temporarily disabled for waitlist phase
-        <Link
-          href="/#our-story"
-          className="hidden text-sm text-slate-600 transition hover:text-[#002FA7] sm:block font-medium"
-        >
-          Our Story
-        </Link>
-      */}
-
-      {/*
-        Temporarily disabled for waitlist phase
-        <Link
-          href="/login?mode=signup"
-          className="rounded-full bg-[#002FA7] px-5 py-2 text-sm font-medium text-white transition duration-300 hover:bg-[#001e6c] shadow-[0_4px_15px_rgba(0,47,167,0.15)]"
-        >
-          Log in/Sign Up
-        </Link>
-      */}
-    </>
-  );
-}
-
-function ActiveLinks({
-  profile,
-  signingOut,
-  onSignOut,
-}: {
-  profile: NavProfile;
-  signingOut: boolean;
-  onSignOut: () => void;
-}) {
-  return (
-    <>
-      <NavLink href="/">Home</NavLink>
+      <Link href="/" className={NAV_LINK_CLASS}>Home</Link>
 
       {profile.role === "Host" ? (
-        <NavLink href="/guest-directory">Guests</NavLink>
+        <Link href="/guest-directory" className={NAV_LINK_CLASS}>Guests</Link>
       ) : (
-        <NavLink href="/host-directory">Hosts</NavLink>
+        <Link href="/host-directory" className={NAV_LINK_CLASS}>Hosts</Link>
       )}
 
-      <NavLink href="/matches">Matches</NavLink>
+      <Link href="/matches" className={NAV_LINK_CLASS}>Matches</Link>
 
-      <Link href="/profile" aria-label="Your profile" className="transition duration-300 hover:scale-[1.03] shrink-0">
-        <Avatar name={profile.full_name} src={profile.avatar_url} />
+      <Link href="/profile" aria-label="Your profile" className="transition hover:scale-[1.03] shrink-0">
+        <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-sm font-medium text-slate-700 ring-1 ring-slate-250 hover:ring-[#002FA7]/50">
+          {profile.avatar_url ? (
+            <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+          ) : (
+            (profile.full_name?.charAt(0)?.toUpperCase() ?? "?")
+          )}
+        </span>
       </Link>
 
-      <SignOutButton signingOut={signingOut} onSignOut={onSignOut} />
+      <button
+        type="button"
+        onClick={onSignOut}
+        disabled={signingOut}
+        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-750 hover:bg-slate-100 hover:text-[#002FA7] disabled:opacity-60"
+      >
+        {signingOut ? <Loader2 className="h-4 w-4 animate-spin text-[#002FA7]" /> : <LogOut className="h-4 w-4" />}
+        <span className="hidden sm:inline">Sign Out</span>
+      </button>
     </>
-  );
-}
-
-function SignOutButton({
-  signingOut,
-  onSignOut,
-}: {
-  signingOut: boolean;
-  onSignOut: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onSignOut}
-      disabled={signingOut}
-      className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-750 transition hover:bg-slate-100 hover:text-[#002FA7] hover:border-slate-300 disabled:opacity-60"
-    >
-      {signingOut ? <Loader2 className="h-4 w-4 animate-spin text-[#002FA7]" /> : <LogOut className="h-4 w-4" />}
-      <span className="hidden sm:inline">Sign Out</span>
-    </button>
-  );
-}
-
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="hidden text-sm font-medium text-slate-650 transition hover:text-[#002FA7] sm:block"
-    >
-      {children}
-    </Link>
-  );
-}
-
-function Avatar({ name, src }: { name: string | null; src: string | null }) {
-  return (
-    <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-sm font-medium text-slate-700 ring-1 ring-slate-250 transition-colors hover:ring-[#002FA7]/50">
-      {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={name ?? "Your avatar"} className="h-full w-full object-cover" />
-      ) : (
-        (name?.charAt(0)?.toUpperCase() ?? "?")
-      )}
-    </span>
   );
 }

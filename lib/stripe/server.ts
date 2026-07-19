@@ -1,4 +1,12 @@
 import Stripe from "stripe";
+import {
+  MATCH_FEE_CENTS,
+  HOST_PAYOUT_CENTS,
+  PLATFORM_FEE_CENTS,
+  MAX_PARTY_SIZE,
+} from "@/lib/pricing";
+
+export { MATCH_FEE_CENTS, HOST_PAYOUT_CENTS, PLATFORM_FEE_CENTS, MAX_PARTY_SIZE };
 
 /**
  * Server-only Stripe client. Never import this from a Client Component —
@@ -13,6 +21,3 @@ if (!secretKey) {
 }
 
 export const stripe = new Stripe(secretKey);
-
-/** The Walk In connection fee, in euro cents (€35.00). */
-export const MATCH_FEE_CENTS = 3500;

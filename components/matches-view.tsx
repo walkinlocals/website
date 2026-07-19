@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -12,9 +12,15 @@ import {
   Mail,
   MapPin,
   PartyPopper,
+  Info,
 } from "lucide-react";
+import { MAX_PARTY_SIZE, HOST_PAYOUT_EUR } from "@/lib/pricing";
+import { PAGE_CONTAINER } from "@/lib/page-layout";
+import { formatDirectoryLocation } from "@/lib/directory-display";
 import ChatBox from "@/components/chat-box";
 import LocationMap from "@/components/location-map";
+import MatchDateNegotiation from "@/components/match-date-negotiation";
+import { isDateNegotiationComplete } from "@/lib/match-dates";
 
 const FEE_PER_PERSON = 35;
 
@@ -39,6 +45,9 @@ export interface MatchRow {
   party_size: number;
   initiator_id: string | null;
   created_at: string;
+  proposed_date: string | null;
+  date_proposed_by: string | null;
+  date_confirmed: boolean | null;
   host: PartyProfile | null;
   guest: PartyProfile | null;
 }
@@ -49,6 +58,7 @@ interface Props {
   matches: MatchRow[];
   loadError: string | null;
   justPaid: boolean;
+  connectComplete?: boolean;
 }
 
 const STATUS_STYLE: Record<Status, string> = {
@@ -65,18 +75,46 @@ export default function MatchesView({
   matches,
   loadError,
   justPaid,
+  connectComplete = false,
 }: Props) {
+  const router = useRouter();
+  const [payoutsReady, setPayoutsReady] = useState(false);
+
+  useEffect(() => {
+    if (!connectComplete) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/stripe/connect/sync-status", { method: "POST" });
+        const data = (await res.json().catch(() => ({}))) as { payouts_enabled?: boolean };
+        if (!cancelled && res.ok && data.payouts_enabled) {
+          setPayoutsReady(true);
+        }
+      } finally {
+        if (!cancelled) router.replace("/matches");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [connectComplete, router]);
+
   return (
-    <main className="mx-auto max-w-3xl px-6 py-14 text-slate-900 sm:py-20">
+    <main className={`${PAGE_CONTAINER} py-14 text-slate-900 sm:py-20`}>
       <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.3em] text-[#002FA7] font-semibold bg-[#002fa7]/5 px-3 py-1 rounded-full mb-4">
         ✦ Connections Panel ✦
       </span>
       <h1 className="font-serif text-3xl font-normal tracking-tight text-slate-950 sm:text-4xl">Your matches</h1>
       <p className="mt-2 text-sm text-slate-500 font-light leading-relaxed">
-        {myRole === "Host"
-          ? "Manage your guest connections. Respond to incoming visits or invite pending travelers."
-          : "Track your requests. Specify travelers and complete your payments to unlock chat doors."}
+        Manage connection requests, respond to invitations, and unlock contact details after payment.
       </p>
+
+      {payoutsReady && (
+        <div className="mt-8 flex items-center gap-2.5 rounded-3xl border border-emerald-100 bg-emerald-50/50 px-5 py-4 text-sm text-emerald-800 font-light leading-relaxed">
+          <Check className="h-5 w-5 text-emerald-600" />
+          <span>Bank details saved — tap <strong>Accept</strong> on your pending visit to confirm it.</span>
+        </div>
+      )}
 
       {justPaid && (
         <div className="mt-8 flex items-center gap-2.5 rounded-3xl border border-emerald-100 bg-emerald-50/50 px-5 py-4 text-sm text-emerald-800 font-light leading-relaxed">
@@ -113,14 +151,20 @@ function MatchCard({
   myRole: "Guest" | "Host";
 }) {
   const router = useRouter();
-  const [working, setWorking] = useState<null | "accept" | "hold" | "decline">(null);
+  const [working, setWorking] = useState<null | "accept" | "hold" | "decline" | "payout">(null);
   const [error, setError] = useState<string | null>(null);
+  const [payoutPromptEur, setPayoutPromptEur] = useState<number | null>(null);
   const [selectedPartySize, setSelectedPartySize] = useState(match.party_size ?? 1);
 
   const iAmHost = match.host_id === currentUserId;
   const other = iAmHost ? match.guest : match.host;
-  const otherLocation = iAmHost ? other?.origin_location : other?.neighborhood;
+  const otherRole = iAmHost ? "Guest" : "Host";
+  const otherLocation =
+    other && (otherRole === "Host" || otherRole === "Guest")
+      ? formatDirectoryLocation(other, otherRole)
+      : null;
   const paid = match.status === "Paid";
+  const dateReady = isDateNegotiationComplete(match);
 
   const hostInitiated = match.initiator_id === match.host_id;
   const iAmDecider = (iAmHost && !hostInitiated) || (!iAmHost && hostInitiated);
@@ -128,6 +172,29 @@ function MatchCard({
 
   const partySize = isGuestAcceptingHostInvite ? selectedPartySize : (match.party_size ?? 1);
   const total = FEE_PER_PERSON * partySize;
+  const hostEarnings = partySize * HOST_PAYOUT_EUR;
+
+  async function startPayoutSetup() {
+    setWorking("payout");
+    setError(null);
+    try {
+      const res = await fetch("/api/stripe/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ returnPath: "/matches" }),
+      });
+      const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !body.url) {
+        setError(body.error ?? "Could not start payout setup.");
+        return;
+      }
+      window.location.href = body.url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Network error");
+    } finally {
+      setWorking(null);
+    }
+  }
 
   const mapQuery = iAmHost
     ? (other?.origin_location ?? "")
@@ -152,8 +219,17 @@ function MatchCard({
             partySize: isGuestAcceptingHostInvite ? selectedPartySize : undefined
           }),
         });
-        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        const body = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          code?: string;
+          hostEarningsEur?: number;
+        };
         if (!res.ok) {
+          if (body.code === "PAYOUT_SETUP_REQUIRED" && iAmHost) {
+            setPayoutPromptEur(body.hostEarningsEur ?? hostEarnings);
+            setError(null);
+            return;
+          }
           setError(body.error ?? `Failed (${res.status})`);
           return;
         }
@@ -201,7 +277,7 @@ function MatchCard({
             {otherLocation && (
               <p className="flex items-center gap-1 text-xs text-slate-400 font-light mt-0.5">
                 <MapPin className="h-3.5 w-3.5 text-[#002FA7]/70" />
-                {iAmHost ? `From ${otherLocation}` : otherLocation}
+                {otherLocation}
               </p>
             )}
           </div>
@@ -227,19 +303,31 @@ function MatchCard({
         </div>
       )}
 
-      <div className="mt-5 space-y-4">
-        {isGuestAcceptingHostInvite && (
+      <div className="mt-5 w-full min-w-0 space-y-4">
+        {!paid && match.status !== "Denied" && (
+          <MatchDateNegotiation
+            match={match}
+            currentUserId={currentUserId}
+            hostId={match.host_id}
+          />
+        )}
+
+        {isGuestAcceptingHostInvite && dateReady && (
           <div className="space-y-1.5 max-w-xs">
             <label htmlFor={`party-confirm-${match.id}`} className="block text-[10px] font-mono uppercase tracking-wider text-slate-400">
-              Confirm how many people? (€35 each, max 5)
+              Confirm how many people? (€35 each, max {MAX_PARTY_SIZE})
             </label>
+            <p className="flex items-start gap-1.5 text-xs text-slate-500 font-light leading-relaxed">
+              <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-[#002FA7]/70" />
+              €35 per person unlocks chat and contact details. Your host receives €25 per person.
+            </p>
             <select
               id={`party-confirm-${match.id}`}
               value={selectedPartySize}
               onChange={(e) => setSelectedPartySize(Number(e.target.value))}
               className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-950 focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7] transition-all font-light"
             >
-              {[1, 2, 3, 4, 5].map((n) => (
+              {Array.from({ length: MAX_PARTY_SIZE }, (_, i) => i + 1).map((n) => (
                 <option key={n} value={n}>
                   {n} {n === 1 ? "person" : "people"} — €{n * FEE_PER_PERSON}
                 </option>
@@ -248,7 +336,41 @@ function MatchCard({
           </div>
         )}
 
-        {iAmDecider && (match.status === "Pending" || match.status === "Hold") ? (
+        {payoutPromptEur !== null && iAmHost && (
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-5 space-y-3">
+            <p className="font-serif text-base text-emerald-950">
+              You have <strong>€{payoutPromptEur}</strong> waiting from this visit.
+            </p>
+            <p className="text-sm text-emerald-800/90 font-light leading-relaxed">
+              Add your IBAN through Stripe to accept the booking and receive your payout when the traveler pays.
+            </p>
+            <button
+              type="button"
+              onClick={startPayoutSetup}
+              disabled={working !== null}
+              className="inline-flex items-center gap-2 rounded-full bg-[#002FA7] px-6 py-3 text-xs font-mono font-semibold uppercase tracking-widest text-white transition-all duration-300 hover:bg-[#001e6c] disabled:opacity-50 shadow-sm"
+            >
+              {working === "payout" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Add bank details &amp; accept
+            </button>
+          </div>
+        )}
+
+        {!dateReady && (match.status === "Pending" || match.status === "Hold") && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => act("decline")}
+              disabled={working !== null}
+              className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-white px-5 py-2.5 text-xs font-mono font-semibold uppercase tracking-wider text-rose-600 transition-all duration-300 hover:bg-rose-50/50 disabled:opacity-50"
+            >
+              {working === "decline" ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+              Decline
+            </button>
+          </div>
+        )}
+
+        {iAmDecider && dateReady && (match.status === "Pending" || match.status === "Hold") ? (
           <div className="flex flex-wrap gap-2 pt-2">
             <button
               type="button"
@@ -287,7 +409,9 @@ function MatchCard({
               disabled
               className="cursor-not-allowed rounded-full bg-slate-50 border border-slate-150 px-5 py-2.5 text-xs font-mono font-semibold uppercase tracking-wider text-slate-400"
             >
-              Awaiting {iAmHost ? "guest" : "host"} response
+              {!dateReady
+                ? "Agree on a visit date first"
+                : `Awaiting ${iAmHost ? "guest" : "host"} response`}
             </button>
           )
         )}
@@ -319,21 +443,36 @@ function MatchCard({
       </div>
 
       {paid && other && (
-        <div className="mt-6 border-t border-slate-100 pt-6">
-          <div className="grid gap-2 sm:grid-cols-2 mb-4">
-            <p className="flex items-center gap-2 text-sm text-slate-650 font-light">
-              <Phone className="h-4 w-4 text-[#002FA7] stroke-[1.5]" />
-              <span>{other.phone || "No phone provided"}</span>
-            </p>
-            <p className="flex items-center gap-2 text-sm text-slate-650 font-light">
-              <Mail className="h-4 w-4 text-[#002FA7] stroke-[1.5]" />
-              <span className="break-all">{other.contact_email || "No email provided"}</span>
-            </p>
+        <div className="mt-6 border-t border-slate-100 pt-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="block font-mono text-[9px] uppercase tracking-[0.25em] text-[#002FA7] font-bold">
+              Member Info
+            </span>
           </div>
 
-          {/* Secure WhatsApp Handshake Trigger Button */}
+          {/* Structured Contact Vector Grid */}
+          <div className="grid gap-3 sm:grid-cols-2 font-mono text-xs text-slate-600">
+            <div className="flex items-center gap-2.5 rounded-xl bg-slate-50/70 px-4 py-3 border border-slate-100 shadow-sm">
+              <Phone className="h-4 w-4 text-[#002FA7] shrink-0" />
+              <div>
+                <span className="block text-[8px] uppercase tracking-wider text-slate-400 font-bold">Phone Number</span>
+                <span className="text-slate-800 tracking-wider font-medium">{other.phone || "—"}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 rounded-xl bg-slate-50/70 px-4 py-3 border border-slate-100 shadow-sm">
+              <Mail className="h-4 w-4 text-[#002FA7] shrink-0" />
+              <div className="min-w-0">
+                <span className="block text-[8px] uppercase tracking-wider text-slate-400 font-bold">Email Coordinate</span>
+                <span className="text-slate-800 break-all font-medium">{other.contact_email || "—"}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Styled Premium WhatsApp Action Row */}
           {other.phone && (
-            <div className="flex gap-3 mb-6">
+            <div className="flex justify-start">
               <a
                 href={`https://wa.me/${other.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
                   `Hi ${other.full_name || "there"}! This is ${
@@ -342,13 +481,17 @@ function MatchCard({
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white px-5 py-2.5 font-mono text-[11px] uppercase font-semibold tracking-wider transition-all duration-300"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-[#002FA7] text-white px-6 py-3.5 font-mono text-[9px] uppercase font-semibold tracking-widest transition-all duration-300 hover:bg-[#001e6c] hover:scale-[1.01] shadow-[0_4px_12px_rgba(0,47,167,0.15)] group"
               >
-                <Phone className="h-3.5 w-3.5 fill-current" />
-                Text on WhatsApp
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
+                <span>Open Chat on WhatsApp</span>
               </a>
             </div>
           )}
+
+          <div className="rounded-2xl border border-slate-100 bg-slate-50/40 p-4 text-xs font-light leading-relaxed text-slate-500 mt-2">
+            Your connection is protected by WalkIn Locals — use the secure ledger in-app chat frame below to coordinate arrival times.
+          </div>
 
           <div className="mt-4">
             <ChatBox matchId={match.id} currentUserId={currentUserId} />

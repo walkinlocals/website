@@ -3,6 +3,12 @@ import Link from "next/link";
 import { BadgeCheck, MapPin, Lock, Phone, Mail, ArrowLeft, Heart } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import ProfileActions from "@/components/profile-actions";
+import ReportUserButton from "@/components/report-user-button";
+import HostBookingPicker from "@/components/host-booking-picker";
+import HostInvitePicker from "@/components/host-invite-picker";
+import { resolveViewerCanConnect } from "@/lib/viewer-profile";
+import { formatDirectoryLocation } from "@/lib/directory-display";
+import { PAGE_BG_DOTS, PAGE_CONTAINER, PAGE_SHELL } from "@/lib/page-layout";
 
 interface TargetProfile {
   id: string;
@@ -42,7 +48,7 @@ export default async function ProfileDetailPage({
       .single(),
     supabase
       .from("profiles")
-      .select("role, is_active")
+      .select("role")
       .eq("id", user.id)
       .single(),
   ]);
@@ -52,10 +58,12 @@ export default async function ProfileDetailPage({
 
   const profile = target as TargetProfile;
   const me = meResult.data;
+  const viewerActive = await resolveViewerCanConnect(supabase, user.id);
 
   const myRole = me?.role ?? null;
-  const viewerActive = me?.is_active ?? false;
   const isSelf = user.id === profile.id;
+  const viewerIsGuest = myRole === "Guest";
+  const viewerIsHost = myRole === "Host";
 
   const rolesAreOpposite =
     !isSelf &&
@@ -88,21 +96,18 @@ export default async function ProfileDetailPage({
 
   const contactUnlocked = matchStatus === "Paid" || isSelf;
 
-  const location = profile.role === "Host" ? profile.neighborhood : profile.origin_location;
-  const locationLabel = profile.role === "Host"
-    ? location
-    : location
-      ? `GUEST FROM ${location.toUpperCase()}`
+  const locationLabel =
+    profile.role === "Host" || profile.role === "Guest"
+      ? formatDirectoryLocation(profile, profile.role)
       : null;
 
   const backHref = myRole === "Host" ? "/guest-directory" : "/host-directory";
 
   return (
-    <div className="relative min-h-screen bg-white antialiased selection:bg-[#002FA7] selection:text-white overflow-hidden">
-      {/* Background blue dots */}
-      <div className="pointer-events-none absolute inset-0 z-0 opacity-30 bg-[radial-gradient(#002fa709_1.5px,transparent_1.5px)] [background-size:32px_32px]" />
+    <div className={`${PAGE_SHELL} antialiased`}>
+      <div className={PAGE_BG_DOTS} />
 
-      <main className="relative z-10 mx-auto max-w-5xl px-6 py-12 sm:py-16">
+      <main className={`${PAGE_CONTAINER} py-12 sm:py-16`}>
         {/* Back Link */}
         <Link
           href={backHref}
@@ -146,14 +151,10 @@ export default async function ProfileDetailPage({
                     {profile.role}
                   </span>
                 )}
-                {profile.id_verified ? (
+                {profile.id_verified && (
                   <span className="inline-flex items-center gap-1 rounded-full border border-slate-150 bg-slate-50 px-3 py-1 font-mono text-[9px] uppercase tracking-wider text-slate-600">
                     <BadgeCheck className="h-3 w-3 text-[#002FA7]" />
                     Verified
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-slate-100 bg-slate-50 px-3 py-1 font-mono text-[9px] uppercase tracking-wider text-slate-400">
-                    Pending ID
                   </span>
                 )}
               </div>
@@ -166,6 +167,27 @@ export default async function ProfileDetailPage({
                 </div>
               )}
             </div>
+
+            {/* Guest: pick a date before requesting */}
+            {rolesAreOpposite && matchStatus === null && guestId && hostId && viewerIsGuest && (
+              <div className="hidden lg:block">
+                <HostBookingPicker
+                  hostId={hostId}
+                  guestId={guestId}
+                  disabled={!viewerActive}
+                />
+              </div>
+            )}
+
+            {rolesAreOpposite && matchStatus === null && guestId && hostId && viewerIsHost && (
+              <div className="hidden lg:block">
+                <HostInvitePicker
+                  guestId={guestId}
+                  hostId={hostId}
+                  disabled={!viewerActive}
+                />
+              </div>
+            )}
           </div>
 
           {/* RIGHT CONTENT COLUMN: Narrative & Dynamic Interfaces */}
@@ -191,31 +213,33 @@ export default async function ProfileDetailPage({
               </span>
 
               {contactUnlocked ? (
-                <div className="space-y-5">
-                  <div className="space-y-4 font-mono text-sm">
-                    <p className="flex items-center gap-3 text-slate-700">
-                      <Phone className="h-4 w-4 text-[#002FA7]" />
-                      <span className="tracking-wider">{profile.phone || "No phone provided"}</span>
-                    </p>
-                    <p className="flex items-center gap-3 text-slate-700">
-                      <Mail className="h-4 w-4 text-[#002FA7]" />
-                      <span className="tracking-wider break-all">{profile.contact_email || "No email provided"}</span>
-                    </p>
+                <div className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-2 font-mono text-xs text-slate-600">
+                    <div className="flex items-center gap-2 rounded-xl bg-slate-50/70 px-3 py-2.5 border border-slate-100">
+                      <Mail className="h-4 w-4 text-[#002FA7] shrink-0" />
+                      <span className="text-slate-400 font-medium">Mail:</span>
+                      <span className="text-slate-800 break-all">{profile.contact_email || "—"}</span>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-xl bg-slate-50/70 px-3 py-2.5 border border-slate-100">
+                      <Phone className="h-4 w-4 text-[#002FA7] shrink-0" />
+                      <span className="text-slate-400 font-medium">Phone:</span>
+                      <span className="text-slate-800 tracking-wider">{profile.phone || "—"}</span>
+                    </div>
                   </div>
 
-                  {/* Secure WhatsApp Handshake Trigger Button */}
+                  {/* Clean, Premium WhatsApp Alignment Handshake Button */}
                   {profile.phone && (
-                    <div className="pt-2">
+                    <div className="pt-2 flex justify-start">
                       <a
                         href={`https://wa.me/${profile.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                          `Hi ${profile.full_name || "there"}! I am contacting you from WalkIn Locals to coordinate our visit details. Looking forward to chat! ✦`
+                          `Hi ${profile.full_name || "there"}! I am contacting you from WalkIn Locals to coordinate our visit details. Looking forward to chatting! ✦`
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white px-6 py-3 font-mono text-xs uppercase font-semibold tracking-wider transition-all duration-300"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#002FA7] text-white px-5 py-3 font-mono text-[9px] uppercase font-semibold tracking-widest transition-all duration-300 hover:bg-[#001e6c] hover:scale-[1.01] shadow-[0_4px_12px_rgba(0,47,167,0.12)] group"
                       >
-                        <Phone className="h-3.5 w-3.5 fill-current" />
-                        Chat on WhatsApp
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
+                        <span>Open Chat on WhatsApp</span>
                       </a>
                     </div>
                   )}
@@ -235,16 +259,60 @@ export default async function ProfileDetailPage({
               )}
             </div>
 
-            {/* Action Buttons Interface Block */}
+            {/* Action Buttons Interface Block / Mobile Responsive Picker */}
             <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-[0_4px_15px_rgba(0,47,167,0.01)]">
-              <ProfileActions
-                isSelf={isSelf}
-                canConnect={rolesAreOpposite}
-                viewerActive={viewerActive}
-                guestId={guestId}
-                hostId={hostId}
-                matchStatus={matchStatus}
-              />
+              {rolesAreOpposite && matchStatus === null && guestId && hostId && viewerIsGuest && (
+                <div className="block lg:hidden mb-2">
+                  <HostBookingPicker
+                    hostId={hostId}
+                    guestId={guestId}
+                    disabled={!viewerActive}
+                  />
+                </div>
+              )}
+
+              {rolesAreOpposite && matchStatus === null && guestId && hostId && viewerIsHost && (
+                <div className="block lg:hidden mb-2">
+                  <HostInvitePicker
+                    guestId={guestId}
+                    hostId={hostId}
+                    disabled={!viewerActive}
+                  />
+                </div>
+              )}
+
+              {!(rolesAreOpposite && matchStatus === null && (viewerIsGuest || viewerIsHost)) && (
+                <ProfileActions
+                  isSelf={isSelf}
+                  canConnect={rolesAreOpposite}
+                  viewerActive={viewerActive}
+                  guestId={guestId}
+                  hostId={hostId}
+                  matchStatus={matchStatus}
+                  viewerRole={myRole === "Host" || myRole === "Guest" ? myRole : null}
+                />
+              )}
+
+              {rolesAreOpposite && matchStatus === null && guestId && hostId && viewerIsGuest && (
+                <p className="hidden lg:block mt-4 text-slate-500 text-xs font-mono font-light uppercase tracking-wider">
+                  ← Choose a date in the sidebar, then send your request.
+                </p>
+              )}
+
+              {rolesAreOpposite && matchStatus === null && guestId && hostId && viewerIsHost && (
+                <p className="hidden lg:block mt-4 text-slate-500 text-xs font-mono font-light uppercase tracking-wider">
+                  ← Send an invitation from the sidebar — they&apos;ll pick a visit date.
+                </p>
+              )}
+
+              {!isSelf && (
+                <div className="mt-6 border-t border-slate-100 pt-6">
+                  <ReportUserButton
+                    reportedUserId={profile.id}
+                    reportedName={profile.full_name ?? "this member"}
+                  />
+                </div>
+              )}
             </div>
 
           </div>

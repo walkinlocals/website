@@ -3,7 +3,9 @@
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2, Heart } from "lucide-react";
+import { pingActivity } from "@/lib/activity-client";
+import { parseAppRole } from "@/lib/profile-role";
+import { Loader2 } from "lucide-react";
 
 type UserRole = "Guest" | "Host";
 type AuthMode = "signin" | "signup";
@@ -26,6 +28,8 @@ function LoginInner() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   useEffect(() => {
     const initialMode = params.get("mode");
@@ -36,7 +40,6 @@ function LoginInner() {
     }
   }, [params]);
 
-  // Completely hide the footer element while keeping the header intact
   useEffect(() => {
     const footer = document.querySelector("footer");
     if (footer) {
@@ -53,6 +56,29 @@ function LoginInner() {
     setMode(next);
     setError(null);
     setInfo(null);
+    if (next === "signin") {
+      setAgeConfirmed(false);
+      setTermsAccepted(false);
+    }
+  }
+
+  async function syncProfileRole(userId: string, preferredRole?: UserRole) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (parseAppRole(profile?.role)) return;
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const metaRole = parseAppRole(user?.user_metadata?.role);
+    const roleToSet = preferredRole ?? metaRole;
+    if (!roleToSet) return;
+
+    await supabase.from("profiles").update({ role: roleToSet }).eq("id", userId);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -62,6 +88,14 @@ function LoginInner() {
     setSubmitting(true);
     try {
       if (mode === "signup") {
+        if (!ageConfirmed) {
+          setError("You must confirm you are at least 18 years old.");
+          return;
+        }
+        if (!termsAccepted) {
+          setError("Please accept the Terms & Safety policy to continue.");
+          return;
+        }
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -75,17 +109,19 @@ function LoginInner() {
           return;
         }
         if (!data.session) {
-          setInfo(
-            "Account created — check your inbox to confirm your email, then sign in."
-          );
+          setInfo("Account created — check your inbox to confirm your email, then sign in.");
           return;
         }
+        await syncProfileRole(data.user.id, role);
+        pingActivity();
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           setError(error.message);
           return;
         }
+        if (data.user) await syncProfileRole(data.user.id);
+        pingActivity();
       }
       router.push("/profile");
       router.refresh();
@@ -111,23 +147,16 @@ function LoginInner() {
 
   return (
     <div className="grid min-h-[calc(100vh-4rem)] w-full lg:grid-cols-2 bg-white overflow-hidden relative">
-
-      {/* Gentle, modern blue-tinted micro-dots covering the background */}
       <div className="pointer-events-none absolute inset-0 z-0 opacity-30 bg-[radial-gradient(#002fa709_1.5px,transparent_1.5px)] [background-size:32px_32px]" />
 
-      {/* Brand Side Panel with Panoramic Door Collage */}
       <aside className="relative hidden h-full items-center justify-center overflow-hidden lg:flex p-6 z-10">
         <div
           className="absolute inset-6 bg-cover bg-center transition-transform duration-700 scale-100 hover:scale-[0.98] rounded-3xl"
-          style={{
-            backgroundImage: "url('/images/doors.png')"
-          }}
+          style={{ backgroundImage: "url('/images/doors.png')" }}
         />
-        {/* Light, transparent overlay to keep the image bright and clean */}
         <div className="absolute inset-6 bg-white/10 rounded-3xl" />
       </aside>
 
-      {/* Static Form Side Panel */}
       <div className="flex h-full items-center justify-center px-6 py-12 bg-white overflow-y-auto z-10">
         <div className="w-full max-w-sm py-4">
           <div className="text-center space-y-2">
@@ -138,13 +167,10 @@ function LoginInner() {
               {mode === "signin" ? "Welcome back" : "Create your account"}
             </h1>
             <p className="mt-2 text-sm text-slate-500 font-light">
-              {mode === "signin"
-                ? "Sign in to continue your Dublin story."
-                : "Just the basics — you'll customize your profile next."}
+              {mode === "signin" ? "Sign in to continue your Dublin story." : "Just the basics — you'll customize your profile next."}
             </p>
           </div>
 
-          {/* Styled Mode Toggle in Klein Blue & White */}
           <div className="mt-8 grid grid-cols-2 rounded-full bg-slate-100 p-1 text-sm font-medium border border-slate-150">
             <button
               type="button"
@@ -198,9 +224,7 @@ function LoginInner() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-xs font-mono tracking-wider uppercase text-slate-600">
-                Email
-              </label>
+              <label htmlFor="email" className="block text-xs font-mono tracking-wider uppercase text-slate-600">Email</label>
               <input
                 id="email"
                 type="email"
@@ -214,9 +238,7 @@ function LoginInner() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs font-mono tracking-wider uppercase text-slate-600">
-                Password
-              </label>
+              <label htmlFor="password" className="block text-xs font-mono tracking-wider uppercase text-slate-600">Password</label>
               <input
                 id="password"
                 type="password"
@@ -230,11 +252,36 @@ function LoginInner() {
               />
             </div>
 
-            {error && (
-              <p className="text-sm text-red-600 font-light" role="alert">
-                {error}
-              </p>
+            {mode === "signup" && (
+              <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/50 p-4">
+                <label className="flex items-start gap-3 text-sm font-light text-slate-600 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={ageConfirmed}
+                    onChange={(e) => setAgeConfirmed(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-slate-300 text-[#002FA7] focus:ring-[#002FA7]"
+                  />
+                  <span>I confirm I am at least 18 years old.</span>
+                </label>
+                <label className="flex items-start gap-3 text-sm font-light text-slate-600 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-slate-300 text-[#002FA7] focus:ring-[#002FA7]"
+                  />
+                  <span>
+                    I agree to the{" "}
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#002FA7] font-medium hover:underline">
+                      Terms, Trust &amp; Safety
+                    </a>{" "}
+                    policy, including the community code of conduct and refund guidelines.
+                  </span>
+                </label>
+              </div>
             )}
+
+            {error && <p className="text-sm text-red-600 font-light" role="alert">{error}</p>}
             {info && (
               <p className="rounded-2xl bg-[#002fa7]/5 border border-[#002fa7]/10 px-4 py-3.5 text-sm text-[#002FA7] leading-relaxed font-light" role="status">
                 {info}
@@ -274,13 +321,11 @@ function LoginInner() {
 
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-[60vh] items-center justify-center bg-white">
-          <Loader2 className="h-6 w-6 animate-spin text-[#002FA7]" />
-        </div>
-      }
-    >
+    <Suspense fallback={
+      <div className="flex min-h-[60vh] items-center justify-center bg-white">
+        <Loader2 className="h-6 w-6 animate-spin text-[#002FA7]" />
+      </div>
+    }>
       <LoginInner />
     </Suspense>
   );

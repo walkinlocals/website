@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, Check, HeartHandshake, Clock, Heart } from "lucide-react";
+import { Loader2, Check, Clock, Heart, Info, ArrowRight, UserPlus } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface Props {
@@ -13,6 +13,7 @@ interface Props {
   guestId: string | null;
   hostId: string | null;
   matchStatus: string | null;
+  viewerRole?: "Guest" | "Host" | null;
 }
 
 type State =
@@ -28,6 +29,7 @@ export default function ProfileActions({
   guestId,
   hostId,
   matchStatus,
+  viewerRole,
 }: Props) {
   const supabase = createClient();
   const router = useRouter();
@@ -43,62 +45,83 @@ export default function ProfileActions({
     getViewer();
   }, [supabase]);
 
+  // SELF PROFILE ACTION
   if (isSelf) {
     return (
       <Link
         href="/profile"
-        className="inline-flex rounded-full border border-slate-200 px-6 py-3 text-xs font-mono font-semibold uppercase tracking-widest text-slate-700 transition-all duration-300 hover:bg-slate-50"
+        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 font-mono text-[9px] uppercase font-semibold tracking-widest text-slate-700 transition-all duration-300 hover:bg-slate-50 hover:border-slate-300 shadow-sm"
       >
-        Edit your profile
+        <span>Edit your profile</span>
       </Link>
     );
   }
 
+  // INVALID ROLE COMBINATION
   if (!canConnect) {
     return (
-      <p className="font-serif text-sm italic text-slate-400 font-light">
-        Connections are made between travelers and hosts.
-      </p>
+      <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+        <p className="font-serif text-xs italic text-slate-400 font-light leading-relaxed">
+          Connections are exclusive structural arrangements engineered between verified travelers and local hosts.
+        </p>
+      </div>
     );
   }
 
+  // PROFILE INCOMPLETE GUARD
   if (!viewerActive) {
     return (
-      <Link
-        href="/profile"
-        className="inline-flex rounded-full bg-[#002FA7] px-6 py-3.5 text-xs font-mono font-semibold uppercase tracking-widest text-white transition-all duration-300 hover:bg-[#001e6c] shadow-[0_4px_15px_rgba(0,47,167,0.18)]"
-      >
-        Complete your profile to connect
-      </Link>
+      <div className="w-full space-y-3">
+        <p className="font-serif text-xs italic text-slate-400 font-light leading-relaxed">
+          Your profile must be completed and active before initiating outside connections.
+        </p>
+        <Link
+          href="/profile"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-[#002FA7] px-6 py-3.5 font-mono text-[9px] uppercase font-semibold tracking-widest text-white transition-all duration-300 hover:bg-[#001e6c] shadow-[0_4px_12px_rgba(0,47,167,0.15)] hover:scale-[1.01]"
+        >
+          <UserPlus className="h-3.5 w-3.5" />
+          Complete your profile to connect
+        </Link>
+      </div>
     );
   }
 
+  // CONNECTION ALREADY EXISTS STATE
   const existing = matchStatus ?? (state.s === "sent" ? "Pending" : null);
   if (existing) {
     const label: Record<string, string> = {
-      Pending: "Requested — awaiting response",
-      Hold: "On hold by host",
-      Accepted: "Accepted — see Matches",
+      Pending: "Requested — Awaiting Response",
+      Hold: "On Hold by Host",
+      Accepted: "Accepted — Pending Checkout",
       Denied: "Declined",
-      Paid: "Connected",
+      Paid: "Connected & Verified",
     };
+
     const tone =
       existing === "Paid"
-        ? "border-emerald-100 bg-emerald-50/50 text-emerald-800"
+        ? "border-emerald-200 bg-emerald-50/40 text-emerald-800"
         : existing === "Denied"
-          ? "border-rose-100 bg-rose-50/50 text-rose-700"
+          ? "border-rose-200 bg-rose-50/40 text-rose-700"
           : "border-slate-200 bg-slate-50 text-slate-600";
+
     return (
-      <div className="flex flex-wrap items-center gap-4">
-        <span className={`inline-flex items-center gap-2 rounded-full border px-5 py-2.5 font-mono text-[10px] uppercase tracking-wider ${tone}`}>
-          {existing === "Paid" ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Clock className="h-3.5 w-3.5" />}
-          {label[existing] ?? existing}
-        </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full rounded-2xl border border-slate-100 p-4 bg-slate-50/30">
+        <div className="flex items-center gap-3">
+          <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-[9px] uppercase font-semibold tracking-wider ${tone}`}>
+            {existing === "Paid" ? (
+              <Check className="h-3 w-3 text-emerald-600 stroke-[3]" />
+            ) : (
+              <Clock className="h-3 w-3 animate-pulse text-slate-400" />
+            )}
+            {label[existing] ?? existing}
+          </span>
+        </div>
         <Link
           href="/matches"
-          className="font-mono text-[10px] uppercase tracking-widest text-[#002FA7] font-semibold transition-colors duration-300 hover:text-slate-950"
+          className="group inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[#002FA7] font-bold transition-all duration-300 hover:text-[#001e6c]"
         >
-          Go to Matches →
+          <span>Go to Matches</span>
+          <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
         </Link>
       </div>
     );
@@ -106,68 +129,91 @@ export default function ProfileActions({
 
   async function requestConnection() {
     setState({ s: "working" });
-    const { error } = await supabase.from("matches").insert({
-      guest_id: guestId,
-      host_id: hostId,
-      status: "Pending",
-      party_size: partySize,
-      initiator_id: viewerId,
+    const res = await fetch("/api/matches/request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ guestId, hostId, partySize }),
     });
-    if (error) {
-      setState(error.code === "23505" ? { s: "sent" } : { s: "error", message: error.message });
-      if (error.code === "23505") router.refresh();
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (res.status === 409) {
+        setState({ s: "sent" });
+        router.refresh();
+        return;
+      }
+      setState({ s: "error", message: data.error || "Could not send request." });
       return;
     }
     setState({ s: "sent" });
     router.refresh();
   }
 
-  const viewerIsGuest = viewerId === guestId;
+  const viewerIsGuest = viewerRole === "Guest" || viewerId === guestId;
+  const viewerIsHost = viewerRole === "Host" || viewerId === hostId;
+
+  // Guests request via the calendar on the host profile — not here.
+  if (viewerIsGuest && !existing) {
+    return (
+      <p className="font-serif text-xs italic font-light leading-relaxed text-slate-400">
+        Use the calendar on a host&apos;s profile to pick a date and send a visit request.
+      </p>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-6 sm:flex-row sm:items-end justify-between w-full">
-      {viewerIsGuest ? (
-        <div className="space-y-2 flex-1 max-w-xs">
-          <label htmlFor="party" className="block font-mono text-[10px] uppercase tracking-wider text-slate-400">
-            Confirm Party Size
-          </label>
-          <select
-            id="party"
-            value={partySize}
-            onChange={(e) => setPartySize(Number(e.target.value))}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7] transition-all duration-300 font-light"
-          >
-            {[1, 2, 3, 4, 5].map((n) => (
-              <option key={n} value={n}>
-                {n} {n === 1 ? "person" : "people"} — €{n * 35}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : (
-        <div className="flex-1 max-w-sm">
-          <p className="font-serif text-sm italic text-slate-500 leading-relaxed font-light">
-            Reaching out will prompt this guest to specify their party size parameters and finalize their connection data later.
-          </p>
-        </div>
-      )}
+    <div className="w-full space-y-6">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-end justify-between w-full">
+        {viewerIsHost ? (
+          <div className="space-y-3 flex-1 max-w-md">
+            <span className="block font-mono text-[9px] uppercase tracking-[0.15em] text-slate-400 font-bold">
+              Invite this traveler
+            </span>
+            <div className="flex items-start gap-2.5 rounded-xl bg-slate-50/70 p-3.5 border border-slate-100 text-xs text-slate-500 font-light leading-relaxed">
+              <Info className="h-4 w-4 shrink-0 text-[#002FA7] mt-0.5" />
+              <p>
+                Send an invitation without a date. They&apos;ll propose a visit day, then you can agree or suggest another.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3 flex-1 max-w-md">
+            <span className="block font-mono text-[9px] uppercase tracking-[0.15em] text-slate-400 font-bold">
+              Connection Request
+            </span>
+            <div className="flex items-start gap-2.5 rounded-xl bg-slate-50/70 p-3.5 border border-slate-100 text-xs text-slate-500 font-light leading-relaxed">
+              <Info className="h-4 w-4 shrink-0 text-[#002FA7] mt-0.5" />
+              <p>
+                Reaching out will prompt this traveler to confirm party size and complete payment when they accept.
+              </p>
+            </div>
+          </div>
+        )}
 
-      <div>
-        <button
-          type="button"
-          onClick={requestConnection}
-          disabled={state.s === "working"}
-          className="inline-flex items-center gap-2 rounded-full bg-[#002FA7] px-6 py-4 text-xs font-mono font-semibold uppercase tracking-widest text-white transition-all duration-300 hover:bg-[#001e6c] hover:scale-[1.01] shadow-[0_4px_15px_rgba(0,47,167,0.18)] disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap"
-        >
-          {state.s === "working" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Heart className="h-3.5 w-3.5 fill-white" />}
-          {state.s === "working" ? "Sending…" : "Request a Connection"}
-        </button>
+        {/* CONNECT INTERFACE TRIGGER BUTTON */}
+        <div className="pt-2 lg:pt-0">
+          <button
+            type="button"
+            onClick={requestConnection}
+            disabled={state.s === "working"}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#002FA7] px-6 py-3.5 font-mono text-[9px] uppercase font-semibold tracking-widest text-white transition-all duration-300 hover:bg-[#001e6c] hover:scale-[1.01] shadow-[0_4px_12px_rgba(0,47,167,0.15)] disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap group"
+          >
+            {state.s === "working" ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+            ) : (
+              <Heart className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 text-white" />
+            )}
+            <span>{state.s === "working" ? "Sending Request..." : "Invite to connect"}</span>
+          </button>
+        </div>
       </div>
 
+      {/* ERROR FEEDBACK ROW */}
       {state.s === "error" && (
-        <p className="w-full font-mono text-[10px] uppercase tracking-wider text-rose-600 font-semibold" role="alert">
-          {state.message}
-        </p>
+        <div className="rounded-xl border border-rose-100 bg-rose-50/30 p-3">
+          <p className="font-mono text-[9px] uppercase tracking-wider text-rose-600 font-bold" role="alert">
+            Error: {state.message}
+          </p>
+        </div>
       )}
     </div>
   );
