@@ -20,6 +20,7 @@ import { formatDirectoryLocation } from "@/lib/directory-display";
 import ChatBox from "@/components/chat-box";
 import LocationMap from "@/components/location-map";
 import MatchDateNegotiation from "@/components/match-date-negotiation";
+import WhatsAppButton from "@/components/whatsapp-button";
 import { isDateNegotiationComplete } from "@/lib/match-dates";
 
 const FEE_PER_PERSON = 35;
@@ -46,6 +47,7 @@ export interface MatchRow {
   initiator_id: string | null;
   created_at: string;
   proposed_date: string | null;
+  proposed_time: string | null;
   date_proposed_by: string | null;
   date_confirmed: boolean | null;
   host: PartyProfile | null;
@@ -455,10 +457,18 @@ function MatchCard({
           <div className="grid gap-3 sm:grid-cols-2 font-mono text-xs text-slate-600">
             <div className="flex items-center gap-2.5 rounded-xl bg-slate-50/70 px-4 py-3 border border-slate-100 shadow-sm">
               <Phone className="h-4 w-4 text-[#002FA7] shrink-0" />
-              <div>
+              <div className="min-w-0 flex-1">
                 <span className="block text-[8px] uppercase tracking-wider text-slate-400 font-bold">Phone Number</span>
                 <span className="text-slate-800 tracking-wider font-medium">{other.phone || "—"}</span>
               </div>
+              {other.phone && (
+                <WhatsAppButton
+                  phone={other.phone}
+                  message={`Hi ${other.full_name || "there"}! This is ${
+                    myRole === "Host" ? match.host?.full_name : match.guest?.full_name
+                  } from WalkIn Locals. Our connection is confirmed! Let's arrange our cozy sit-down. ✦`}
+                />
+              )}
             </div>
 
             <div className="flex items-center gap-2.5 rounded-xl bg-slate-50/70 px-4 py-3 border border-slate-100 shadow-sm">
@@ -469,25 +479,6 @@ function MatchCard({
               </div>
             </div>
           </div>
-
-          {/* Styled Premium WhatsApp Action Row */}
-          {other.phone && (
-            <div className="flex justify-start">
-              <a
-                href={`https://wa.me/${other.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                  `Hi ${other.full_name || "there"}! This is ${
-                    myRole === "Host" ? match.host?.full_name : match.guest?.full_name
-                  } from WalkIn Locals. Our connection is confirmed! Let's arrange our cozy sit-down. ✦`
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-[#002FA7] text-white px-6 py-3.5 font-mono text-[9px] uppercase font-semibold tracking-widest transition-all duration-300 hover:bg-[#001e6c] hover:scale-[1.01] shadow-[0_4px_12px_rgba(0,47,167,0.15)] group"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
-                <span>Open Chat on WhatsApp</span>
-              </a>
-            </div>
-          )}
 
           <div className="rounded-2xl border border-slate-100 bg-slate-50/40 p-4 text-xs font-light leading-relaxed text-slate-500 mt-2">
             Your connection is protected by WalkIn Locals — use the secure ledger in-app chat frame below to coordinate arrival times.

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Heart, Info, Loader2 } from "lucide-react";
 import VisitDatePicker from "@/components/visit-date-picker";
 import { MAX_PARTY_SIZE } from "@/lib/pricing";
-import { formatVisitDate } from "@/lib/match-dates";
+import { formatVisitDateTime } from "@/lib/match-dates";
 
 interface Props {
   hostId: string;
@@ -16,14 +16,17 @@ interface Props {
 export default function HostBookingPicker({ hostId, guestId, disabled }: Props) {
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [partySize, setPartySize] = useState(1);
   const [working, setWorking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
 
+  const ready = Boolean(selectedDate && selectedTime);
+
   async function requestVisit() {
-    if (!selectedDate) {
-      setError("Choose a visit date first.");
+    if (!selectedDate || !selectedTime) {
+      setError("Choose a visit date and time first.");
       return;
     }
     setWorking(true);
@@ -32,7 +35,13 @@ export default function HostBookingPicker({ hostId, guestId, disabled }: Props) 
       const res = await fetch("/api/matches/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ guestId, hostId, partySize, proposedDate: selectedDate }),
+        body: JSON.stringify({
+          guestId,
+          hostId,
+          partySize,
+          proposedDate: selectedDate,
+          proposedTime: selectedTime,
+        }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
@@ -63,7 +72,10 @@ export default function HostBookingPicker({ hostId, guestId, disabled }: Props) 
           Request sent
         </p>
         <p className="mt-2 text-sm font-light text-emerald-900/80">
-          {selectedDate ? formatVisitDate(selectedDate) : "Your date"} — awaiting the host&apos;s response on Matches.
+          {selectedDate && selectedTime
+            ? formatVisitDateTime(selectedDate, selectedTime)
+            : "Your visit"}{" "}
+          — awaiting the host&apos;s response on Matches.
         </p>
       </div>
     );
@@ -71,7 +83,14 @@ export default function HostBookingPicker({ hostId, guestId, disabled }: Props) 
 
   return (
     <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_4px_15px_rgba(0,47,167,0.01)]">
-      <VisitDatePicker hostId={hostId} value={selectedDate} onChange={setSelectedDate} disabled={working} />
+      <VisitDatePicker
+        hostId={hostId}
+        value={selectedDate}
+        timeValue={selectedTime}
+        onChange={setSelectedDate}
+        onTimeChange={setSelectedTime}
+        disabled={working}
+      />
 
       <div className="space-y-2">
         <label htmlFor="guest-party" className="block font-mono text-[9px] uppercase tracking-[0.15em] text-slate-400 font-bold">
@@ -101,11 +120,15 @@ export default function HostBookingPicker({ hostId, guestId, disabled }: Props) 
       <button
         type="button"
         onClick={requestVisit}
-        disabled={working || !selectedDate}
+        disabled={working || !ready}
         className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#002FA7] px-6 py-3.5 font-mono text-[9px] font-semibold uppercase tracking-widest text-white shadow-[0_4px_12px_rgba(0,47,167,0.15)] transition hover:bg-[#001e6c] hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {working ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Heart className="h-3.5 w-3.5" />}
-        {working ? "Sending…" : selectedDate ? `Request visit · ${formatVisitDate(selectedDate)}` : "Request visit"}
+        {working
+          ? "Sending…"
+          : ready
+            ? `Request visit · ${formatVisitDateTime(selectedDate!, selectedTime!)}`
+            : "Request visit"}
       </button>
 
       {error && (

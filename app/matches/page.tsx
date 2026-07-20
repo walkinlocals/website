@@ -27,7 +27,7 @@ export default async function MatchesPage({
     .select(
       `
       id, guest_id, host_id, status, stripe_link, party_size, initiator_id, created_at,
-      proposed_date, date_proposed_by, date_confirmed,
+      proposed_date, proposed_time, date_proposed_by, date_confirmed,
       host:profiles!matches_host_id_fkey(id, full_name, avatar_url, neighborhood, origin_location, phone, contact_email, id_verified),
       guest:profiles!matches_guest_id_fkey(id, full_name, avatar_url, neighborhood, origin_location, phone, contact_email, id_verified)
       `,

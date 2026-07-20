@@ -201,8 +201,22 @@ alter table public.matches add column if not exists initiator_id uuid references
 alter table public.matches add column if not exists stripe_link text;
 alter table public.matches add column if not exists created_at timestamptz not null default now();
 alter table public.matches add column if not exists proposed_date date;
+alter table public.matches add column if not exists proposed_time text;
 alter table public.matches add column if not exists date_proposed_by uuid references public.profiles (id) on delete set null;
 alter table public.matches add column if not exists date_confirmed boolean not null default false;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conrelid = 'public.matches'::regclass
+      and conname = 'matches_proposed_time_check'
+  ) then
+    alter table public.matches
+      add constraint matches_proposed_time_check
+      check (proposed_time is null or proposed_time ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$');
+  end if;
+end $$;
 
 -- Widen party_size cap to 6 (drops any existing party_size check constraint)
 do $$

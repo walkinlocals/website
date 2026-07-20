@@ -2,12 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { toDateString } from "@/lib/match-dates";
+import {
+  VISIT_TIME_SLOTS,
+  formatVisitTime,
+  isDateFullyBooked,
+  isVisitSlotInPast,
+  toDateString,
+} from "@/lib/match-dates";
 
 interface Props {
   hostId: string;
   value: string | null;
+  timeValue: string | null;
   onChange: (date: string) => void;
+  onTimeChange: (time: string | null) => void;
   disabled?: boolean;
 }
 
@@ -21,9 +29,16 @@ function addMonths(d: Date, n: number) {
   return new Date(d.getFullYear(), d.getMonth() + n, 1);
 }
 
-export default function VisitDatePicker({ hostId, value, onChange, disabled }: Props) {
+export default function VisitDatePicker({
+  hostId,
+  value,
+  timeValue,
+  onChange,
+  onTimeChange,
+  disabled,
+}: Props) {
   const [viewMonth, setViewMonth] = useState(() => startOfMonth(new Date()));
-  const [bookedDates, setBookedDates] = useState<Set<string>>(new Set());
+  const [bookedSlots, setBookedSlots] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   const today = useMemo(() => {
@@ -38,9 +53,13 @@ export default function VisitDatePicker({ hostId, value, onChange, disabled }: P
       setLoading(true);
       try {
         const res = await fetch(`/api/matches/availability?hostId=${encodeURIComponent(hostId)}`);
-        const data = (await res.json().catch(() => ({}))) as { bookedDates?: string[] };
-        if (!cancelled && res.ok && Array.isArray(data.bookedDates)) {
-          setBookedDates(new Set(data.bookedDates));
+        const data = (await res.json().catch(() => ({}))) as {
+          bookedSlots?: Array<{ date: string; time: string }>;
+        };
+        if (!cancelled && res.ok && Array.isArray(data.bookedSlots)) {
+          setBookedSlots(
+            new Set(data.bookedSlots.map((slot) => `${slot.date}|${slot.time}`)),
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -72,11 +91,24 @@ export default function VisitDatePicker({ hostId, value, onChange, disabled }: P
 
   function isDisabledDate(date: Date): boolean {
     if (date < today) return true;
-    return bookedDates.has(toDateString(date));
+    return isDateFullyBooked(toDateString(date), bookedSlots);
+  }
+
+  function isSlotUnavailable(slot: string): boolean {
+    if (!value) return true;
+    if (bookedSlots.has(`${value}|${slot}`)) return true;
+    return isVisitSlotInPast(value, slot);
+  }
+
+  function handleDateSelect(iso: string) {
+    onChange(iso);
+    if (timeValue && isSlotUnavailable(timeValue)) {
+      onTimeChange(null);
+    }
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-400 font-bold">
           Pick a visit date
@@ -125,7 +157,7 @@ export default function VisitDatePicker({ hostId, value, onChange, disabled }: P
                 key={key}
                 type="button"
                 disabled={disabled || unavailable}
-                onClick={() => onChange(iso)}
+                onClick={() => handleDateSelect(iso)}
                 className={[
                   "min-h-8 rounded-lg text-xs font-light transition",
                   unavailable && "cursor-not-allowed text-slate-200",
@@ -142,8 +174,40 @@ export default function VisitDatePicker({ hostId, value, onChange, disabled }: P
         </div>
       </div>
 
+      {value && (
+        <div className="space-y-2">
+          <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-400 font-bold">
+            Pick a time · 10am – 5pm
+          </span>
+          <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
+            {VISIT_TIME_SLOTS.map((slot) => {
+              const unavailable = isSlotUnavailable(slot);
+              const selected = timeValue === slot;
+              return (
+                <button
+                  key={slot}
+                  type="button"
+                  disabled={disabled || unavailable}
+                  onClick={() => onTimeChange(slot)}
+                  className={[
+                    "rounded-lg px-1 py-2 text-[10px] font-mono transition",
+                    unavailable && "cursor-not-allowed text-slate-200",
+                    !unavailable && !selected && "text-slate-600 hover:bg-[#002fa7]/5 hover:text-[#002FA7]",
+                    selected && "bg-[#002FA7] font-semibold text-white shadow-sm",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {formatVisitTime(slot)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <p className="text-[10px] font-light leading-relaxed text-slate-400">
-        Greyed-out dates are unavailable. You can suggest another date if the first one doesn&apos;t work.
+        Greyed-out dates and times are unavailable. Visits are offered in 30-minute slots between 10am and 5pm.
       </p>
     </div>
   );

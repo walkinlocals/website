@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { isValidProposedDate } from "@/lib/match-dates";
+import {
+  formatVisitDateTime,
+  isValidProposedDate,
+  isValidProposedTime,
+  isVisitSlotInPast,
+} from "@/lib/match-dates";
 import { Resend } from "resend";
-import { formatVisitDate } from "@/lib/match-dates";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-async function assertHostDateAvailable(
+async function assertHostSlotAvailable(
   supabase: Awaited<ReturnType<typeof createClient>>,
   hostId: string,
   proposedDate: string,
+  proposedTime: string,
   excludeMatchId?: string,
 ) {
   let query = supabase
@@ -17,6 +22,7 @@ async function assertHostDateAvailable(
     .select("id")
     .eq("host_id", hostId)
     .eq("proposed_date", proposedDate)
+    .eq("proposed_time", proposedTime)
     .in("status", ["Accepted", "Paid"]);
 
   if (excludeMatchId) {
@@ -31,7 +37,7 @@ async function assertHostDateAvailable(
     return {
       ok: false as const,
       status: 409,
-      error: "This host is already booked on that date.",
+      error: "This time slot is already booked.",
     };
   }
   return { ok: true as const };
@@ -46,14 +52,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 
-  let body: { matchId?: string; action?: string; proposedDate?: string };
+  let body: { matchId?: string; action?: string; proposedDate?: string; proposedTime?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { matchId, action, proposedDate } = body;
+  const { matchId, action, proposedDate, proposedTime } = body;
   if (!matchId || (action !== "propose" && action !== "accept")) {
     return NextResponse.json(
       { error: "matchId and action ('propose' | 'accept') are required." },
@@ -64,7 +70,7 @@ export async function POST(request: Request) {
   const { data: match } = await supabase
     .from("matches")
     .select(
-      "id, guest_id, host_id, initiator_id, status, proposed_date, date_proposed_by, date_confirmed",
+      "id, guest_id, host_id, initiator_id, status, proposed_date, proposed_time, date_proposed_by, date_confirmed",
     )
     .eq("id", matchId)
     .single();
@@ -85,6 +91,15 @@ export async function POST(request: Request) {
     if (!proposedDate || !isValidProposedDate(proposedDate)) {
       return NextResponse.json({ error: "A valid future proposedDate is required." }, { status: 400 });
     }
+    if (!proposedTime || !isValidProposedTime(proposedTime)) {
+      return NextResponse.json(
+        { error: "A valid proposedTime between 10am and 5pm is required." },
+        { status: 400 },
+      );
+    }
+    if (isVisitSlotInPast(proposedDate, proposedTime)) {
+      return NextResponse.json({ error: "That visit time has already passed." }, { status: 400 });
+    }
 
     const hostInitiated = match.initiator_id === match.host_id;
     if (hostInitiated && !match.proposed_date && user.id !== match.guest_id) {
@@ -100,10 +115,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const availability = await assertHostDateAvailable(
+    const availability = await assertHostSlotAvailable(
       supabase,
       match.host_id,
       proposedDate,
+      proposedTime,
       match.id,
     );
     if (!availability.ok) {
@@ -114,6 +130,7 @@ export async function POST(request: Request) {
       .from("matches")
       .update({
         proposed_date: proposedDate,
+        proposed_time: proposedTime,
         date_proposed_by: user.id,
         date_confirmed: false,
         status: "Pending",
@@ -123,6 +140,8 @@ export async function POST(request: Request) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    const formatted = formatVisitDateTime(proposedDate, proposedTime);
 
     try {
       const targetUserId = user.id === match.guest_id ? match.host_id : match.guest_id;
@@ -136,13 +155,13 @@ export async function POST(request: Request) {
         await resend.emails.send({
           from: "WalkIn Locals <updates@walkinlocals.com>",
           to: [targetProfile.contact_email],
-          subject: `📅 New date proposed: ${formatVisitDate(proposedDate)}`,
+          subject: `📅 New date proposed: ${formatted}`,
           html: `
             <div style="font-family: serif; color: #0f172a; max-width: 600px; margin: 0 auto; padding: 20px;">
               <h2 style="font-weight: normal; font-size: 22px;">A visit date was proposed</h2>
               <p style="font-size: 16px; font-weight: 300;">Hello ${targetProfile.full_name},</p>
               <p style="font-size: 16px; font-weight: 300; line-height: 1.6;">
-                <strong>${formatVisitDate(proposedDate)}</strong> has been suggested for your WalkIn Locals visit.
+                <strong>${formatted}</strong> has been suggested for your WalkIn Locals visit.
                 Open Matches to accept it or suggest another date.
               </p>
               <a href="${appUrl}/matches" style="display: inline-block; margin-top: 20px; background: #002FA7; color: white; padding: 12px 24px; text-decoration: none; border-radius: 9999px;">Open Matches</a>
@@ -154,24 +173,34 @@ export async function POST(request: Request) {
       console.error("Date proposal email failed:", emailErr);
     }
 
-    return NextResponse.json({ success: true, proposedDate, date_confirmed: false });
+    return NextResponse.json({
+      success: true,
+      proposedDate,
+      proposedTime,
+      date_confirmed: false,
+    });
   }
 
-  // accept
-  if (!match.proposed_date) {
-    return NextResponse.json({ error: "No date has been proposed yet." }, { status: 400 });
+  if (!match.proposed_date || !match.proposed_time) {
+    return NextResponse.json({ error: "No date and time have been proposed yet." }, { status: 400 });
   }
   if (match.date_proposed_by === user.id) {
     return NextResponse.json({ error: "You cannot accept your own date proposal." }, { status: 403 });
   }
   if (match.date_confirmed) {
-    return NextResponse.json({ success: true, date_confirmed: true, proposed_date: match.proposed_date });
+    return NextResponse.json({
+      success: true,
+      date_confirmed: true,
+      proposed_date: match.proposed_date,
+      proposed_time: match.proposed_time,
+    });
   }
 
-  const availability = await assertHostDateAvailable(
+  const availability = await assertHostSlotAvailable(
     supabase,
     match.host_id,
     match.proposed_date,
+    match.proposed_time,
     match.id,
   );
   if (!availability.ok) {
@@ -187,6 +216,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  const formatted = formatVisitDateTime(match.proposed_date, match.proposed_time);
+
   try {
     const targetUserId = user.id === match.guest_id ? match.host_id : match.guest_id;
     const { data: targetProfile } = await supabase
@@ -199,13 +230,13 @@ export async function POST(request: Request) {
       await resend.emails.send({
         from: "WalkIn Locals <updates@walkinlocals.com>",
         to: [targetProfile.contact_email],
-        subject: `✅ Visit date confirmed: ${formatVisitDate(match.proposed_date)}`,
+        subject: `✅ Visit date confirmed: ${formatted}`,
         html: `
           <div style="font-family: serif; color: #0f172a; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="font-weight: normal; font-size: 22px;">Visit date confirmed</h2>
             <p style="font-size: 16px; font-weight: 300;">Hello ${targetProfile.full_name},</p>
             <p style="font-size: 16px; font-weight: 300; line-height: 1.6;">
-              You agreed on <strong>${formatVisitDate(match.proposed_date)}</strong>.
+              You agreed on <strong>${formatted}</strong>.
               Head to Matches to continue with acceptance and payment.
             </p>
             <a href="${appUrl}/matches" style="display: inline-block; margin-top: 20px; background: #002FA7; color: white; padding: 12px 24px; text-decoration: none; border-radius: 9999px;">Open Matches</a>
@@ -221,5 +252,6 @@ export async function POST(request: Request) {
     success: true,
     date_confirmed: true,
     proposed_date: match.proposed_date,
+    proposed_time: match.proposed_time,
   });
 }

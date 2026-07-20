@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { resolveViewerCanConnect } from "@/lib/viewer-profile";
 import { MAX_PARTY_SIZE } from "@/lib/stripe/server";
-import { isValidProposedDate, formatVisitDate } from "@/lib/match-dates";
+import { isValidProposedDate, formatVisitDateTime, isValidProposedTime, isVisitSlotInPast } from "@/lib/match-dates";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -12,14 +12,14 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
 
-  let body: { guestId?: string; hostId?: string; partySize?: number; proposedDate?: string };
+  let body: { guestId?: string; hostId?: string; partySize?: number; proposedDate?: string; proposedTime?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { guestId, hostId, partySize, proposedDate } = body;
+  const { guestId, hostId, partySize, proposedDate, proposedTime } = body;
 
   if (!guestId || !hostId) {
     return NextResponse.json({ error: "guestId and hostId are required." }, { status: 400 });
@@ -38,7 +38,16 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-  } else if (proposedDate) {
+    if (!proposedTime || !isValidProposedTime(proposedTime)) {
+      return NextResponse.json(
+        { error: "Guests must choose a visit time between 10am and 5pm." },
+        { status: 400 },
+      );
+    }
+    if (isVisitSlotInPast(proposedDate, proposedTime)) {
+      return NextResponse.json({ error: "That visit time has already passed." }, { status: 400 });
+    }
+  } else if (proposedDate || proposedTime) {
     return NextResponse.json(
       { error: "Hosts send invitations without a date — the guest will propose one." },
       { status: 400 },
@@ -53,12 +62,13 @@ export async function POST(request: Request) {
     );
   }
 
-  if (proposedDate) {
+  if (proposedDate && proposedTime) {
     const { data: conflictingMatch, error: conflictError } = await supabase
       .from("matches")
       .select("id")
       .eq("host_id", hostId)
       .eq("proposed_date", proposedDate)
+      .eq("proposed_time", proposedTime)
       .in("status", ["Accepted", "Paid"])
       .maybeSingle();
 
@@ -68,7 +78,7 @@ export async function POST(request: Request) {
 
     if (conflictingMatch) {
       return NextResponse.json(
-        { error: "This host is already booked on that date. Pick another day." },
+        { error: "This time slot is already booked. Pick another." },
         { status: 409 },
       );
     }
@@ -85,8 +95,9 @@ export async function POST(request: Request) {
     date_confirmed: false,
   };
 
-  if (isGuestInitiator && proposedDate) {
+  if (isGuestInitiator && proposedDate && proposedTime) {
     insertPayload.proposed_date = proposedDate;
+    insertPayload.proposed_time = proposedTime;
     insertPayload.date_proposed_by = guestId;
   }
 
@@ -113,7 +124,9 @@ export async function POST(request: Request) {
       supabase.from("profiles").select("contact_email, full_name").eq("id", targetUserId).maybeSingle(),
     ]);
 
-    const formattedDate = proposedDate ? formatVisitDate(proposedDate) : null;
+    const formattedDate = proposedDate && proposedTime
+      ? formatVisitDateTime(proposedDate, proposedTime)
+      : null;
 
     if (recipientResult.data?.contact_email) {
       await resend.emails.send({

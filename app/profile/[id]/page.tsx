@@ -6,6 +6,7 @@ import ProfileActions from "@/components/profile-actions";
 import ReportUserButton from "@/components/report-user-button";
 import HostBookingPicker from "@/components/host-booking-picker";
 import HostInvitePicker from "@/components/host-invite-picker";
+import WhatsAppButton from "@/components/whatsapp-button";
 import { resolveViewerCanConnect } from "@/lib/viewer-profile";
 import { formatDirectoryLocation } from "@/lib/directory-display";
 import { PAGE_BG_DOTS, PAGE_CONTAINER, PAGE_SHELL } from "@/lib/page-layout";
@@ -218,31 +219,20 @@ export default async function ProfileDetailPage({
                     <div className="flex items-center gap-2 rounded-xl bg-slate-50/70 px-3 py-2.5 border border-slate-100">
                       <Mail className="h-4 w-4 text-[#002FA7] shrink-0" />
                       <span className="text-slate-400 font-medium">Mail:</span>
-                      <span className="text-slate-800 break-all">{profile.contact_email || "—"}</span>
+                      <span className="min-w-0 flex-1 text-slate-800 break-all">{profile.contact_email || "—"}</span>
                     </div>
                     <div className="flex items-center gap-2 rounded-xl bg-slate-50/70 px-3 py-2.5 border border-slate-100">
                       <Phone className="h-4 w-4 text-[#002FA7] shrink-0" />
                       <span className="text-slate-400 font-medium">Phone:</span>
-                      <span className="text-slate-800 tracking-wider">{profile.phone || "—"}</span>
+                      <span className="min-w-0 flex-1 text-slate-800 tracking-wider">{profile.phone || "—"}</span>
+                      {profile.phone && (
+                        <WhatsAppButton
+                          phone={profile.phone}
+                          message={`Hi ${profile.full_name || "there"}! I am contacting you from WalkIn Locals to coordinate our visit details. Looking forward to chatting! ✦`}
+                        />
+                      )}
                     </div>
                   </div>
-
-                  {/* Clean, Premium WhatsApp Alignment Handshake Button */}
-                  {profile.phone && (
-                    <div className="pt-2 flex justify-start">
-                      <a
-                        href={`https://wa.me/${profile.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                          `Hi ${profile.full_name || "there"}! I am contacting you from WalkIn Locals to coordinate our visit details. Looking forward to chatting! ✦`
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#002FA7] text-white px-5 py-3 font-mono text-[9px] uppercase font-semibold tracking-widest transition-all duration-300 hover:bg-[#001e6c] hover:scale-[1.01] shadow-[0_4px_12px_rgba(0,47,167,0.12)] group"
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
-                        <span>Open Chat on WhatsApp</span>
-                      </a>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-5">

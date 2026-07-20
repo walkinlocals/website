@@ -3,9 +3,22 @@ export interface MatchDateFields {
   host_id: string;
   initiator_id: string | null;
   proposed_date: string | null;
+  proposed_time: string | null;
   date_proposed_by: string | null;
   date_confirmed: boolean | null;
 }
+
+/** Half-hour visit slots from 10:00 through 17:00. */
+export const VISIT_TIME_SLOTS = (() => {
+  const slots: string[] = [];
+  for (let hour = 10; hour <= 17; hour++) {
+    for (const minute of [0, 30]) {
+      if (hour === 17 && minute === 30) break;
+      slots.push(`${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`);
+    }
+  }
+  return slots;
+})();
 
 export function formatVisitDate(dateStr: string): string {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -15,6 +28,23 @@ export function formatVisitDate(dateStr: string): string {
     month: "long",
     day: "numeric",
   });
+}
+
+export function formatVisitTime(timeStr: string): string {
+  const [h, m] = timeStr.split(":").map(Number);
+  const date = new Date();
+  date.setHours(h, m, 0, 0);
+  return date.toLocaleTimeString("en-IE", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+export function formatVisitDateTime(dateStr: string, timeStr?: string | null): string {
+  const datePart = formatVisitDate(dateStr);
+  if (!timeStr) return datePart;
+  return `${datePart} at ${formatVisitTime(timeStr)}`;
 }
 
 export function toDateString(date: Date): string {
@@ -32,6 +62,24 @@ export function isValidProposedDate(dateStr: string): boolean {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return date >= today;
+}
+
+export function isValidProposedTime(timeStr: string): boolean {
+  return VISIT_TIME_SLOTS.includes(timeStr);
+}
+
+export function isVisitSlotInPast(dateStr: string, timeStr: string): boolean {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const [h, min] = timeStr.split(":").map(Number);
+  const slot = new Date(y, m - 1, d, h, min, 0, 0);
+  return slot.getTime() <= Date.now();
+}
+
+export function isDateFullyBooked(
+  dateStr: string,
+  bookedSlots: ReadonlySet<string>,
+): boolean {
+  return VISIT_TIME_SLOTS.every((slot) => bookedSlots.has(`${dateStr}|${slot}`));
 }
 
 export function isDateNegotiationComplete(match: MatchDateFields): boolean {
@@ -64,8 +112,5 @@ export function isAwaitingDateResponse(match: MatchDateFields, userId: string): 
 
 /** Host invited the guest — waiting for the guest to pick the first date. */
 export function isHostWaitingForGuestDate(match: MatchDateFields, userId: string): boolean {
-  return (
-    guestMustProposeDate(match) &&
-    userId === match.host_id
-  );
+  return guestMustProposeDate(match) && userId === match.host_id;
 }

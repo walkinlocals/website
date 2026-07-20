@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Calendar, Check, Loader2 } from "lucide-react";
 import VisitDatePicker from "@/components/visit-date-picker";
 import {
-  formatVisitDate,
+  formatVisitDateTime,
   canRespondToDateProposal,
   guestMustProposeDate,
   isAwaitingDateResponse,
@@ -26,6 +26,7 @@ interface Props {
 export default function MatchDateNegotiation({ match, currentUserId, hostId }: Props) {
   const router = useRouter();
   const [counterDate, setCounterDate] = useState<string | null>(match.proposed_date);
+  const [counterTime, setCounterTime] = useState<string | null>(match.proposed_time);
   const [showCounter, setShowCounter] = useState(false);
   const [working, setWorking] = useState<null | "propose" | "accept">(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +38,9 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
           <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-700 font-bold">
             Visit date
           </span>
-          <p className="mt-1 font-serif">{formatVisitDate(match.proposed_date)}</p>
+          <p className="mt-1 font-serif">
+            {formatVisitDateTime(match.proposed_date, match.proposed_time)}
+          </p>
         </div>
       );
     }
@@ -53,14 +56,21 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
   const hasVisibleContent =
     mustPropose || hostWaiting || (awaiting && !!match.proposed_date) || showRespondActions || showCounterActions;
 
-  async function run(action: "propose" | "accept", proposedDate?: string) {
+  const proposeReady = Boolean(counterDate && counterTime);
+
+  async function run(action: "propose" | "accept", proposedDate?: string, proposedTime?: string) {
     setWorking(action);
     setError(null);
     try {
       const res = await fetch("/api/matches/date", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ matchId: match.id, action, proposedDate }),
+        body: JSON.stringify({
+          matchId: match.id,
+          action,
+          proposedDate,
+          proposedTime,
+        }),
       });
       const body = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
@@ -78,12 +88,17 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
     if (canRespond && match.proposed_date && date !== match.proposed_date) {
       setShowCounter(true);
       setCounterDate(date);
+      setCounterTime(null);
       return;
     }
     setCounterDate(date);
+    setCounterTime(null);
   }
 
-  const calendarValue = showCounter ? counterDate : counterDate ?? match.proposed_date;
+  const calendarDate = showCounter ? counterDate : counterDate ?? match.proposed_date;
+  const calendarTime = showCounter
+    ? counterTime
+    : counterTime ?? match.proposed_time;
 
   return (
     <div className={CARD_CLASS}>
@@ -97,29 +112,33 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
       {mustPropose && (
         <>
           <p className="text-sm font-light leading-relaxed text-slate-600">
-            This host invited you to connect. Pick a date you&apos;d like to visit, then send it over.
+            This host invited you to connect. Pick a date and time for your visit, then send it over.
           </p>
           <VisitDatePicker
             hostId={hostId}
-            value={calendarValue}
+            value={calendarDate}
+            timeValue={counterTime}
             onChange={handleCalendarChange}
+            onTimeChange={setCounterTime}
             disabled={working !== null}
           />
           <button
             type="button"
-            disabled={working !== null || !counterDate}
-            onClick={() => counterDate && run("propose", counterDate)}
+            disabled={working !== null || !proposeReady}
+            onClick={() => counterDate && counterTime && run("propose", counterDate, counterTime)}
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#002FA7] px-6 py-3.5 font-mono text-[9px] font-semibold uppercase tracking-widest text-white shadow-[0_4px_12px_rgba(0,47,167,0.15)] transition hover:bg-[#001e6c] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {working === "propose" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-            {counterDate ? `Propose visit · ${formatVisitDate(counterDate)}` : "Propose this date"}
+            {proposeReady
+              ? `Propose visit · ${formatVisitDateTime(counterDate!, counterTime!)}`
+              : "Propose this visit"}
           </button>
         </>
       )}
 
       {hostWaiting && (
         <p className="text-sm font-light leading-relaxed text-slate-600">
-          You invited this traveler to connect. They&apos;ll pick a visit date from their calendar — you&apos;ll
+          You invited this traveler to connect. They&apos;ll pick a date and time from their calendar — you&apos;ll
           get a notification when they do.
         </p>
       )}
@@ -127,13 +146,18 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
       {awaiting && match.proposed_date && (
         <>
           <p className="text-sm font-light text-slate-600">
-            You proposed <strong className="text-slate-900">{formatVisitDate(match.proposed_date)}</strong>.
-            Waiting for the other person to respond.
+            You proposed{" "}
+            <strong className="text-slate-900">
+              {formatVisitDateTime(match.proposed_date, match.proposed_time)}
+            </strong>
+            . Waiting for the other person to respond.
           </p>
           <VisitDatePicker
             hostId={hostId}
             value={match.proposed_date}
+            timeValue={match.proposed_time}
             onChange={() => undefined}
+            onTimeChange={() => undefined}
             disabled
           />
         </>
@@ -145,13 +169,21 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
             {currentUserId === match.host_id
               ? "This traveler proposed a visit on"
               : "Your host proposed"}{" "}
-            <strong className="text-slate-900">{formatVisitDate(match.proposed_date!)}</strong>. Review the
-            calendar below, accept it, or tap another day to suggest a different date.
+            <strong className="text-slate-900">
+              {formatVisitDateTime(match.proposed_date!, match.proposed_time)}
+            </strong>
+            . Review below, accept it, or pick another slot.
           </p>
           <VisitDatePicker
             hostId={hostId}
             value={match.proposed_date}
+            timeValue={match.proposed_time}
             onChange={handleCalendarChange}
+            onTimeChange={(time) => {
+              setShowCounter(true);
+              setCounterDate(match.proposed_date);
+              setCounterTime(time);
+            }}
             disabled={working !== null}
           />
           <div className="flex flex-wrap gap-2">
@@ -162,7 +194,7 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
               className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#002FA7] px-5 py-3 font-mono text-[9px] font-semibold uppercase tracking-widest text-white shadow-[0_4px_12px_rgba(0,47,167,0.15)] transition hover:bg-[#001e6c] disabled:opacity-50 sm:flex-none"
             >
               {working === "accept" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-              Accept this date
+              Accept this slot
             </button>
             <button
               type="button"
@@ -170,10 +202,11 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
               onClick={() => {
                 setShowCounter(true);
                 setCounterDate(null);
+                setCounterTime(null);
               }}
               className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-5 py-3 font-mono text-[9px] font-semibold uppercase tracking-widest text-slate-650 sm:flex-none"
             >
-              Pick another day
+              Pick another slot
             </button>
           </div>
         </>
@@ -181,22 +214,26 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
 
       {showCounterActions && (
         <>
-          <p className="text-sm font-light text-slate-600">Pick a different date to suggest instead.</p>
+          <p className="text-sm font-light text-slate-600">Pick a different date and time to suggest instead.</p>
           <VisitDatePicker
             hostId={hostId}
             value={counterDate}
+            timeValue={counterTime}
             onChange={setCounterDate}
+            onTimeChange={setCounterTime}
             disabled={working !== null}
           />
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              disabled={working !== null || !counterDate}
-              onClick={() => counterDate && run("propose", counterDate)}
+              disabled={working !== null || !proposeReady}
+              onClick={() => counterDate && counterTime && run("propose", counterDate, counterTime)}
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-[#002FA7] px-5 py-3 font-mono text-[9px] font-semibold uppercase tracking-widest text-white disabled:opacity-50 sm:flex-none"
             >
               {working === "propose" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {counterDate ? `Send · ${formatVisitDate(counterDate)}` : "Send new date"}
+              {proposeReady
+                ? `Send · ${formatVisitDateTime(counterDate!, counterTime!)}`
+                : "Send new slot"}
             </button>
             <button
               type="button"
@@ -204,6 +241,7 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
               onClick={() => {
                 setShowCounter(false);
                 setCounterDate(match.proposed_date);
+                setCounterTime(match.proposed_time);
               }}
               className="rounded-full border border-slate-200 bg-white px-5 py-3 font-mono text-[9px] font-semibold uppercase tracking-widest text-slate-500"
             >
@@ -216,8 +254,8 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
       {!hasVisibleContent && (
         <p className="text-sm font-light leading-relaxed text-slate-600">
           {currentUserId === match.guest_id
-            ? "Pick a visit date below to continue this connection."
-            : "Waiting for the traveler to choose a visit date."}
+            ? "Pick a visit date and time below to continue this connection."
+            : "Waiting for the traveler to choose a visit slot."}
         </p>
       )}
 
@@ -226,17 +264,21 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
           <VisitDatePicker
             hostId={hostId}
             value={counterDate}
+            timeValue={counterTime}
             onChange={setCounterDate}
+            onTimeChange={setCounterTime}
             disabled={working !== null}
           />
           <button
             type="button"
-            disabled={working !== null || !counterDate}
-            onClick={() => counterDate && run("propose", counterDate)}
+            disabled={working !== null || !proposeReady}
+            onClick={() => counterDate && counterTime && run("propose", counterDate, counterTime)}
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#002FA7] px-6 py-3.5 font-mono text-[9px] font-semibold uppercase tracking-widest text-white shadow-[0_4px_12px_rgba(0,47,167,0.15)] transition hover:bg-[#001e6c] disabled:opacity-50"
           >
             {working === "propose" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-            {counterDate ? `Propose visit · ${formatVisitDate(counterDate)}` : "Propose this date"}
+            {proposeReady
+              ? `Propose visit · ${formatVisitDateTime(counterDate!, counterTime!)}`
+              : "Propose this visit"}
           </button>
         </>
       )}

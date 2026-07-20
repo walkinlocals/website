@@ -4,12 +4,13 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { usePageToast } from "@/components/page-toast";
-import { formatVisitDate } from "@/lib/match-dates";
+import { formatVisitDateTime } from "@/lib/match-dates";
 
 interface MatchSnapshot {
   id: string;
   status: string;
   proposed_date: string | null;
+  proposed_time: string | null;
   date_proposed_by: string | null;
   date_confirmed: boolean | null;
   initiator_id: string | null;
@@ -122,7 +123,7 @@ export default function LiveNotifications() {
       ) {
         pushToast({
           title: "Visit date proposed",
-          message: `${name} suggested ${formatVisitDate(after.proposed_date)}. Open Matches to accept or suggest another date.`,
+          message: `${name} suggested ${formatVisitDateTime(after.proposed_date, after.proposed_time)}. Open Matches to accept or suggest another date.`,
           href: "/matches",
         });
         router.refresh();
@@ -132,7 +133,7 @@ export default function LiveNotifications() {
       if (!before.date_confirmed && after.date_confirmed && after.proposed_date) {
         pushToast({
           title: "Visit date confirmed",
-          message: `You agreed on ${formatVisitDate(after.proposed_date)} with ${name}.`,
+          message: `You agreed on ${formatVisitDateTime(after.proposed_date, after.proposed_time)} with ${name}.`,
           href: "/matches",
         });
         router.refresh();
@@ -175,7 +176,7 @@ export default function LiveNotifications() {
       const { data: matches } = await supabase
         .from("matches")
         .select(
-          "id, status, proposed_date, date_proposed_by, date_confirmed, initiator_id, guest_id, host_id",
+          "id, status, proposed_date, proposed_time, date_proposed_by, date_confirmed, initiator_id, guest_id, host_id",
         )
         .or(`guest_id.eq.${user.id},host_id.eq.${user.id}`);
 
