@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { pingActivity } from "@/lib/activity-client";
-import { LogOut, Loader2 } from "lucide-react";
+import { Loader2, Menu, Search, X } from "lucide-react";
 
 type Role = "Host" | "Guest" | "Admin";
 
@@ -16,8 +16,14 @@ interface NavProfile {
   is_active: boolean;
 }
 
-const NAV_LINK_CLASS =
-  "hidden sm:block text-sm font-medium text-slate-650 hover:text-[#002FA7] transition";
+const MENU_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/about-us", label: "About Us" },
+  { href: "/how-it-works", label: "How It Works" },
+  { href: "/get-paid", label: "Get Paid" },
+  { href: "/pay", label: "Pay" },
+  { href: "/terms", label: "Terms" },
+] as const;
 
 export default function Navbar() {
   const router = useRouter();
@@ -27,13 +33,17 @@ export default function Navbar() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [profile, setProfile] = useState<NavProfile | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [syncTrigger, setSyncTrigger] = useState(0);
 
   useEffect(() => {
     let active = true;
 
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!active) return;
 
       if (!user) {
@@ -65,17 +75,15 @@ export default function Navbar() {
 
     const matchesChannel = supabase
       .channel("navbar-live-sync")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "matches" },
-        () => {
-          router.refresh();
-          setSyncTrigger((prev) => prev + 1);
-        }
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, () => {
+        router.refresh();
+        setSyncTrigger((prev) => prev + 1);
+      })
       .subscribe();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => load());
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => load());
 
     return () => {
       active = false;
@@ -84,8 +92,17 @@ export default function Navbar() {
     };
   }, [supabase, router, syncTrigger]);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
   async function handleSignOut() {
     setSigningOut(true);
+    setMenuOpen(false);
     await supabase.auth.signOut();
     setIsAuthed(false);
     setProfile(null);
@@ -93,84 +110,165 @@ export default function Navbar() {
     router.refresh();
   }
 
-  return (
-    <header
-      id="site-navbar"
-      className="sticky top-0 z-40 border-b border-slate-150 bg-slate-50/80 backdrop-blur"
-    >
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        {/* Always visible brand identity */}
-        <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-950 transition-colors hover:text-[#002FA7]">
-          <img src="/images/logo.png" alt="WalkIn Locals Logo" className="h-5 w-5 object-contain shrink-0 rounded-md" />
-          <span>WalkIn<span className="text-[#002FA7]"> Locals </span></span>
-        </Link>
+  function handleSearchSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setMenuOpen(false);
+    if (!isAuthed) {
+      router.push("/login?mode=signup&role=Guest");
+      return;
+    }
+    if (profile?.role === "Host") {
+      router.push("/guest-directory");
+      return;
+    }
+    router.push("/host-directory");
+  }
 
-        {/* Dynamic actions wrapper */}
-        <div className="flex items-center gap-3 sm:gap-5">
-          {loading ? (
-            <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
-          ) : !isAuthed ? (
-            /* FIX: Instead of returning null, show Sign In and Sign Up buttons if logged out */
-            <div className="flex items-center gap-3">
-              <Link
-                href="/login"
-                className="text-sm font-medium text-slate-650 hover:text-[#002FA7] transition"
-              >
-                Sign In
+  const menuLinks = isAuthed
+    ? [
+        { href: "/", label: "Home" },
+        ...(profile?.role === "Host"
+          ? [{ href: "/guest-directory", label: "Guests" }]
+          : [{ href: "/host-directory", label: "Hosts" }]),
+        { href: "/matches", label: "Matches" },
+        { href: "/profile", label: "Profile" },
+        { href: "/about-us", label: "About Us" },
+        { href: "/how-it-works", label: "How It Works" },
+        { href: "/get-paid", label: "Get Paid" },
+        { href: "/pay", label: "Pay" },
+        { href: "/terms", label: "Terms" },
+      ]
+    : MENU_LINKS.map((link) => ({ ...link }));
+
+  return (
+    <header id="site-navbar" className="sticky top-0 z-50 border-b border-slate-200 bg-white relative">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <nav className="flex items-center gap-3 py-3 sm:gap-4 sm:py-4">
+          <Link href="/" className="flex shrink-0 items-center gap-2.5">
+            <span className="text-base font-semibold tracking-tight text-slate-950 sm:text-lg">
+              WalkIn<span className="text-[#002FA7]">Locals</span>
+            </span>
+            <img src="/images/logo.png" alt="" className="h-8 w-8 object-contain sm:h-9 sm:w-9" />
+          </Link>
+
+          <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-3">
+            <form
+              onSubmit={handleSearchSubmit}
+              className="hidden min-w-0 md:block md:w-[min(100%,280px)] lg:w-[min(100%,320px)]"
+            >
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search Dublin hosts…"
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#002FA7] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#002FA7]"
+                />
+              </div>
+            </form>
+
+            {!loading && !isAuthed ? (
+              <>
+                <Link
+                  href="/login"
+                  className="hidden text-sm font-medium text-slate-700 hover:text-[#002FA7] sm:inline"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/login?mode=signup"
+                  className="hidden rounded-lg bg-[#002FA7] px-4 py-2 text-sm font-medium text-white hover:bg-[#001e6c] sm:inline"
+                >
+                  Sign Up
+                </Link>
+              </>
+            ) : null}
+
+            {isAuthed && profile ? (
+              <Link href="/profile" className="hidden sm:block">
+                <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    profile.full_name?.charAt(0)?.toUpperCase() ?? "?"
+                  )}
+                </span>
               </Link>
-              <Link
-                href="/login?mode=signup"
-                className="rounded-full bg-[#002FA7] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#001e6c] transition"
-              >
-                Sign Up
-              </Link>
-            </div>
-          ) : (
-            /* Revealed immediately when user session resolves successfully */
-            <ActiveLinks
-              profile={profile ?? { role: null, full_name: null, avatar_url: null, is_active: false }}
-              signingOut={signingOut}
-              onSignOut={handleSignOut}
+            ) : null}
+
+            <button
+              type="button"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-expanded={menuOpen}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:border-[#002FA7]/30 hover:text-[#002FA7]"
+            >
+              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </nav>
+
+        <form onSubmit={handleSearchSubmit} className="pb-3 md:hidden">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search Dublin hosts…"
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7]"
             />
-          )}
-        </div>
-      </nav>
+          </div>
+        </form>
+      </div>
+
+      {menuOpen ? (
+        <>
+          <button
+            type="button"
+            aria-label="Close menu backdrop"
+            className="fixed inset-0 top-[var(--navbar-height,0)] z-40 bg-slate-950/20"
+            onClick={() => setMenuOpen(false)}
+          />
+          <div
+            id="site-menu-panel"
+            className="absolute right-4 top-full z-50 mt-1 w-[min(100vw-2rem,280px)] rounded-xl border border-slate-200 bg-white py-2 shadow-lg sm:right-6"
+          >
+            {loading ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+              </div>
+            ) : (
+              <ul className="flex flex-col">
+                {menuLinks.map((link) => (
+                  <li key={`${link.href}-${link.label}`}>
+                    <Link
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="block px-4 py-3 text-sm font-medium text-slate-700 hover:bg-[#002FA7]/5 hover:text-[#002FA7]"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+                {isAuthed ? (
+                  <li>
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      disabled={signingOut}
+                      className="block w-full px-4 py-3 text-left text-sm font-medium text-slate-700 hover:bg-[#002FA7]/5 hover:text-[#002FA7] disabled:opacity-50"
+                    >
+                      {signingOut ? "Signing out…" : "Sign Out"}
+                    </button>
+                  </li>
+                ) : null}
+              </ul>
+            )}
+          </div>
+        </>
+      ) : null}
     </header>
-  );
-}
-
-function ActiveLinks({ profile, signingOut, onSignOut }: { profile: NavProfile; signingOut: boolean; onSignOut: () => void }) {
-  return (
-    <>
-      <Link href="/" className={NAV_LINK_CLASS}>Home</Link>
-
-      {profile.role === "Host" ? (
-        <Link href="/guest-directory" className={NAV_LINK_CLASS}>Guests</Link>
-      ) : (
-        <Link href="/host-directory" className={NAV_LINK_CLASS}>Hosts</Link>
-      )}
-
-      <Link href="/matches" className={NAV_LINK_CLASS}>Matches</Link>
-
-      <Link href="/profile" aria-label="Your profile" className="transition hover:scale-[1.03] shrink-0">
-        <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-sm font-medium text-slate-700 ring-1 ring-slate-250 hover:ring-[#002FA7]/50">
-          {profile.avatar_url ? (
-            <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
-          ) : (
-            (profile.full_name?.charAt(0)?.toUpperCase() ?? "?")
-          )}
-        </span>
-      </Link>
-
-      <button
-        type="button"
-        onClick={onSignOut}
-        disabled={signingOut}
-        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-750 hover:bg-slate-100 hover:text-[#002FA7] disabled:opacity-60"
-      >
-        {signingOut ? <Loader2 className="h-4 w-4 animate-spin text-[#002FA7]" /> : <LogOut className="h-4 w-4" />}
-        <span className="hidden sm:inline">Sign Out</span>
-      </button>
-    </>
   );
 }

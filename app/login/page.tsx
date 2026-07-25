@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { pingActivity } from "@/lib/activity-client";
 import { parseAppRole } from "@/lib/profile-role";
 import { Loader2 } from "lucide-react";
+import LoginDoorCollage from "@/components/login-door-collage";
 
 type UserRole = "Guest" | "Host";
 type AuthMode = "signin" | "signup";
@@ -146,23 +147,13 @@ function LoginInner() {
     "mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-950 focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7] transition-all duration-300 shadow-[0_4px_15px_rgba(0,47,167,0.01)] font-light placeholder:text-slate-400";
 
   return (
-    <div className="grid min-h-[calc(100vh-4rem)] w-full lg:grid-cols-2 bg-white overflow-hidden relative">
-      <div className="pointer-events-none absolute inset-0 z-0 opacity-30 bg-[radial-gradient(#002fa709_1.5px,transparent_1.5px)] [background-size:32px_32px]" />
+    <div className="grid min-h-[calc(100vh-4rem)] w-full lg:grid-cols-2 lg:items-stretch bg-white overflow-hidden">
+      <LoginDoorCollage />
 
-      <aside className="relative hidden h-full items-center justify-center overflow-hidden lg:flex p-6 z-10">
-        <div
-          className="absolute inset-6 bg-cover bg-center transition-transform duration-700 scale-100 hover:scale-[0.98] rounded-3xl"
-          style={{ backgroundImage: "url('/images/doors.png')" }}
-        />
-        <div className="absolute inset-6 bg-white/10 rounded-3xl" />
-      </aside>
-
-      <div className="flex h-full items-center justify-center px-6 py-12 bg-white overflow-y-auto z-10">
-        <div className="w-full max-w-sm py-4">
+      <div className="relative flex h-full min-h-[calc(100vh-4rem)] items-center justify-center overflow-y-auto z-10">
+        <div className="pointer-events-none absolute inset-0 z-0 opacity-30 bg-[radial-gradient(#002fa709_1.5px,transparent_1.5px)] [background-size:32px_32px]" />
+        <div className="relative z-10 w-full max-w-sm px-6 py-12">
           <div className="text-center space-y-2">
-            <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.3em] text-[#002FA7] font-semibold bg-[#002fa7]/5 px-3 py-1 rounded-full">
-              ✦ WalkIn Locals ✦
-            </span>
             <h1 className="font-serif text-3xl font-normal tracking-tight text-slate-950">
               {mode === "signin" ? "Welcome back" : "Create your account"}
             </h1>
@@ -191,8 +182,8 @@ function LoginInner() {
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             {mode === "signup" && (
               <fieldset className="space-y-3">
-                <legend className="block text-xs font-mono tracking-wider uppercase text-slate-600 mb-1">
-                  ✦ I&apos;m joining as a…
+                <legend className="mb-1 block text-xs font-mono uppercase tracking-wider text-slate-600">
+                  I&apos;m joining as a…
                 </legend>
                 <div className="grid grid-cols-2 gap-3">
                   {ROLE_OPTIONS.map((option) => {

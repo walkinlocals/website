@@ -103,9 +103,6 @@ export default function MatchesView({
 
   return (
     <main className={`${PAGE_CONTAINER} py-14 text-slate-900 sm:py-20`}>
-      <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.3em] text-[#002FA7] font-semibold bg-[#002fa7]/5 px-3 py-1 rounded-full mb-4">
-        ✦ Connections Panel ✦
-      </span>
       <h1 className="font-serif text-3xl font-normal tracking-tight text-slate-950 sm:text-4xl">Your matches</h1>
       <p className="mt-2 text-sm text-slate-500 font-light leading-relaxed">
         Manage connection requests, respond to invitations, and unlock contact details after payment.
@@ -297,7 +294,7 @@ function MatchCard({
       {mapQuery && (
         <div className="mt-6">
           <span className="block font-mono text-[11px] uppercase tracking-widest text-[#002FA7] font-semibold mb-3">
-            ✦ {mapLabel}
+            {mapLabel}
           </span>
           <div className="overflow-hidden rounded-2xl border border-slate-150 shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)]">
             <LocationMap query={mapQuery} zoom={mapZoom} label="" />

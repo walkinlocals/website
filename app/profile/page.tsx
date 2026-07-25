@@ -782,10 +782,7 @@ function ProfileInner() {
         <div className={PAGE_CONTAINER}>
           <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 pb-12 gap-6">
             <div>
-              <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.3em] text-[#002FA7] font-semibold bg-[#002fa7]/5 px-3 py-1 rounded-full">
-                ✦ Your Account ✦
-              </span>
-              <h1 className="font-serif text-4xl font-normal text-slate-950 mt-4 tracking-tight">Your Details</h1>
+              <h1 className="font-serif text-4xl font-normal tracking-tight text-slate-950">Your Details</h1>
               <div className="mt-3 flex items-center gap-2 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
                 <Clock className="h-3.5 w-3.5 text-[#002FA7]" />
                 <span>Last Activity: {lastActiveText}</span>
@@ -930,10 +927,7 @@ function ProfileInner() {
             </button>
           )}
           <div>
-            <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.3em] text-[#002FA7] font-semibold bg-[#002fa7]/5 px-3 py-1 rounded-full">
-              ✦ WalkIn Locals ✦
-            </span>
-            <h1 className="font-serif text-3xl font-normal tracking-tight text-slate-950 mt-4">
+            <h1 className="font-serif text-3xl font-normal tracking-tight text-slate-950">
               {isAsleep ? "Restore Profile" : "Edit Profile"}
             </h1>
             <p className="mt-2 text-sm text-slate-500 font-light leading-relaxed">

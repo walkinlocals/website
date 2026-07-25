@@ -58,10 +58,7 @@ export default function TermsPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 text-slate-900 sm:py-24">
-      <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.3em] text-[#002FA7] font-semibold bg-[#002fa7]/5 px-3 py-1 rounded-full">
-        ✦ MAXIMUM PARTNERSHIP PROTECTION DEED ✦
-      </span>
-      <h1 className="mt-4 font-serif text-4xl font-normal tracking-tight text-slate-950">
+      <h1 className="font-serif text-4xl font-normal tracking-tight text-slate-950">
         Terms of Service &amp; Absolute Liability Release
       </h1>
       <p className="mt-3 text-sm text-slate-500 font-light leading-relaxed">

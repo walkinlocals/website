@@ -50,10 +50,7 @@ export default function DirectoryView({ role, profiles, liquidity, error }: Dire
 
       <main className={`${PAGE_CONTAINER} py-14 text-slate-900 sm:py-20`}>
         <section className="relative mb-12 border-b border-slate-100 pb-12">
-          <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.3em] text-[#002FA7] font-semibold bg-[#002fa7]/5 px-3 py-1 rounded-full">
-            ✦ WalkIn Locals ✦
-          </span>
-          <h1 className="mt-4 font-serif text-4xl font-normal tracking-tight text-slate-950 sm:text-6xl">
+          <h1 className="font-serif text-4xl font-normal tracking-tight text-slate-950 sm:text-6xl">
             {copy.title}{" "}
             <span className="italic text-[#002FA7]">{copy.titleAccent}</span>
           </h1>
