@@ -208,21 +208,21 @@ export default function Navbar() {
     <header id="site-navbar" className="sticky top-0 z-50 border-b border-slate-200 bg-white relative">
       <div className={`w-full ${SITE_GUTTER}`}>
         <nav className="flex min-w-0 items-center gap-2 py-3 sm:gap-4 sm:py-5 lg:py-6">
-          <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <Link href="/" className="flex min-w-0 max-w-[min(100%,70vw)] items-center gap-2 sm:max-w-none sm:gap-3">
             <span className={`${brandWordmark} min-w-0 leading-none`}>
               {BRAND_NAME}
             </span>
             <img
               src="/images/logo.png"
               alt=""
-              className="hidden h-9 w-9 shrink-0 object-contain md:block md:h-11 lg:h-12"
+              className="hidden h-9 w-9 shrink-0 object-contain xl:block xl:h-11 xl:w-11"
             />
           </Link>
 
           <div className="ml-auto flex shrink-0 items-center justify-end gap-2 sm:gap-3">
             <form
               onSubmit={handleSearchSubmit}
-              className="hidden min-w-0 md:block md:w-[min(100%,320px)] lg:w-[min(100%,416px)]"
+              className="hidden min-w-0 xl:block xl:w-[min(100%,280px)] 2xl:w-[min(100%,360px)]"
             >
               <div ref={searchWrapRef} className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 sm:h-[1.125rem] sm:w-[1.125rem]" />
@@ -273,7 +273,7 @@ export default function Navbar() {
             </form>
 
             {!loading && !isAuthed ? (
-              <div className="hidden items-center gap-3 lg:flex">
+              <div className="hidden items-center gap-3 xl:flex">
                 <Link
                   href="/login"
                   className="whitespace-nowrap text-lg font-medium text-slate-700 hover:text-[#002FA7]"
@@ -290,7 +290,7 @@ export default function Navbar() {
             ) : null}
 
             {isAuthed && profile ? (
-              <Link href="/profile" className="shrink-0 lg:hidden">
+              <Link href="/profile" className="shrink-0 xl:hidden">
                 <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-lg font-medium ring-1 ring-slate-200">
                   {profile.avatar_url ? (
                     <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
@@ -302,7 +302,7 @@ export default function Navbar() {
             ) : null}
 
             {isAuthed && profile ? (
-              <Link href="/profile" className="hidden shrink-0 lg:block">
+              <Link href="/profile" className="hidden shrink-0 xl:block">
                 <span className="flex h-[3.6rem] w-[3.6rem] items-center justify-center overflow-hidden rounded-full bg-slate-100 text-xl font-medium ring-1 ring-slate-200">
                   {profile.avatar_url ? (
                     <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
@@ -325,7 +325,7 @@ export default function Navbar() {
           </div>
         </nav>
 
-        <form onSubmit={handleSearchSubmit} className="pb-4 md:hidden">
+        <form onSubmit={handleSearchSubmit} className="pb-3 pt-0 xl:hidden sm:pb-4">
           <div ref={mobileSearchWrapRef} className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -402,7 +402,7 @@ export default function Navbar() {
                   </li>
                 ))}
                 {!loading && !isAuthed ? (
-                  <li className="mt-1 border-t border-slate-200 pt-1 lg:hidden">
+                  <li className="mt-1 border-t border-slate-200 pt-1 xl:hidden">
                     <Link
                       href="/login"
                       onClick={() => setMenuOpen(false)}
