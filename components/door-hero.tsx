@@ -63,13 +63,13 @@ export default function DoorHero({
     <img
       src="/images/logo.png"
       alt={`${BRAND_NAME} door`}
-      className="h-auto w-80 sm:w-[28rem] lg:w-[36rem] xl:w-[42rem] object-contain"
+      className="h-auto w-[min(92vw,20rem)] max-h-[min(50vh,26rem)] object-contain sm:w-[min(88vw,28rem)] sm:max-h-[min(55vh,32rem)] lg:w-[min(36rem,42vw)] xl:w-[min(42rem,38vw)]"
     />
   );
 
   return (
     <section
-      className={`relative z-10 flex min-h-[min(72vh,880px)] flex-col justify-center py-12 sm:py-16 lg:py-20 ${SITE_GUTTER}`}
+      className={`relative z-10 flex min-h-[min(64vh,720px)] flex-col justify-center py-10 sm:min-h-[min(72vh,880px)] sm:py-16 lg:py-20 ${SITE_GUTTER}`}
       style={{ backgroundColor: CREAM }}
     >
       {showComingSoon ? (
@@ -99,7 +99,7 @@ export default function DoorHero({
           </p>
         ) : null}
 
-        <p className={heroTitle}>Home is where you feel loved</p>
+        <p className={`${heroTitle} px-1`}>Home is where you feel loved</p>
 
         <div className="mt-8 flex flex-col items-center sm:mt-12 lg:mt-14">
           {isHashLink ? (

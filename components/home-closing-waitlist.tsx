@@ -34,7 +34,7 @@ export default function HomeClosingWaitlist() {
             id="waitlist"
             className="scroll-mt-24 mt-14 border-t border-slate-200/90 pt-14 lg:col-span-6 lg:mt-2 lg:border-l lg:border-t-0 lg:pl-12 lg:pt-0 xl:col-span-5 xl:pl-16"
           >
-            <div className="grid gap-12 sm:grid-cols-2 sm:gap-10 lg:grid-cols-1 lg:gap-14">
+            <div className="grid gap-10 md:grid-cols-2 md:gap-10 lg:grid-cols-1 lg:gap-14">
               <div>
                 <p className={homeEyebrow}>Hosts</p>
                 <p className="mt-3 font-serif text-2xl font-normal uppercase leading-snug text-slate-950 sm:text-[1.65rem]">

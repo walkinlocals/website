@@ -1,15 +1,22 @@
 @import "tailwindcss";
 
+body {
+  overflow-x: hidden;
+}
+
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 7.2rem;
+  scroll-padding-top: 5.5rem;
   /* Site-wide scale: ~20% above prior root sizes (rem-based UI follows automatically). */
-  font-size: 20.4px;
+  font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 @media (min-width: 640px) {
   html {
     font-size: 21.6px;
+    scroll-padding-top: 7.2rem;
   }
 }
 

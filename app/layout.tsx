@@ -1,6 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SiteShell from "@/components/site-shell";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "WALKINLOCALS Dublin",
@@ -22,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="flex min-h-screen flex-col text-slate-950 antialiased bg-white">
+      <body className="flex min-h-screen min-w-0 flex-col overflow-x-hidden text-slate-950 antialiased bg-white">
         <SiteShell>{children}</SiteShell>
       </body>
     </html>
