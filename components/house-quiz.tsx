@@ -170,24 +170,24 @@ function QuizResult({
 }) {
   return (
     <div className={`space-y-12 border-t border-slate-200/80 pt-10 sm:pt-12 ${embedded ? "text-left" : ""}`}>
-      <div className="relative overflow-hidden rounded-2xl">
+      <div className="overflow-hidden rounded-2xl">
         <img
           src={result.image}
-          alt={result.imageAlt}
+          alt=""
           className="aspect-[16/10] w-full object-cover sm:aspect-[21/9]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white sm:text-base">
-            Your match
-          </p>
-          <h3
-            className="mt-3 inline-block max-w-full bg-[#002FA7] px-3 py-2 font-sans text-xl font-semibold uppercase tracking-[0.32em] text-white sm:px-4 sm:py-2.5 sm:text-2xl lg:text-3xl"
-          >
-            {result.title}
-          </h3>
-          <p className="mt-3 text-lg text-white sm:text-xl">{result.subtitle}</p>
-        </div>
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#002FA7] sm:text-base">
+          Your match
+        </p>
+        <h3
+          className="inline-block max-w-full bg-[#002FA7] px-3 py-2 font-sans text-xl font-semibold uppercase tracking-[0.32em] text-white sm:px-4 sm:py-2.5 sm:text-2xl lg:text-3xl"
+        >
+          {result.title}
+        </h3>
+        <p className="font-sans text-lg text-slate-600 sm:text-xl">{result.subtitle}</p>
       </div>
 
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
