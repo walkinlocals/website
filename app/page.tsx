@@ -55,7 +55,7 @@ export default function HomePage() {
       <HouseQuizTeaser />
 
       <HomeClosing
-        showJoinLinks={!isAuthed}
+        showJoinLinks
         hostHref={getCtaLink("Host")}
         guestHref={getCtaLink("Guest")}
       />

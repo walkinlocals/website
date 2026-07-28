@@ -215,7 +215,7 @@ export default function Navbar() {
             <img
               src="/images/logo.png"
               alt=""
-              className="hidden h-9 w-9 shrink-0 object-contain xl:block xl:h-11 xl:w-11"
+              className="h-9 w-9 shrink-0 object-contain sm:h-11 sm:w-11"
             />
           </Link>
 
