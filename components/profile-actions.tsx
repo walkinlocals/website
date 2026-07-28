@@ -57,7 +57,7 @@ export default function ProfileActions({
   if (!canConnect) {
     return (
       <p className="font-serif text-sm italic text-slate-400 font-light">
-        Connections are made between travelers and hosts.
+        Connections are made between backpackers and hosts.
       </p>
     );
   }

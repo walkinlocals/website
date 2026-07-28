@@ -1,1 +1,117 @@
 @import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 7.2rem;
+  /* Site-wide scale: ~20% above prior root sizes (rem-based UI follows automatically). */
+  font-size: 20.4px;
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 21.6px;
+  }
+}
+
+@media (min-width: 1280px) {
+  html {
+    font-size: 24px;
+  }
+}
+
+@keyframes discovery-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes coming-soon-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes coming-soon-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(6px, -10px, 0);
+  }
+}
+
+@layer utilities {
+  .animate-coming-soon-marquee {
+    animation: coming-soon-marquee 28s linear infinite;
+  }
+
+  .animate-coming-soon-float {
+    animation: coming-soon-float 5s ease-in-out infinite;
+  }
+}
+
+@layer components {
+  .visit-date-calendar-grid {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.25rem;
+    text-align: center;
+  }
+
+  .visit-date-calendar-grid > button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .page-toast-stack {
+    position: fixed;
+    z-index: 99999 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.75rem;
+    width: min(22rem, calc(100vw - 2rem));
+    pointer-events: none;
+  }
+
+  .discovery-marquee-viewport {
+    overflow: hidden;
+    min-height: 11rem;
+  }
+
+  .discovery-marquee-track {
+    display: flex;
+    width: max-content;
+    flex-wrap: nowrap;
+    animation: discovery-marquee 70s linear infinite;
+    will-change: transform;
+  }
+
+  .discovery-marquee-viewport:hover .discovery-marquee-track {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .discovery-marquee-viewport {
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .discovery-marquee-viewport::-webkit-scrollbar {
+      display: none;
+    }
+
+    .discovery-marquee-track {
+      animation: none;
+    }
+  }
+}

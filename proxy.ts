@@ -1,26 +1,27 @@
-// proxy.ts
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { updateSession } from "@/lib/supabase/proxy";
 
-// 1. Rename this function from "middleware" to "proxy"
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Allow the landing page, static assets, and the waitlist API endpoint
-  if (
-    pathname === "/" ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api/waitlist") ||
-    pathname.includes(".")
-  ) {
-    return NextResponse.next();
-  }
-
-  // Redirect all other traffic back to the home landing page
-  return NextResponse.redirect(new URL("/", request.url));
+function isBlockedAuthPath(pathname: string) {
+  return (
+    pathname === "/login" ||
+    pathname.startsWith("/login/") ||
+    pathname === "/auth" ||
+    pathname.startsWith("/auth/")
+  );
 }
 
-// Keep your matcher config exactly the same
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (isBlockedAuthPath(pathname)) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  return updateSession(request);
+}
+
 export const config = {
-  matcher: "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };

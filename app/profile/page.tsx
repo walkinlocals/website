@@ -564,7 +564,7 @@ export default function ProfileHubPage() {
                         onChange={() => setForm((p) => ({ ...p, role: r }))}
                         className="sr-only"
                       />
-                      <span className="block font-medium">{r === "Guest" ? "Guest (Traveler)" : "Host (Local Guide)"}</span>
+                      <span className="block font-medium">{r === "Guest" ? "Guest (Backpacker)" : "Host (Local Guide)"}</span>
                     </label>
                   ))}
                 </div>

@@ -74,8 +74,8 @@ export default function MatchesView({
       <h1 className="font-serif text-3xl font-normal tracking-tight text-slate-950 sm:text-4xl">Your matches</h1>
       <p className="mt-2 text-sm text-slate-500 font-light leading-relaxed">
         {myRole === "Host"
-          ? "Manage your guest connections. Respond to incoming visits or invite pending travelers."
-          : "Track your requests. Specify travelers and complete your payments to unlock chat doors."}
+          ? "Manage your guest connections. Respond to incoming visits or invite pending backpackers."
+          : "Track your requests. Specify backpackers and complete your payments to unlock chat doors."}
       </p>
 
       {justPaid && (
@@ -136,7 +136,7 @@ function MatchCard({
       : "";
   const mapZoom = iAmHost ? 5 : 13;
   const mapLabel = iAmHost
-    ? `Where ${other?.full_name ?? "this traveler"} is from`
+    ? `Where ${other?.full_name ?? "this backpacker"} is from`
     : `${other?.full_name ?? "this host"}'s area`;
 
   async function act(kind: "accept" | "hold" | "decline") {
@@ -196,7 +196,7 @@ function MatchCard({
           </Link>
           <div>
             <Link href={`/profile/${other?.id ?? ""}`} className="font-serif text-lg font-normal text-slate-950 hover:text-[#002FA7] transition-colors duration-300">
-              {other?.full_name ?? (iAmHost ? "Traveler" : "Host")}
+              {other?.full_name ?? (iAmHost ? "Backpacker" : "Host")}
             </Link>
             {otherLocation && (
               <p className="flex items-center gap-1 text-xs text-slate-400 font-light mt-0.5">
@@ -293,7 +293,7 @@ function MatchCard({
         )}
 
         {iAmHost && match.status === "Accepted" && (
-          <p className="text-xs font-mono uppercase tracking-widest text-[#002FA7]">Accepted — awaiting traveler payment.</p>
+          <p className="text-xs font-mono uppercase tracking-widest text-[#002FA7]">Accepted — awaiting backpacker payment.</p>
         )}
 
         {!iAmHost && match.status === "Accepted" && match.stripe_link && (

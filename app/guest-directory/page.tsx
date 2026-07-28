@@ -69,17 +69,17 @@ export default async function GuestDirectoryPage() {
             ✦ WalkIn Locals ✦
           </span>
           <h1 className="mt-4 font-serif text-4xl font-normal tracking-tight text-slate-950 sm:text-6xl">
-            Travelers in <span className="italic text-[#002FA7]">Dublin</span>
+            Backpackers in <span className="italic text-[#002FA7]">Dublin</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base font-light leading-relaxed text-slate-500 sm:text-lg">
-            Meet travelers hoping for an authentic afternoon. Click a traveler&apos;s card to read their story, see their journey, and welcome them in.
+            Meet backpackers hoping for an authentic afternoon. Click a backpacker&apos;s card to read their story, see their journey, and welcome them in.
           </p>
         </section>
 
         {list.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-200 p-12 text-center bg-slate-50/50">
             <p className="font-serif text-lg italic text-slate-500">
-              No travelers are looking right now — check back soon.
+              No backpackers are looking right now — check back soon.
             </p>
           </div>
         ) : (
@@ -98,7 +98,7 @@ export default async function GuestDirectoryPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={g.avatar_url}
-                          alt={g.full_name ?? "Traveler"}
+                          alt={g.full_name ?? "Backpacker"}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       ) : (
@@ -110,7 +110,7 @@ export default async function GuestDirectoryPage() {
 
                     <div className="space-y-1">
                       <h2 className="font-serif text-xl font-normal text-slate-950 transition-colors duration-300 group-hover:text-[#002FA7]">
-                        {g.full_name ?? "Traveler"}
+                        {g.full_name ?? "Backpacker"}
                       </h2>
 
                       <div className="flex flex-col gap-0.5">

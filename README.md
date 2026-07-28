@@ -1,6 +1,6 @@
 # Walk In
 
-A curated marketplace connecting travelers (**Guests**) with local Dublin hosts (**Hosts**)
+A curated marketplace connecting backpackers (**Guests**) with local Dublin hosts (**Hosts**)
 for storytelling experiences over tea, coffee, and traditional treats.
 
 Stack: **Next.js (App Router) · TypeScript · Tailwind CSS · Supabase (auth + DB + storage) ·
@@ -47,7 +47,7 @@ Stripe (Checkout + Identity) · Resend (email) · Google Maps**.
 | `app/profile/page.tsx` → `/profile` | Edit your own profile; reconciles OAuth role. |
 | `app/profile/[id]/page.tsx` → `/profile/<id>` | View another user; privacy wall on contact info. |
 | `app/host-directory/page.tsx` → `/host-directory` | Guest-only: host feed + map. |
-| `app/guest-directory/page.tsx` → `/guest-directory` | Host-only: traveler feed + privacy map. |
+| `app/guest-directory/page.tsx` → `/guest-directory` | Host-only: backpacker feed + privacy map. |
 | `app/matches/page.tsx` → `/matches` | Match dashboard: pay when Accepted, banner on success. |
 
 ### API routes
