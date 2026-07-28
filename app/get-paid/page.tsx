@@ -1,83 +1,90 @@
 import Link from "next/link";
 import { HOST_PAYOUT_COPY } from "@/lib/marketing-content";
-import { PAGE_CONTAINER, PAGE_SHELL } from "@/lib/page-layout";
+import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
 import {
   homeDisplayTitle,
-  homeEyebrow,
   homePrimaryButton,
-  homeSectionBorder,
   homeTextLink,
+  marketingBody,
+  marketingPageTitle,
+  siteTitleTypography,
 } from "@/lib/homepage-ui";
 
-const bodyText = "font-sans text-base leading-relaxed text-slate-950 sm:text-[17px] sm:leading-[1.65]";
+const hostStepTitle = `${siteTitleTypography} text-xl sm:text-2xl`;
 
 const PAYOUT_DETAILS = [
   {
     title: "You set the schedule",
-    body: "Host whenever you like. Choose the days and times that work for your life — no pressure, no fixed commitments.",
+    body: "Host whenever you like. Choose the days and times that work for your life. No pressure, no fixed commitments.",
   },
   {
     title: `€${HOST_PAYOUT_COPY.feePerGuest} per guest`,
-    body: "When a traveller connects with you, you earn €25 for each person in their party. Payouts go directly to your bank via Stripe.",
+    body: "When a backpacker connects with you, you earn €25 for each person in their party. Payouts go directly to your bank.",
   },
   {
     title: "Verified guests only",
-    body: "Every traveller completes identity verification before they can send a request, so you know who is coming to your door.",
+    body: "Every backpacker completes identity verification before they can send a request, so you know who is coming to your door.",
   },
   {
     title: "Simple setup",
-    body: "Connect your Stripe account from your profile in minutes. We handle the payment flow — you focus on the welcome.",
+    body: "Connect your bank details from your profile in minutes. We handle the payment flow. You focus on the welcome.",
   },
 ] as const;
 
 export default function GetPaidPage() {
   return (
     <div className={`${PAGE_SHELL} font-sans text-slate-950`}>
-      <div className={`${PAGE_CONTAINER} space-y-14 sm:space-y-16`}>
+      <div className={`${PAGE_MAIN} space-y-14 sm:space-y-20`}>
         <header className="max-w-3xl">
           <Link href="/" className={`inline-flex items-center gap-2 ${homeTextLink}`}>
             ← Back home
           </Link>
-          <h1 className="mt-8 font-sans text-2xl font-bold tracking-tight sm:text-[1.875rem]">
+          <h1 className={`mt-8 ${marketingPageTitle}`}>
             {HOST_PAYOUT_COPY.headline}
           </h1>
-          <p className="mt-4 font-serif text-xl font-normal italic leading-snug text-slate-950 sm:text-2xl">
-            Host whenever you like.
-          </p>
-          <p className={`mt-4 ${bodyText}`}>
-            Share your home, your neighbourhood, and your stories — and earn for every genuine connection you make.
+          <p className={`mt-5 ${marketingBody}`}>
+            Share your home, your neighbourhood, and your stories. Earn for every genuine connection you make.
           </p>
         </header>
 
-        <section>
-          <p className={homeEyebrow}>Your earnings</p>
-          <p className="mt-4 font-serif text-5xl font-normal tracking-tight text-slate-950 sm:text-6xl">
-            €{HOST_PAYOUT_COPY.feePerGuest}
-          </p>
-          <p className={`mt-2 ${bodyText}`}>per guest, per confirmed visit</p>
-        </section>
-
-        <section>
-          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 sm:gap-12 lg:gap-14">
-            {PAYOUT_DETAILS.map((item) => (
-              <div key={item.title}>
-                <h2 className="font-serif text-xl font-normal text-slate-950 sm:text-2xl">{item.title}</h2>
-                <p className={`mt-3 ${bodyText}`}>{item.body}</p>
-              </div>
-            ))}
+        <section className="text-center">
+          <p className={homeDisplayTitle}>Your earnings</p>
+          <div
+            className="mx-auto mt-6 flex h-44 w-44 items-center justify-center rounded-full bg-[#002FA7] p-4 sm:mt-8 sm:h-52 sm:w-52 lg:h-64 lg:w-64"
+          >
+            <span className="max-w-full text-center font-serif text-[3.63rem] font-normal leading-none tracking-tight text-white sm:text-[4.54rem] lg:text-[5.45rem]">
+              €{HOST_PAYOUT_COPY.feePerGuest}
+            </span>
           </div>
+          <p className="mt-6 text-[1.125rem] text-slate-600 sm:mt-8 sm:text-[1.35rem] lg:text-[1.6875rem]">
+            per guest
+          </p>
         </section>
 
-        <section className={`${homeSectionBorder} pt-14 sm:pt-16`}>
-          <h2 className={homeDisplayTitle}>How the fee breaks down</h2>
-          <p className={`mt-4 max-w-2xl ${bodyText}`}>
-            Travellers pay a €{HOST_PAYOUT_COPY.connectionFee} connection fee per person. You receive €
-            {HOST_PAYOUT_COPY.feePerGuest}, and €{HOST_PAYOUT_COPY.platformFee} covers verification, payments, and keeping{" "}
-            <span className="text-[#002FA7]">WalkIn Locals</span> running.
-          </p>
-          <Link href="/login?mode=signup&role=Host" className={`mt-8 ${homePrimaryButton}`}>
-            Start hosting in Dublin
-          </Link>
+        <section>
+          <ol className="space-y-8 sm:space-y-10">
+            {PAYOUT_DETAILS.map((item, index) => (
+              <li key={item.title} className="flex gap-4 sm:gap-5">
+                <span
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#002fa7]/10 font-sans text-lg font-semibold text-[#002FA7] sm:h-12 sm:w-12 sm:text-xl"
+                  aria-hidden
+                >
+                  {index + 1}
+                </span>
+                <div className="min-w-0 pt-0.5">
+                  <p className={hostStepTitle}>
+                    {item.title}
+                  </p>
+                  <p className={`mt-3 ${marketingBody}`}>{item.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-12 flex justify-center">
+            <Link href="/login?mode=signup&role=Host" className={homePrimaryButton}>
+              Start hosting in Dublin
+            </Link>
+          </div>
         </section>
       </div>
     </div>

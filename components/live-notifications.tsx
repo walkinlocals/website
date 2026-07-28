@@ -61,17 +61,40 @@ export default function LiveNotifications() {
       }
     }
 
-    async function notifyNewMatch(match: MatchSnapshot) {
-      if (!userIdRef.current || match.initiator_id === userIdRef.current) return;
+    async function ensurePaidMatch(matchId: string): Promise<boolean> {
+      if (paidMatchIdsRef.current.has(matchId)) return true;
 
-      const name = await loadName(otherPartyId(match, userIdRef.current));
+      const { data } = await supabase
+        .from("matches")
+        .select("status")
+        .eq("id", matchId)
+        .maybeSingle();
+
+      if (data?.status === "Paid") {
+        paidMatchIdsRef.current.add(matchId);
+        return true;
+      }
+      return false;
+    }
+
+    async function notifyNewMatch(match: MatchSnapshot) {
+      const userId = userIdRef.current;
+      if (!userId) return;
+
+      // Initiator already knows they sent the request / invite.
+      if (match.initiator_id === userId) return;
+
+      const name = await loadName(otherPartyId(match, userId));
       const hasDate = Boolean(match.proposed_date);
+      const iAmGuest = match.guest_id === userId;
 
       pushToast({
-        title: "New match",
+        title: hasDate ? "New visit request" : "New connection",
         message: hasDate
-          ? `${name} sent you a visit request. Open Matches to respond.`
-          : `${name} invited you to connect. Open Matches to pick a visit date.`,
+          ? `${name} requested a visit. Open Matches to respond.`
+          : iAmGuest
+            ? `${name} invited you to connect. Open Matches to pick a visit date.`
+            : `${name} wants to connect. Open Matches to respond.`,
         href: "/matches",
       });
       router.refresh();
@@ -83,12 +106,16 @@ export default function LiveNotifications() {
 
       const otherId = otherPartyId(after, userId);
       const name = await loadName(otherId);
+      const iAmGuest = after.guest_id === userId;
+      const prevStatus = snapshotsRef.current.get(after.id)?.status ?? before.status;
 
-      if (before.status !== after.status) {
+      if (prevStatus !== after.status) {
         if (after.status === "Accepted") {
           pushToast({
-            title: "Match accepted",
-            message: `${name} accepted your connection. Open Matches to continue.`,
+            title: iAmGuest ? "Visit accepted — pay to unlock" : "Match accepted",
+            message: iAmGuest
+              ? `${name} accepted your visit. Open Matches to pay €35 per person and unlock chat & contact details.`
+              : `${name} accepted the connection. You'll be notified when they pay.`,
             href: "/matches",
           });
         } else if (after.status === "Denied") {
@@ -100,8 +127,10 @@ export default function LiveNotifications() {
         } else if (after.status === "Paid") {
           paidMatchIdsRef.current.add(after.id);
           pushToast({
-            title: "Payment received",
-            message: `Your connection with ${name} is now unlocked — Live Connection Chat is ready.`,
+            title: iAmGuest ? "Payment complete" : "Payment received",
+            message: iAmGuest
+              ? `You're connected with ${name} — chat and contact details are unlocked.`
+              : `${name} paid — chat and contact details are unlocked for your visit.`,
             href: "/matches",
           });
         } else if (after.status === "Hold") {
@@ -130,10 +159,11 @@ export default function LiveNotifications() {
         return;
       }
 
-      if (!before.date_confirmed && after.date_confirmed && after.proposed_date) {
+      const prevConfirmed = snapshotsRef.current.get(after.id)?.date_confirmed ?? before.date_confirmed;
+      if (!prevConfirmed && after.date_confirmed && after.proposed_date && after.date_proposed_by !== userId) {
         pushToast({
           title: "Visit date confirmed",
-          message: `You agreed on ${formatVisitDateTime(after.proposed_date, after.proposed_time)} with ${name}.`,
+          message: `${name} agreed on ${formatVisitDateTime(after.proposed_date, after.proposed_time)}.`,
           href: "/matches",
         });
         router.refresh();
@@ -143,8 +173,10 @@ export default function LiveNotifications() {
     async function notifyNewMessage(message: MessageSnapshot) {
       const userId = userIdRef.current;
       if (!userId || message.sender_id === userId) return;
-      if (!paidMatchIdsRef.current.has(message.match_id)) return;
       if (messageIdsRef.current.has(message.id)) return;
+
+      const paid = await ensurePaidMatch(message.match_id);
+      if (!paid) return;
 
       messageIdsRef.current.add(message.id);
 
@@ -158,7 +190,7 @@ export default function LiveNotifications() {
 
       const name = await loadName(message.sender_id);
       pushToast({
-        title: "Live connection chat",
+        title: "New message",
         message: `${name}: ${previewMessage(message.content)}`,
         href: "/matches",
       });

@@ -33,7 +33,7 @@ function splitName(fullName: string | null | undefined): {
 /** Stripe rejects many localhost / invalid business URLs — use description only for hosts. */
 function businessProfile(): Stripe.AccountCreateParams.BusinessProfile {
   return {
-    product_description: "Local Dublin host on WalkIn Locals — home visits and storytelling.",
+    product_description: "Local Dublin host on WALKINLOCALS: home visits and storytelling.",
     mcc: "7999",
   };
 }

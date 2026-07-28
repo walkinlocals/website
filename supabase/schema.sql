@@ -199,6 +199,7 @@ create table if not exists public.matches (
 alter table public.matches add column if not exists party_size int not null default 1;
 alter table public.matches add column if not exists initiator_id uuid references public.profiles (id) on delete cascade;
 alter table public.matches add column if not exists stripe_link text;
+alter table public.matches add column if not exists stripe_session_id text;
 alter table public.matches add column if not exists created_at timestamptz not null default now();
 alter table public.matches add column if not exists proposed_date date;
 alter table public.matches add column if not exists proposed_time text;
@@ -243,6 +244,8 @@ where initiator_id is null;
 
 alter table public.matches enable row level security;
 
+alter table public.matches replica identity full;
+
 drop policy if exists "see own matches" on public.matches;
 create policy "see own matches"
   on public.matches for select
@@ -285,6 +288,8 @@ create table if not exists public.messages (
 );
 
 alter table public.messages enable row level security;
+
+alter table public.messages replica identity full;
 
 drop policy if exists "chat only unlocked post payment select" on public.messages;
 create policy "chat only unlocked post payment select"

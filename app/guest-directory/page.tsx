@@ -5,7 +5,12 @@ import { fetchDirectoryProfiles, fetchDirectoryLiquidity } from "@/lib/directory
 
 export const dynamic = "force-dynamic";
 
-export default async function GuestDirectoryPage() {
+export default async function GuestDirectoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -21,5 +26,13 @@ export default async function GuestDirectoryPage() {
     fetchDirectoryLiquidity(supabase),
   ]);
 
-  return <DirectoryView role="Guest" profiles={profiles} liquidity={liquidity} error={error} />;
+  return (
+    <DirectoryView
+      role="Guest"
+      profiles={profiles}
+      liquidity={liquidity}
+      error={error}
+      initialSearchQuery={q?.trim() ?? ""}
+    />
+  );
 }

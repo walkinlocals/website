@@ -24,7 +24,7 @@ export async function sendEmail({
   to,
   subject,
   html,
-  from = "WalkIn Locals <updates@walkinlocals.com>",
+  from = "WALKINLOCALS <updates@walkinlocals.com>",
   replyTo,
 }: SendEmailInput): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!emailConfigured()) {
@@ -49,7 +49,7 @@ export async function sendEmail({
 export function emailShell(title: string, body: string): string {
   return `
     <div style="font-family: serif; color: #0f172a; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <p style="font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #002FA7;">WalkIn Locals</p>
+      <p style="font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #002FA7;">WALKINLOCALS</p>
       <h2 style="font-weight: normal; font-size: 24px; margin-top: 10px;">${title}</h2>
       ${body}
     </div>

@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   try {
     const resend = new Resend(apiKey);
     const { error: sendError } = await resend.emails.send({
-      from: "WalkIn Locals Feedback <updates@walkinlocals.com>",
+      from: "WALKINLOCALS Feedback <updates@walkinlocals.com>",
       to: [CONTACT_INBOX],
       replyTo: email ?? undefined,
       subject: `New Walk In message${name ? ` from ${name}` : ""}`,

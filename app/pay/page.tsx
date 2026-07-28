@@ -1,85 +1,92 @@
 import Link from "next/link";
 import { GUEST_PAY_COPY } from "@/lib/marketing-content";
 import { MAX_PARTY_SIZE } from "@/lib/pricing";
-import { PAGE_CONTAINER, PAGE_SHELL } from "@/lib/page-layout";
+import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
 import {
   homeDisplayTitle,
-  homeEyebrow,
   homePrimaryButton,
-  homeSectionBorder,
   homeTextLink,
+  marketingBody,
+  marketingPageTitle,
+  siteTitleTypography,
 } from "@/lib/homepage-ui";
 
-const bodyText = "font-sans text-base leading-relaxed text-slate-950 sm:text-[17px] sm:leading-[1.65]";
+const payStepTitle = `${siteTitleTypography} text-xl sm:text-2xl`;
 
 const PAY_DETAILS = [
   {
     title: "One clear fee",
-    body: `€${GUEST_PAY_COPY.feePerGuest} per person covers your connection to a verified Dublin host — no hidden charges, no subscriptions.`,
+    body: `€${GUEST_PAY_COPY.feePerGuest} per person covers your connection to a verified Dublin host. No hidden charges, no subscriptions.`,
   },
   {
     title: "Pay when it feels right",
-    body: "Browse hosts for free. You only pay once your host accepts your connection request and you're ready to meet.",
+    body: "Browse hosts for free. You only pay once your host accepts your connection request and you are ready to meet.",
   },
   {
     title: "Unlock real contact",
-    body: "After payment, you get the host's phone number, email, and in-app chat so you can coordinate your visit.",
+    body: "After payment, you get the host's phone number, email, and in app chat so you can coordinate your visit.",
   },
   {
     title: "Bring your people",
-    body: `Travelling with friends or family? Add up to ${MAX_PARTY_SIZE} guests to a single connection request.`,
+    body: `Visiting with friends or family? Add up to ${MAX_PARTY_SIZE} guests to a single connection request.`,
   },
 ] as const;
 
 export default function PayPage() {
   return (
     <div className={`${PAGE_SHELL} font-sans text-slate-950`}>
-      <div className={`${PAGE_CONTAINER} space-y-14 sm:space-y-16`}>
+      <div className={`${PAGE_MAIN} space-y-14 sm:space-y-20`}>
         <header className="max-w-3xl">
           <Link href="/" className={`inline-flex items-center gap-2 ${homeTextLink}`}>
             ← Back home
           </Link>
-          <h1 className="mt-8 font-sans text-2xl font-bold tracking-tight sm:text-[1.875rem]">
+          <h1 className={`mt-8 ${marketingPageTitle}`}>
             {GUEST_PAY_COPY.headline}
           </h1>
-          <p className="mt-4 font-serif text-xl font-normal italic leading-snug text-slate-950 sm:text-2xl">
-            Travel whenever you want.
-          </p>
-          <p className={`mt-4 ${bodyText}`}>
-            Discover Dublin through the homes and hearts of people who live here — not as a tourist, but as a welcomed
-            guest.
+          <p className={`mt-5 ${marketingBody}`}>
+            Discover Dublin through the homes and hearts of people who live here. You are a welcomed guest, not just a
+            tourist.
           </p>
         </header>
 
-        <section>
-          <p className={homeEyebrow}>Connection fee</p>
-          <p className="mt-4 font-serif text-5xl font-normal tracking-tight text-slate-950 sm:text-6xl">
-            €{GUEST_PAY_COPY.feePerGuest}
-          </p>
-          <p className={`mt-2 ${bodyText}`}>per person, per visit</p>
-        </section>
-
-        <section>
-          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 sm:gap-12 lg:gap-14">
-            {PAY_DETAILS.map((item) => (
-              <div key={item.title}>
-                <h2 className="font-serif text-xl font-normal text-slate-950 sm:text-2xl">{item.title}</h2>
-                <p className={`mt-3 ${bodyText}`}>{item.body}</p>
-              </div>
-            ))}
+        <section className="text-center">
+          <p className={homeDisplayTitle}>Connection fee</p>
+          <div
+            className="mx-auto mt-6 flex h-44 w-44 items-center justify-center rounded-full bg-[#002FA7] p-4 sm:mt-8 sm:h-52 sm:w-52 lg:h-64 lg:w-64"
+          >
+            <span className="max-w-full text-center font-serif text-[3.63rem] font-normal leading-none tracking-tight text-white sm:text-[4.54rem] lg:text-[5.45rem]">
+              €{GUEST_PAY_COPY.feePerGuest}
+            </span>
           </div>
+          <p className="mt-6 text-[1.125rem] text-slate-600 sm:mt-8 sm:text-[1.35rem] lg:text-[1.6875rem]">
+            per person
+          </p>
         </section>
 
-        <section className={`${homeSectionBorder} pt-14 sm:pt-16`}>
-          <h2 className={homeDisplayTitle}>Where your payment goes</h2>
-          <p className={`mt-4 max-w-2xl ${bodyText}`}>
-            €{GUEST_PAY_COPY.hostShare} goes directly to your host. The remainder covers identity verification, secure
-            payments, and keeping <span className="text-[#002FA7]">WalkIn Locals</span> running so we can grow this
-            community thoughtfully.
-          </p>
-          <Link href="/login?mode=signup&role=Guest" className={`mt-8 ${homePrimaryButton}`}>
-            Find a Dublin host
-          </Link>
+        <section>
+          <ol className="space-y-8 sm:space-y-10">
+            {PAY_DETAILS.map((item, index) => (
+              <li key={item.title} className="flex gap-4 sm:gap-5">
+                <span
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#002fa7]/10 font-sans text-lg font-semibold text-[#002FA7] sm:h-12 sm:w-12 sm:text-xl"
+                  aria-hidden
+                >
+                  {index + 1}
+                </span>
+                <div className="min-w-0 pt-0.5">
+                  <p className={payStepTitle}>
+                    {item.title}
+                  </p>
+                  <p className={`mt-3 ${marketingBody}`}>{item.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-12 flex justify-center">
+            <Link href="/login?mode=signup&role=Guest" className={homePrimaryButton}>
+              Find a Dublin host
+            </Link>
+          </div>
         </section>
       </div>
     </div>

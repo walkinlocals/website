@@ -89,7 +89,7 @@ export default function ChatBox({
   }
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+    <div className="border border-slate-200/80 overflow-hidden">
       <div className="border-b border-slate-100 bg-slate-50 px-5 py-3 text-xs font-mono font-semibold uppercase tracking-wider text-slate-500">
         Live Connection Chat
       </div>

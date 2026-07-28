@@ -1,4 +1,4 @@
-/** ISO 3166 country names for traveller origin selection. */
+/** ISO 3166 country names for sightseer origin selection. */
 export const COUNTRIES = [
   "Afghanistan",
   "Albania",

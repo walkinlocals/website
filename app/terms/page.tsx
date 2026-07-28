@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 import { Loader2, X, Heart } from "lucide-react";
+import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
+
+/** Body copy ~10% above default `text-sm` / `text-xs` (titles unchanged). */
+const termsBody =
+  "text-[0.9625rem] font-light leading-relaxed sm:text-[1.0625rem] sm:leading-[1.65]";
+const termsBodySm =
+  "text-[0.825rem] font-light leading-relaxed sm:text-[0.9rem] sm:leading-[1.65]";
 
 type SubmitState =
   | { status: "idle" }
@@ -57,21 +64,22 @@ export default function TermsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16 text-slate-900 sm:py-24">
+    <div className={`${PAGE_SHELL} font-sans text-slate-950`}>
+      <main className={`${PAGE_MAIN} w-full max-w-none text-slate-900`}>
       <h1 className="font-serif text-4xl font-normal tracking-tight text-slate-950">
         Terms of Service &amp; Absolute Liability Release
       </h1>
-      <p className="mt-3 text-sm text-slate-500 font-light leading-relaxed">
+      <p className={`mt-3 text-slate-500 ${termsBody}`}>
         Last updated July 2026. This is a legally binding contract between you and the individual developer partnership operating WalkIn Locals (&quot;we,&quot; &quot;us,&quot; &quot;our,&quot; or the &quot;Partnership&quot;). By creating an account, you explicitly assent to these terms.
       </p>
 
       {/* SECTION 1: NATURE OF THE PLATFORM */}
       <section className="mt-12 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">1. Scope of Utility &amp; Legal Capacity</h2>
-        <p className="text-sm font-light leading-relaxed text-slate-600">
+        <p className={`${termsBody} text-slate-600`}>
           WalkIn Locals is an independent, experimental peer-to-peer software project owned and operated by an un-incorporated developer partnership. The software functions strictly as a passive online directory and marketplace utility to facilitate initial introductions between independent travelers (&quot;Guests&quot;) and local residents (&quot;Hosts&quot;).
         </p>
-        <div className="bg-red-50 border-l-4 border-red-600 p-4 text-xs text-red-950 font-light leading-relaxed rounded-r-md">
+        <div className={`bg-red-50 border-l-4 border-red-600 p-4 text-red-950 rounded-r-md ${termsBodySm}`}>
           <strong>CRITICAL ASSUMPTION OF RISK DISCLOSURE:</strong> You explicitly recognize that the platform operators do not own, inspect, vet, manage, or control any physical host properties, neighborhoods, or individuals. We provide software connections, not offline real-world hospitality services. By arranging an in-home visit, you acknowledge that you are permitting a stranger into your private residence, or entering the private residence of a stranger, entirely at your own discretion and exclusive personal risk.
         </div>
       </section>
@@ -79,10 +87,10 @@ export default function TermsPage() {
       {/* SECTION 2: REGISTRATION & STRIPE IDENTITY DISCLAIMER */}
       <section className="mt-10 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">2. Verification Limitations &amp; Account Controls</h2>
-        <p className="text-sm font-light leading-relaxed text-slate-600">
+        <p className={`${termsBody} text-slate-600`}>
           You must be at least <strong>18 years old</strong> to register. Identity verification checks are performed via an integrated third-party api protocol (Stripe Identity).
         </p>
-        <p className="text-sm font-light leading-relaxed text-slate-600">
+        <p className={`${termsBody} text-slate-600`}>
           The Partnership makes no structural warranties or representations that our verification procedures are infallible, or that a verified user is safe, law-abiding, or mentally sound. The verification layer is an identity check only, not a comprehensive criminal background screening. We retain an un-reviewable right to terminate any profile at any time, for any reason, with zero ongoing civil liability.
         </p>
       </section>
@@ -90,10 +98,10 @@ export default function TermsPage() {
       {/* SECTION 3: TRANSACTIONAL RULES */}
       <section className="mt-10 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">3. Fee Structures, Disintermediation, &amp; No Escrow</h2>
-        <p className="text-sm font-light leading-relaxed text-slate-600">
+        <p className={`${termsBody} text-slate-600`}>
           Platform marketplace pricing is structural: Guests pay <strong>€35.00 per person</strong>, Hosts receive a fixed payout of <strong>€25.00 per person</strong>, and the Partnership retains a <strong>€10.00 per person</strong> technology facilitation fee. Maximum party sizes are hardcapped at <strong>6 individuals</strong>.
         </p>
-        <ul className="list-disc space-y-2 pl-5 text-sm font-light leading-relaxed text-slate-600">
+        <ul className={`list-disc space-y-2 pl-5 text-slate-600 ${termsBody}`}>
           <li>
             <strong>Immediate Direct Payout Routing:</strong> Financial transfers use Stripe Destination Charges. The Partnership does not collect, hold, or maintain legal custody of user funds, nor do we provide financial escrow service protections. Payouts route instantly to the Host&apos;s connected Stripe Express account upon successful checkout.
           </li>
@@ -109,7 +117,7 @@ export default function TermsPage() {
       {/* SECTION 4: INACTIVITY SEQUENCE */}
       <section className="mt-10 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">4. Automated Account Lifecycle</h2>
-        <p className="text-sm font-light leading-relaxed text-slate-600">
+        <p className={`${termsBody} text-slate-600`}>
           To minimize data liability and ensure systemic privacy compliance under regional regulations, accounts undergo an automated dormancy routine: system warning at 80 days of continuous inactivity, profile hiding from public view directories at 90 days, and full, permanent account erasure from backend databases at 180 days.
         </p>
       </section>
@@ -117,10 +125,10 @@ export default function TermsPage() {
       {/* SECTION 5: MAXIMUM POSSIBLE LIABILITY PROTECTION */}
       <section className="mt-10 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950 font-bold text-red-600">5. TOTAL WAIVER OF LIABILITY &amp; FINANCIAL CEILING</h2>
-        <p className="text-xs uppercase tracking-wider text-slate-950 font-bold leading-relaxed">
+        <p className={`uppercase tracking-wider text-slate-950 font-bold ${termsBodySm}`}>
           THIS SECTION WAIVES CRITICAL CIVIL RIGHTS TO FILE LAWSUITS. READ IT CAREFULLY.
         </p>
-        <ul className="list-disc space-y-2 pl-5 text-sm font-light leading-relaxed text-slate-600">
+        <ul className={`list-disc space-y-2 pl-5 text-slate-600 ${termsBody}`}>
           <li>
             <strong>Joint and Personal Waiver:</strong> To the absolute maximum extent permitted by applicable laws of Ireland and the European Union, you explicitly release, waive, and forever discharge the Partnership, as well as each individual partner, developer, co-founder, and infrastructure agent personally, from any and all current or future legal or financial claims, torts, lawsuits, or demands related to property destruction, physical theft, burglary, bodily injury, assault, severe emotional distress, personal illness, accidents, or death arising out of or connecting to any offline matches or home visits arranged via this software.
           </li>
@@ -136,7 +144,7 @@ export default function TermsPage() {
       {/* SECTION 6: USER AGREEMENT TO PAY FOR LAWSUITS */}
       <section className="mt-10 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">6. Hold Harmless &amp; Active Indemnification</h2>
-        <p className="text-sm font-light leading-relaxed text-slate-600">
+        <p className={`${termsBody} text-slate-600`}>
           You agree to completely indemnify, defend, and hold harmless the Partnership and each of its individual developers from and against any third-party claims, lawsuits, damages, losses, liabilities, and expenses (including all legal fees, solicitor costs, and court disbursements) arising out of or relating to your misconduct, your breach of these Terms, or your negligent behavior during an offline match or home visit.
         </p>
       </section>
@@ -144,10 +152,10 @@ export default function TermsPage() {
       {/* SECTION 7: SEVERABILITY & CONTRACTUAL CONTINUANCE */}
       <section className="mt-10 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">7. Third-Party Rights &amp; Severability</h2>
-        <p className="text-sm font-light leading-relaxed text-slate-600">
+        <p className={`${termsBody} text-slate-600`}>
           <strong>Severability:</strong> If any provision, sentence, or specific clause of these Terms is found by an Irish court or regulatory authority to be invalid, illegal, or completely unenforceable, that specific provision shall be severed from the contract. The remainder of these Terms shall continue in full force and effect as if the severed provision had never been included.
         </p>
-        <p className="text-sm font-light leading-relaxed text-slate-600">
+        <p className={`${termsBody} text-slate-600`}>
           <strong>Third-Party Exclusion:</strong> These terms do not confer any third-party rights. No person who is not an active registered member of this platform has any legal right to enforce or sue under any provision of this agreement.
         </p>
       </section>
@@ -155,12 +163,12 @@ export default function TermsPage() {
       {/* SECTION 8: JURISDICTION */}
       <section className="mt-10 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">8. Governing Law &amp; Forum Selection</h2>
-        <p className="text-sm font-light leading-relaxed text-slate-600">
+        <p className={`${termsBody} text-slate-600`}>
           These Terms, and any non-contractual obligations or disputes arising out of them, are governed exclusively by the laws of <strong>Ireland</strong>. You and the Partnership explicitly agree that the courts located in <strong>Dublin, Ireland</strong> hold exclusive jurisdiction to settle any legal claim or lawsuit arising under this agreement.
         </p>
       </section>
 
-      <p className="mt-12 text-sm text-slate-500 font-light">
+      <p className={`mt-12 text-slate-500 ${termsBody}`}>
         Questions regarding legal compliance?{" "}
         <button
           type="button"
@@ -321,6 +329,7 @@ export default function TermsPage() {
           </div>
         </div>
       )}
-    </main>
+      </main>
+    </div>
   );
 }

@@ -153,7 +153,7 @@ export async function POST(request: Request) {
 
       if (targetProfile?.contact_email) {
         await resend.emails.send({
-          from: "WalkIn Locals <updates@walkinlocals.com>",
+          from: "WALKINLOCALS <updates@walkinlocals.com>",
           to: [targetProfile.contact_email],
           subject: `📅 New date proposed: ${formatted}`,
           html: `
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
               <h2 style="font-weight: normal; font-size: 22px;">A visit date was proposed</h2>
               <p style="font-size: 16px; font-weight: 300;">Hello ${targetProfile.full_name},</p>
               <p style="font-size: 16px; font-weight: 300; line-height: 1.6;">
-                <strong>${formatted}</strong> has been suggested for your WalkIn Locals visit.
+                <strong>${formatted}</strong> has been suggested for your WALKINLOCALS visit.
                 Open Matches to accept it or suggest another date.
               </p>
               <a href="${appUrl}/matches" style="display: inline-block; margin-top: 20px; background: #002FA7; color: white; padding: 12px 24px; text-decoration: none; border-radius: 9999px;">Open Matches</a>
@@ -228,7 +228,7 @@ export async function POST(request: Request) {
 
     if (targetProfile?.contact_email) {
       await resend.emails.send({
-        from: "WalkIn Locals <updates@walkinlocals.com>",
+        from: "WALKINLOCALS <updates@walkinlocals.com>",
         to: [targetProfile.contact_email],
         subject: `✅ Visit date confirmed: ${formatted}`,
         html: `

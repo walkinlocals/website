@@ -82,7 +82,7 @@ export default function HostBookingPicker({ hostId, guestId, disabled }: Props) 
   }
 
   return (
-    <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_4px_15px_rgba(0,47,167,0.01)]">
+    <div className="space-y-5 border-t border-slate-200/80 pt-6">
       <VisitDatePicker
         hostId={hostId}
         value={selectedDate}

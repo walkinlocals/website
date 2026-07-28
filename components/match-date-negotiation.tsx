@@ -15,7 +15,7 @@ import {
 } from "@/lib/match-dates";
 
 const CARD_CLASS =
-  "w-full min-w-0 space-y-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_4px_15px_rgba(0,47,167,0.01)]";
+  "w-full min-w-0 space-y-5 border-t border-slate-200/80 pt-6";
 
 interface Props {
   match: MatchDateFields & { id: string; status: string };
@@ -138,7 +138,7 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
 
       {hostWaiting && (
         <p className="text-sm font-light leading-relaxed text-slate-600">
-          You invited this traveler to connect. They&apos;ll pick a date and time from their calendar — you&apos;ll
+          You invited this backpacker to connect. They&apos;ll pick a date and time from their calendar — you&apos;ll
           get a notification when they do.
         </p>
       )}
@@ -167,7 +167,7 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
         <>
           <p className="text-sm font-light leading-relaxed text-slate-600">
             {currentUserId === match.host_id
-              ? "This traveler proposed a visit on"
+              ? "This backpacker proposed a visit on"
               : "Your host proposed"}{" "}
             <strong className="text-slate-900">
               {formatVisitDateTime(match.proposed_date!, match.proposed_time)}
@@ -255,7 +255,7 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
         <p className="text-sm font-light leading-relaxed text-slate-600">
           {currentUserId === match.guest_id
             ? "Pick a visit date and time below to continue this connection."
-            : "Waiting for the traveler to choose a visit slot."}
+            : "Waiting for the backpacker to choose a visit slot."}
         </p>
       )}
 

@@ -1,16 +1,16 @@
 # Homepage images
 
-Use the **exact filenames** below (your uploads). Formats: JPEG, PNG, or WebP.
+Use the exact filenames below under `public/images/home/`.
 
 ## `quiz/`
 | File | Used for |
 |------|----------|
 | `quiz1.jpeg` | Homepage quiz teaser (left) |
 | `quiz2.jpeg` | Homepage quiz teaser (right) |
-| `georgian.jpeg` | Quiz result — Georgian |
-| `victorian.jpeg` | Quiz result — Victorian |
-| `midcentury.jpeg` | Quiz result — Mid-century |
-| `modern.jpeg` | Quiz result — Modern |
+| `p1.jpg` | Quiz result — Georgian |
+| `p2.webp` | Quiz result — Victorian |
+| `p3.jpeg` | Quiz result — Mid-century |
+| `p4.jpg.webp` | Quiz result — Modern |
 
 ## `areas/`
 | File | Place |
@@ -20,6 +20,7 @@ Use the **exact filenames** below (your uploads). Formats: JPEG, PNG, or WebP.
 | `clontarf.jpg` | Clontarf |
 | `malahide.jpg` | Malahide |
 | `burrow.jpg` | Sutton Beach |
+| `wicklow.jpg` | Wicklow |
 
 ## `brunch/`
 | File | Place |
@@ -41,3 +42,4 @@ Use the **exact filenames** below (your uploads). Formats: JPEG, PNG, or WebP.
 | `bonobo.jpeg` | Bonobo |
 | `opium.jpg` | Opium |
 | `masa.jpg` | Masa |
+| `kinara.jpeg` | Kinara |

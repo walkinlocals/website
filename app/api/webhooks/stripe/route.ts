@@ -113,12 +113,12 @@ export async function POST(request: Request) {
 
           if (guest?.contact_email && host?.contact_email) {
             await resend.emails.send({
-              from: "WalkIn Locals <bookings@walkinlocals.com>",
+              from: "WALKINLOCALS <bookings@walkinlocals.com>",
               to: [guest.contact_email],
               subject: "🔓 Connections Unlocked! Your Host Contact Details",
               html: `
                 <div style="font-family: serif; color: #0f172a; max-width: 600px; margin: 0 auto; padding: 20px;">
-                  <p style="font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #002FA7;">WalkIn Locals Connection Dossier</p>
+                  <p style="font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #002FA7;">WALKINLOCALS Connection Dossier</p>
                   <h2 style="font-weight: normal; font-size: 24px; margin-top: 10px;">Your host details are unlocked!</h2>
                   <p style="font-size: 16px; font-weight: 300;">You are connected with <strong>${host.full_name}</strong>.</p>
                   <div style="background-color: #f8fafc; border-radius: 16px; padding: 24px; margin: 24px 0; font-family: monospace; font-size: 14px;">
@@ -130,12 +130,12 @@ export async function POST(request: Request) {
             });
 
             await resend.emails.send({
-              from: "WalkIn Locals <bookings@walkinlocals.com>",
+              from: "WALKINLOCALS <bookings@walkinlocals.com>",
               to: [host.contact_email],
               subject: "🔓 Connections Unlocked! Your Guest Contact Details",
               html: `
                 <div style="font-family: serif; color: #0f172a; max-width: 600px; margin: 0 auto; padding: 20px;">
-                  <p style="font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #002FA7;">WalkIn Locals Connection Dossier</p>
+                  <p style="font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #002FA7;">WALKINLOCALS Connection Dossier</p>
                   <h2 style="font-weight: normal; font-size: 24px; margin-top: 10px;">Your guest details are unlocked!</h2>
                   <p style="font-size: 16px; font-weight: 300;">Connected with <strong>${guest.full_name}</strong> (Party Size: ${match.party_size}).</p>
                   <div style="background-color: #f8fafc; border-radius: 16px; padding: 24px; margin: 24px 0; font-family: monospace; font-size: 14px;">

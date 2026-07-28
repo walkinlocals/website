@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { BadgeCheck, MapPin, Lock, Phone, Mail, ArrowLeft, Heart } from "lucide-react";
+import { BadgeCheck, MapPin, Lock, Phone, Mail, MessageCircle, ArrowLeft, Heart } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import ProfileActions from "@/components/profile-actions";
 import ReportUserButton from "@/components/report-user-button";
@@ -9,7 +9,7 @@ import HostInvitePicker from "@/components/host-invite-picker";
 import WhatsAppButton from "@/components/whatsapp-button";
 import { resolveViewerCanConnect } from "@/lib/viewer-profile";
 import { formatDirectoryLocation } from "@/lib/directory-display";
-import { PAGE_BG_DOTS, PAGE_CONTAINER, PAGE_SHELL } from "@/lib/page-layout";
+import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
 
 interface TargetProfile {
   id: string;
@@ -105,10 +105,9 @@ export default async function ProfileDetailPage({
   const backHref = myRole === "Host" ? "/guest-directory" : "/host-directory";
 
   return (
-    <div className={`${PAGE_SHELL} antialiased`}>
-      <div className={PAGE_BG_DOTS} />
+    <div className={`${PAGE_SHELL} font-sans text-slate-950 antialiased`}>
 
-      <main className={`${PAGE_CONTAINER} py-12 sm:py-16`}>
+      <main className={PAGE_MAIN}>
         {/* Back Link */}
         <Link
           href={backHref}
@@ -123,7 +122,7 @@ export default async function ProfileDetailPage({
 
           {/* LEFT SIDEBAR COLUMN: Compact Identity Profile */}
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_4px_15px_rgba(0,47,167,0.01)] text-center lg:text-left">
+            <div className="border-b border-slate-200/80 pb-8 text-center lg:border-b-0 lg:pb-0 lg:text-left">
               {/* Profile Picture Frame */}
               <div className="mx-auto lg:mx-0 h-32 w-32 overflow-hidden rounded-full border border-slate-200 bg-slate-50 shadow-inner">
                 {profile.avatar_url ? (
@@ -141,7 +140,7 @@ export default async function ProfileDetailPage({
               </div>
 
               {/* Title Identity Parameters */}
-              <h1 className="mt-5 font-serif text-3xl font-normal tracking-tight text-slate-950 break-words">
+              <h1 className="mt-5 font-sans text-2xl font-bold tracking-tight text-slate-950 break-words sm:text-[1.875rem]">
                 {profile.full_name ?? "Walk In member"}
               </h1>
 
@@ -195,54 +194,67 @@ export default async function ProfileDetailPage({
           <div className="lg:col-span-8 space-y-8">
 
             {/* Biography Context Wrapper */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-[0_4px_15px_rgba(0,47,167,0.01)]">
-              <div className="flex items-center gap-1.5 border-b border-slate-100 pb-4">
-                <Heart className="h-3.5 w-3.5 fill-[#002FA7] text-[#002FA7] animate-pulse" />
-                <span className="block font-mono text-[9px] uppercase tracking-[0.3em] text-[#002FA7] font-semibold">
+            <div className="border-b border-slate-200/80 pb-8">
+              <div className="flex items-center gap-1.5 pb-4">
+                <Heart className="h-3.5 w-3.5 fill-[#002FA7] text-[#002FA7]" />
+                <span className="font-sans text-[11px] font-semibold uppercase tracking-[0.22em] text-[#002FA7]">
                   The Story
                 </span>
               </div>
-              <p className="mt-6 font-serif text-lg font-light leading-relaxed text-slate-850 whitespace-pre-line sm:text-xl">
+              <p className="text-base leading-relaxed text-slate-950 whitespace-pre-line sm:text-[17px] sm:leading-[1.65]">
                 {profile.bio || "This member hasn't written their story yet."}
               </p>
             </div>
 
             {/* Verification Metrics / Secured Content */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-[0_4px_15px_rgba(0,47,167,0.01)]">
-              <span className="block font-mono text-[9px] uppercase tracking-[0.3em] text-slate-400 font-semibold border-b border-slate-100 pb-4 mb-6">
-                Secured Contact Metrics
+            <div className="border-b border-slate-200/80 pb-8">
+              <span className="block font-sans text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 pb-4">
+                Contact
               </span>
 
               {contactUnlocked ? (
                 <div className="space-y-4">
-                  <div className="grid gap-3 sm:grid-cols-2 font-mono text-xs text-slate-600">
-                    <div className="flex items-center gap-2 rounded-xl bg-slate-50/70 px-3 py-2.5 border border-slate-100">
-                      <Mail className="h-4 w-4 text-[#002FA7] shrink-0" />
-                      <span className="text-slate-400 font-medium">Mail:</span>
-                      <span className="min-w-0 flex-1 text-slate-800 break-all">{profile.contact_email || "—"}</span>
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 text-sm text-slate-700">
+                    <div className="flex items-start gap-2">
+                      <Mail className="h-4 w-4 text-[#002FA7] shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <span className="text-slate-500">Email</span>
+                        <p className="mt-0.5 text-slate-950 break-all">{profile.contact_email || "—"}</p>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 rounded-xl bg-slate-50/70 px-3 py-2.5 border border-slate-100">
-                      <Phone className="h-4 w-4 text-[#002FA7] shrink-0" />
-                      <span className="text-slate-400 font-medium">Phone:</span>
-                      <span className="min-w-0 flex-1 text-slate-800 tracking-wider">{profile.phone || "—"}</span>
-                      {profile.phone && (
-                        <WhatsAppButton
-                          phone={profile.phone}
-                          message={`Hi ${profile.full_name || "there"}! I am contacting you from WalkIn Locals to coordinate our visit details. Looking forward to chatting! ✦`}
-                        />
-                      )}
+                    <div className="flex items-start gap-2">
+                      <Phone className="h-4 w-4 text-[#002FA7] shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <span className="text-slate-500">Phone</span>
+                        <p className="mt-0.5 text-slate-950 tracking-wide">{profile.phone || "—"}</p>
+                      </div>
                     </div>
+                    {profile.phone ? (
+                      <div className="flex items-start gap-2">
+                        <MessageCircle className="h-4 w-4 text-[#002FA7] shrink-0 mt-0.5" />
+                        <div className="min-w-0">
+                          <span className="text-slate-500">WhatsApp</span>
+                          <div className="mt-1">
+                            <WhatsAppButton
+                              phone={profile.phone}
+                              message={`Hi ${profile.full_name || "there"}! I am contacting you from WALKINLOCALS to coordinate our visit details. Looking forward to chatting! ✦`}
+                              className="h-9 w-9"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               ) : (
-                <div className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-5">
+                <div className="flex items-start gap-4">
                   <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#002FA7]" />
                   <div className="space-y-1">
-                    <p className="font-serif text-sm font-medium text-slate-950">
+                    <p className="text-sm font-medium text-slate-950">
                       Contact details are currently locked
                     </p>
-                    <p className="text-xs font-light leading-relaxed text-slate-500 max-w-xl">
-                      Direct metrics (phone and email) become visible automatically only after a host accepts your visit request and the corresponding connection setup is completed.
+                    <p className="text-sm leading-relaxed text-slate-600 max-w-xl">
+                      Phone and email appear after a host accepts your visit request and the connection is set up.
                     </p>
                   </div>
                 </div>
@@ -250,7 +262,7 @@ export default async function ProfileDetailPage({
             </div>
 
             {/* Action Buttons Interface Block / Mobile Responsive Picker */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-[0_4px_15px_rgba(0,47,167,0.01)]">
+            <div className="pt-2">
               {rolesAreOpposite && matchStatus === null && guestId && hostId && viewerIsGuest && (
                 <div className="block lg:hidden mb-2">
                   <HostBookingPicker

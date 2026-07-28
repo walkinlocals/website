@@ -62,7 +62,7 @@ export default function ProfileActions({
     return (
       <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
         <p className="font-serif text-xs italic text-slate-400 font-light leading-relaxed">
-          Connections are exclusive structural arrangements engineered between verified travelers and local hosts.
+          Connections are exclusive structural arrangements engineered between verified sightseers and local hosts.
         </p>
       </div>
     );
@@ -166,7 +166,7 @@ export default function ProfileActions({
         {viewerIsHost ? (
           <div className="space-y-3 flex-1 max-w-md">
             <span className="block font-mono text-[9px] uppercase tracking-[0.15em] text-slate-400 font-bold">
-              Invite this traveler
+              Invite this sightseer
             </span>
             <div className="flex items-start gap-2.5 rounded-xl bg-slate-50/70 p-3.5 border border-slate-100 text-xs text-slate-500 font-light leading-relaxed">
               <Info className="h-4 w-4 shrink-0 text-[#002FA7] mt-0.5" />
@@ -183,7 +183,7 @@ export default function ProfileActions({
             <div className="flex items-start gap-2.5 rounded-xl bg-slate-50/70 p-3.5 border border-slate-100 text-xs text-slate-500 font-light leading-relaxed">
               <Info className="h-4 w-4 shrink-0 text-[#002FA7] mt-0.5" />
               <p>
-                Reaching out will prompt this traveler to confirm party size and complete payment when they accept.
+                Reaching out will prompt this sightseer to confirm party size and complete payment when they accept.
               </p>
             </div>
           </div>

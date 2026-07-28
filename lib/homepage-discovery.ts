@@ -39,6 +39,12 @@ export const TOP_DUBLIN_AREAS: DiscoveryCard[] = [
     description: "Wide sands and open sky — Dublin’s quieter edge where the bay meets the horizon.",
     image: homeImage("areas", "burrow.jpg"),
   },
+  {
+    title: "Wicklow",
+    subtitle: "Glendalough & uplands",
+    description: "Lakes, monastic ruins, and mountain trails — an easy escape into Ireland’s Garden County.",
+    image: homeImage("areas", "wicklow.jpg"),
+  },
 ];
 
 export const BEST_BRUNCH_DUBLIN: DiscoveryCard[] = [
@@ -56,7 +62,7 @@ export const BEST_BRUNCH_DUBLIN: DiscoveryCard[] = [
   },
   {
     title: "Taste Food Company",
-    subtitle: "Dublin",
+    subtitle: "City centre",
     description: "Neighbourhood café energy — sandwiches, salads, and proper daytime comfort food.",
     image: homeImage("brunch", "taste.jpg"),
   },
@@ -123,43 +129,10 @@ export const BEST_RESTAURANTS_DUBLIN: DiscoveryCard[] = [
     description: "Japanese-inspired dining downtown — precise flavours and a polished night out.",
     image: homeImage("restaurants", "masa.jpg"),
   },
-];
-
-export const NEAR_DUBLIN_WITHIN_HOUR: DiscoveryCard[] = [
   {
-    title: "Clontarf & St Anne’s Park",
-    subtitle: "In Dublin",
-    description: "Rose gardens, woodland paths, and the promenade — a full day without leaving town.",
-    image: homeImage("day-trips", "clontarf-st-annes.jpg"),
-  },
-  {
-    title: "Howth",
-    subtitle: "~30 min from the city",
-    description: "Harbour village, cliff paths, and fish straight off the boat.",
-    image: homeImage("day-trips", "howth.jpg"),
-  },
-  {
-    title: "Bray",
-    subtitle: "~45 min by DART",
-    description: "Coastal promenade and the cliff walk toward Greystones.",
-    image: homeImage("day-trips", "bray.jpg"),
-  },
-  {
-    title: "Glendalough & Wicklow",
-    subtitle: "~1 hour south",
-    description: "Monastic ruins, twin lakes, and Wicklow’s green uplands.",
-    image: homeImage("day-trips", "glendalough-wicklow.jpg"),
-  },
-  {
-    title: "Portmarnock Beach",
-    subtitle: "~25 min north",
-    description: "Long sandy beach and open horizon — easy escape on the northside.",
-    image: homeImage("day-trips", "portmarnock-beach.jpg"),
-  },
-  {
-    title: "Greystones",
-    subtitle: "~50 min by DART",
-    description: "Harbour town, beach walks, and a slower pace down the coast.",
-    image: homeImage("day-trips", "greystones.jpg"),
+    title: "Kinara",
+    subtitle: "Clontarf",
+    description: "Beloved northside Indian — fragrant curries and a warm room steps from the bay.",
+    image: homeImage("restaurants", "kinara.jpeg"),
   },
 ];

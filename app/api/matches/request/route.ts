@@ -130,14 +130,14 @@ export async function POST(request: Request) {
 
     if (recipientResult.data?.contact_email) {
       await resend.emails.send({
-        from: "WalkIn Locals <updates@walkinlocals.com>",
+        from: "WALKINLOCALS <updates@walkinlocals.com>",
         to: [recipientResult.data.contact_email],
         subject: isGuestSender && formattedDate
           ? `💌 Visit request for ${formattedDate}`
           : "💌 New connection invitation",
         html: `
           <div style="font-family: serif; color: #0f172a; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <p style="font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #002FA7;">WalkIn Locals Notification</p>
+            <p style="font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #002FA7;">WALKINLOCALS Notification</p>
             <h2 style="font-weight: normal; font-size: 24px; margin-top: 10px;">
               ${isGuestSender ? "New visit request" : "New connection invitation"}
             </h2>

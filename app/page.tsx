@@ -43,7 +43,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-white font-sans text-[15px] text-slate-900 antialiased sm:text-base">
+    <div className="relative min-h-screen w-full bg-white font-sans text-slate-900 antialiased">
       <DoorHero
         doorHref={doorHref}
         isAuthenticated={isAuthed}

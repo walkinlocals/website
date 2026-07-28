@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { buildFullName, isProfileComplete, isBrowsableProfile, isAtLeast18FromDate, maxDateOfBirthFor18Plus, normalizeDateOfBirth, profileActivationBlockers } from "@/lib/profile";
-import { PAGE_BG_DOTS, PAGE_CONTAINER, PAGE_SHELL } from "@/lib/page-layout";
+import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
+import { BRAND_NAME, homePrimaryButton, marketingPageTitle, heroTitle, siteTitleSm } from "@/lib/homepage-ui";
 import { formatDirectoryLocation } from "@/lib/directory-display";
 import { ensureProfileRole, parseAppRole } from "@/lib/profile-role";
 import { buildActivityUpdate } from "@/lib/activity";
@@ -65,7 +66,9 @@ const EMPTY: Form = {
 };
 
 const inputClass =
-  "mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-950 focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7] transition-all duration-300 shadow-[0_4px_15px_rgba(0,47,167,0.01)] font-light placeholder:text-slate-400";
+  "mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 placeholder:text-slate-400 focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7]";
+
+const fieldLabel = "text-base font-medium text-slate-700 sm:text-lg";
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
@@ -638,7 +641,7 @@ function ProfileInner() {
         return;
       }
       if (!isAtLeast18FromDate(nextForm.dateOfBirth)) {
-        setError("You must be 18 or older to join WalkIn Locals.");
+        setError(`You must be 18 or older to join ${BRAND_NAME}.`);
         return;
       }
 
@@ -776,42 +779,43 @@ function ProfileInner() {
         : null;
 
     return (
-      <main className={PAGE_SHELL}>
-        <div className={PAGE_BG_DOTS} />
+      <main className={`${PAGE_SHELL} font-sans text-slate-950`}>
 
-        <div className={PAGE_CONTAINER}>
-          <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 pb-12 gap-6">
+        <div className={PAGE_MAIN}>
+          <div className="flex flex-col gap-6 border-b border-slate-200/80 pb-10 md:flex-row md:items-start md:justify-between">
             <div>
-              <h1 className="font-serif text-4xl font-normal tracking-tight text-slate-950">Your Details</h1>
-              <div className="mt-3 flex items-center gap-2 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
-                <Clock className="h-3.5 w-3.5 text-[#002FA7]" />
-                <span>Last Activity: {lastActiveText}</span>
-              </div>
+              <h1 className={heroTitle}>
+                Your profile
+              </h1>
+              <p className="mt-3 flex items-center gap-2 text-base text-slate-600 sm:text-lg">
+                <Clock className="h-5 w-5 text-[#002FA7]" />
+                Last active {lastActiveText}
+              </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-xs font-medium text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 hover:border-slate-300"
+                className="inline-flex items-center gap-2 text-base font-medium text-[#002FA7] underline decoration-[#002FA7]/35 underline-offset-4 hover:decoration-[#002FA7] sm:text-lg"
               >
-                <Edit2 className="h-3 w-3 text-slate-400" />
-                Edit Profile
+                <Edit2 className="h-4 w-4" />
+                Edit
               </button>
               <button
                 type="button"
                 onClick={handleDeleteAccount}
                 disabled={deleting}
-                className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-5 py-2.5 text-xs font-semibold font-mono uppercase tracking-widest text-red-600 transition-all duration-300 hover:bg-red-50 disabled:opacity-50"
+                className="inline-flex items-center gap-2 text-base font-medium text-red-600 hover:underline disabled:opacity-50 sm:text-lg"
               >
-                {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                Delete Profile
+                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                Delete account
               </button>
             </div>
           </div>
 
-          <div className="mt-16 grid md:grid-cols-12 gap-12 items-start">
+          <div className="mt-12 grid items-start gap-12 md:grid-cols-12">
             <div className="md:col-span-4 flex flex-col items-center md:items-start text-center md:text-left">
-              <div className="h-36 w-36 overflow-hidden rounded-full bg-slate-50 border border-slate-200 shadow-sm">
+              <div className="h-40 w-40 overflow-hidden rounded-full bg-slate-100 sm:h-44 sm:w-44">
                 {form.avatarUrl ? (
                   <img src={form.avatarUrl} alt={fullName} className="h-full w-full object-cover" />
                 ) : (
@@ -822,36 +826,32 @@ function ProfileInner() {
               </div>
 
               {isVerified && (
-                <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50/50 px-3.5 py-1.5">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600 stroke-[1.5]" />
-                  <span className="text-[11px] font-medium tracking-wide text-emerald-700">
-                    Verified Member (18+)
-                  </span>
-                </div>
+                <p className="mt-4 flex items-center gap-2 text-base text-emerald-700 sm:text-lg">
+                  <ShieldCheck className="h-5 w-5" />
+                  Verified · 18+
+                </p>
               )}
 
             </div>
 
-            <div className="md:col-span-8 space-y-10">
+            <div className="md:col-span-8 space-y-8">
               <div>
-                <span className="text-[10px] uppercase tracking-[0.3em] font-semibold text-[#002FA7] font-mono">Name</span>
-                <h2 className="font-serif text-3xl font-normal text-slate-950 mt-1">{fullName}</h2>
+                <p className={fieldLabel}>Name</p>
+                <p className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{fullName}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-8 border-t border-slate-100 pt-8">
+              <div className="grid grid-cols-2 gap-8 border-t border-slate-200/80 pt-8">
                 <div>
-                  <span className="text-[10px] uppercase tracking-[0.3em] font-semibold text-[#002FA7] font-mono">Community Role</span>
-                  <p className="font-serif text-lg text-[#002FA7] mt-1 italic">{form.role}</p>
+                  <p className={fieldLabel}>Role</p>
+                  <p className="mt-1 text-lg text-[#002FA7] sm:text-xl">{form.role}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase tracking-[0.3em] font-semibold text-[#002FA7] font-mono">Location</span>
-                  <p className="font-serif text-lg text-slate-800 mt-1">{activeLocation || "Not declared"}</p>
+                  <p className={fieldLabel}>Location</p>
+                  <p className="mt-1 text-lg text-slate-950 sm:text-xl">{activeLocation || "Not set"}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase tracking-[0.3em] font-semibold text-[#002FA7] font-mono">
-                    {form.role === "Host" ? "Payouts" : "Identity"}
-                  </span>
-                  <p className="font-serif text-lg text-slate-800 mt-1">
+                  <p className={fieldLabel}>{form.role === "Host" ? "Payouts" : "Identity"}</p>
+                  <p className="mt-1 text-lg text-slate-950 sm:text-xl">
                     {form.role === "Host"
                       ? form.payoutsEnabled
                         ? "Stripe payouts active"
@@ -862,42 +862,38 @@ function ProfileInner() {
                   </p>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase tracking-[0.3em] font-semibold text-[#002FA7] font-mono">Status</span>
-                  <p className="font-serif text-lg text-slate-800 mt-1">
-                    {form.isActive ? "Active in directory" : "Not yet active"}
+                  <p className={fieldLabel}>Status</p>
+                  <p className="mt-1 text-lg text-slate-950 sm:text-xl">
+                    {form.isActive ? "Active" : "Not yet active"}
                   </p>
                 </div>
               </div>
 
               {form.bio && (
-                <div className="border-t border-slate-100 pt-8">
-                  <span className="text-[10px] uppercase tracking-[0.3em] font-semibold text-[#002FA7] font-mono">The Story</span>
-                  <p className="mt-4 font-serif text-lg text-slate-800 leading-relaxed italic whitespace-pre-line">
-                    &ldquo;{form.bio}&rdquo;
+                <div className="border-t border-slate-200/80 pt-8">
+                  <p className={fieldLabel}>About you</p>
+                  <p className="mt-3 text-lg leading-relaxed text-slate-950 whitespace-pre-line sm:text-xl sm:leading-[1.65]">
+                    {form.bio}
                   </p>
                 </div>
               )}
 
-              <div className="border-t border-slate-100 pt-8 grid sm:grid-cols-2 gap-8">
+              <div className="border-t border-slate-200/80 pt-8 grid sm:grid-cols-2 gap-8">
                 <div>
-                  <span className="text-[10px] uppercase tracking-[0.3em] font-semibold text-slate-400 font-mono">Phone</span>
-                  <p className="mt-2 text-sm text-slate-600 font-light tracking-wide">{form.phone || "—"}</p>
+                  <p className={fieldLabel}>Phone</p>
+                  <p className="mt-1 text-lg text-slate-700 sm:text-xl">{form.phone || "—"}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase tracking-[0.3em] font-semibold text-slate-400 font-mono">Direct Email</span>
-                  <p className="mt-2 text-sm text-slate-600 font-light break-all tracking-wide">{form.contactEmail || "—"}</p>
+                  <p className={fieldLabel}>Email</p>
+                  <p className="mt-1 text-lg text-slate-700 break-all sm:text-xl">{form.contactEmail || "—"}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-28 border-t border-slate-100 pt-12 flex justify-end">
-            <Link
-              href={form.role === "Host" ? "/guest-directory" : "/host-directory"}
-              className="group inline-flex items-center gap-3 rounded-full bg-[#002FA7] px-8 py-4 text-xs font-semibold font-mono uppercase tracking-widest text-white transition-all duration-300 hover:bg-[#001e6c] hover:scale-[1.01] shadow-[0_4px_15px_rgba(0,47,167,0.18)]"
-            >
-              <span>Browse {form.role === "Host" ? "Guests" : "Hosts"}</span>
-              <span className="text-sm transition-transform duration-300 group-hover:translate-x-1.5">→</span>
+          <div className="mt-16 border-t border-slate-200/80 pt-10">
+            <Link href={form.role === "Host" ? "/guest-directory" : "/host-directory"} className={homePrimaryButton}>
+              Browse {form.role === "Host" ? "guests" : "hosts"}
             </Link>
           </div>
         </div>
@@ -906,11 +902,10 @@ function ProfileInner() {
   }
 
   return (
-    <main className={PAGE_SHELL}>
-      <div className={PAGE_BG_DOTS} />
+    <main className={`${PAGE_SHELL} font-sans text-slate-950`}>
 
-      <div className={PAGE_CONTAINER}>
-        <div className="flex items-start gap-4 border-b border-slate-100 pb-8">
+      <div className={`${PAGE_MAIN}`}>
+        <div className="flex items-start gap-4 border-b border-slate-200/80 pb-8">
           {profileDone && isEditing && (
             <button
               type="button"
@@ -927,23 +922,23 @@ function ProfileInner() {
             </button>
           )}
           <div>
-            <h1 className="font-serif text-3xl font-normal tracking-tight text-slate-950">
-              {isAsleep ? "Restore Profile" : "Edit Profile"}
+            <h1 className={heroTitle}>
+              {isAsleep ? "Restore your profile" : isEditing ? "Edit profile" : "Complete your profile"}
             </h1>
-            <p className="mt-2 text-sm text-slate-500 font-light leading-relaxed">
+            <p className="mt-3 text-base leading-relaxed text-slate-600 sm:text-[17px] sm:leading-[1.65]">
               {isAsleep
                 ? "Your profile has been temporarily hidden. Wake it up to rejoin the directories."
-                : "Fill in details below to customize your presence in the Walkinlocals community."}
+                : "Add your details below. When you&apos;re ready, activate to show up in the directory."}
             </p>
           </div>
         </div>
 
         {isAsleep ? (
-          <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col gap-4">
+          <div className="mt-8 border-b border-slate-200/80 pb-8 flex flex-col gap-4">
             <div className="flex items-start gap-3">
               <Moon className="h-5 w-5 text-[#002FA7] shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-serif text-base font-normal text-slate-950">Your profile is currently asleep</h3>
+                <h3 className={heroTitle}>Your profile is currently asleep</h3>
                 <p className="mt-1 text-xs text-slate-500 leading-relaxed font-light">
                   Because you haven&apos;t visited in over {INACTIVITY_SLEEP_DAYS} days, we hid your profile to keep directories fresh. Restoration is instant and won&apos;t change your settings.
                 </p>
@@ -953,14 +948,14 @@ function ProfileInner() {
               type="button"
               onClick={handleWakeUp}
               disabled={saving}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#002FA7] py-4 text-xs font-semibold font-mono uppercase tracking-widest text-white transition-all duration-300 hover:bg-[#001e6c] disabled:opacity-50 shadow-[0_4px_15px_rgba(0,47,167,0.18)]"
+              className={`mt-4 w-full sm:w-auto ${homePrimaryButton} disabled:opacity-50`}
             >
               {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
               Wake Profile Up
             </button>
           </div>
         ) : (
-          <div className="mt-6 flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white p-6 text-slate-700 shadow-sm">
+          <div className="mt-6 flex flex-col gap-3 border-b border-slate-200/80 pb-8 text-slate-700">
             <div className="flex items-start gap-3">
               <Lock className="h-4 w-4 mt-0.5 text-slate-400 shrink-0 stroke-[1.5]" />
               <div className="text-xs font-light leading-relaxed text-slate-500">
@@ -998,22 +993,18 @@ function ProfileInner() {
                 )}
               </button>
               <input ref={fileRef} type="file" onChange={onPhoto} className="hidden" />
-              <p className="mt-3 text-[10px] tracking-[0.25em] uppercase font-semibold text-slate-400 font-mono">
-                Profile photo (max 5MB)
-              </p>
+              <p className="mt-3 text-sm text-slate-600">Profile photo (max 5MB)</p>
 
-              <div className="mt-5 w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-center">
+              <div className="mt-6 w-full max-w-md text-center sm:text-left">
                 {form.role === "Host" ? (
                   <p className="text-xs text-slate-500 font-light leading-relaxed">
                     No Stripe setup needed to go live. We&apos;ll ask for your bank details only when you accept a paid visit.
                   </p>
                 ) : form.idVerified ? (
-                  <div className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50/50 px-3.5 py-1.5">
-                    <ShieldCheck className="h-4 w-4 text-emerald-600 stroke-[1.5]" />
-                    <span className="text-[11px] font-medium tracking-wide text-emerald-700">
-                      Identity verified
-                    </span>
-                  </div>
+                  <p className="flex items-center justify-center gap-2 text-sm text-emerald-700 sm:justify-start">
+                    <ShieldCheck className="h-4 w-4" />
+                    Identity verified
+                  </p>
                 ) : verificationPolling ? (
                   <p className="text-sm text-amber-600 font-light flex items-center justify-center gap-2">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -1028,7 +1019,7 @@ function ProfileInner() {
                       type="button"
                       onClick={startVerification}
                       disabled={verifying}
-                      className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#002FA7] px-5 py-2.5 text-[10px] font-semibold font-mono uppercase tracking-widest text-white transition-all duration-300 hover:bg-[#001e6c] disabled:opacity-50"
+                      className={`mt-3 ${homePrimaryButton} disabled:opacity-50`}
                     >
                       {verifying ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
                       {verifying ? "Loading..." : "Verify Identity"}
@@ -1051,15 +1042,13 @@ function ProfileInner() {
 
             {!form.role && (
               <fieldset>
-                <legend className="mb-3 block text-sm font-medium text-slate-800">I am joining as a…</legend>
-                <div className="grid grid-cols-2 gap-3">
+                <legend className={`mb-3 ${fieldLabel}`}>I&apos;m joining as</legend>
+                <div className="flex flex-col border-t border-slate-200/80 sm:flex-row sm:gap-8">
                   {(["Guest", "Host"] as Role[]).map((r) => (
                     <label
                       key={r}
-                      className={`cursor-pointer rounded-2xl border p-4 text-sm transition-all duration-300 ${
-                        form.role === r
-                          ? "border-[#002FA7] bg-[#002fa7]/5 ring-1 ring-[#002FA7]"
-                          : "border-slate-200 bg-white hover:border-slate-300 shadow-sm"
+                      className={`cursor-pointer border-b border-slate-200/80 py-4 text-sm sm:border-b-0 sm:py-0 ${
+                        form.role === r ? "font-semibold text-[#002FA7]" : "text-slate-700"
                       }`}
                     >
                       <input
@@ -1069,9 +1058,7 @@ function ProfileInner() {
                         onChange={() => setForm((p) => ({ ...p, role: r }))}
                         className="sr-only"
                       />
-                      <span className="block font-medium">
-                        {r === "Guest" ? "Guest (Traveler)" : "Host (Local Guide)"}
-                      </span>
+                      <span>{r === "Guest" ? "Guest (backpacker)" : "Host (local)"}</span>
                     </label>
                   ))}
                 </div>
@@ -1080,7 +1067,7 @@ function ProfileInner() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="firstName" className="block text-xs uppercase tracking-[0.2em] font-semibold text-slate-400 font-mono">
+                <label htmlFor="firstName" className={fieldLabel}>
                   First Name
                 </label>
                 <input
@@ -1093,7 +1080,7 @@ function ProfileInner() {
                 />
               </div>
               <div>
-                <label htmlFor="lastName" className="block text-xs uppercase tracking-[0.2em] font-semibold text-slate-400 font-mono">
+                <label htmlFor="lastName" className={fieldLabel}>
                   Surname
                 </label>
                 <input
@@ -1109,7 +1096,7 @@ function ProfileInner() {
 
             {form.role === "Host" ? (
               <div>
-                <label htmlFor="neighborhood" className="block text-xs uppercase tracking-[0.2em] font-semibold text-slate-400 font-mono">
+                <label htmlFor="neighborhood" className={fieldLabel}>
                   General Area of your Dublin Home
                 </label>
                 <input
@@ -1129,7 +1116,7 @@ function ProfileInner() {
               </div>
             ) : form.role === "Guest" ? (
               <div>
-                <label htmlFor="origin" className="block text-xs uppercase tracking-[0.2em] font-semibold text-slate-400 font-mono">
+                <label htmlFor="origin" className={fieldLabel}>
                   Where are you from?
                 </label>
                 <input
@@ -1151,7 +1138,7 @@ function ProfileInner() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="phone" className="block text-xs uppercase tracking-[0.2em] font-semibold text-slate-400 font-mono">
+                <label htmlFor="phone" className={fieldLabel}>
                   Phone <span className="text-slate-400 font-light normal-case">(private)</span>
                 </label>
                 <input
@@ -1164,7 +1151,7 @@ function ProfileInner() {
                 />
               </div>
               <div>
-                <label htmlFor="cemail" className="block text-xs uppercase tracking-[0.2em] font-semibold text-slate-400 font-mono">
+                <label htmlFor="cemail" className={fieldLabel}>
                   Contact Email <span className="text-slate-400 font-light normal-case">(private)</span>
                 </label>
                 <input
@@ -1179,7 +1166,7 @@ function ProfileInner() {
             </div>
 
             <div>
-              <label htmlFor="bio" className="block text-xs uppercase tracking-[0.2em] font-semibold text-slate-400 font-mono">
+              <label htmlFor="bio" className={fieldLabel}>
                 Your Story
               </label>
               <textarea
@@ -1188,13 +1175,13 @@ function ProfileInner() {
                 required
                 value={form.bio}
                 onChange={(e) => setForm((p) => ({ ...p, bio: e.target.value }))}
-                className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-950 focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7] transition-all duration-300 shadow-[0_4px_15px_rgba(0,47,167,0.01)] font-light placeholder:text-slate-400 resize-none"
+                className={`${inputClass} resize-none`}
                 placeholder="Tell us a bit about yourself..."
               />
             </div>
 
             <div>
-              <label htmlFor="dob" className="block text-xs uppercase tracking-[0.2em] font-semibold text-slate-400 font-mono">
+              <label htmlFor="dob" className={fieldLabel}>
                 Date of Birth <span className="text-slate-400 font-light normal-case">(must be 18+)</span>
               </label>
               <input
@@ -1221,12 +1208,10 @@ function ProfileInner() {
             </div>
 
             {form.role === "Host" && form.payoutsEnabled && (
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="border-t border-slate-200/80 pt-8">
                 <div className="flex items-center gap-2.5">
                   <CreditCard className="h-5 w-5 stroke-[1.5] text-slate-800" />
-                  <h2 className="text-xs uppercase tracking-[0.2em] font-semibold text-slate-850 font-mono">
-                    Host Payouts
-                  </h2>
+                  <h2 className={siteTitleSm}>Host payouts</h2>
                 </div>
                 <p className="mt-2 text-sm text-slate-600 font-light">
                   ✓ Your Stripe payout account is active.
@@ -1242,16 +1227,16 @@ function ProfileInner() {
             {success && <p className="text-sm text-emerald-600 font-light">{success}</p>}
 
             {!profileDone && activationBlockers.length > 0 && (
-              <div className="rounded-2xl border border-amber-100 bg-amber-50/60 px-4 py-3 text-sm text-amber-800 font-light">
-                To activate your account: {activationBlockers.join(", ")}.
-              </div>
+              <p className="text-sm text-amber-800">
+                To activate: {activationBlockers.join(", ")}.
+              </p>
             )}
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-3 border-t border-slate-200/80 pt-8 sm:flex-row sm:items-center">
               <button
                 type="submit"
                 disabled={saving}
-                className="flex flex-1 items-center justify-center gap-2 rounded-full bg-[#002FA7] px-6 py-4 text-xs font-semibold font-mono uppercase tracking-widest text-white transition-all duration-300 hover:bg-[#001e6c] shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+                className={`flex flex-1 items-center justify-center gap-2 ${homePrimaryButton} disabled:cursor-not-allowed disabled:opacity-50`}
               >
                 {saving && <Loader2 className="h-4 w-4 animate-spin text-white" />}
                 {profileDone ? "Activate Account" : "Save Details"}
@@ -1261,7 +1246,7 @@ function ProfileInner() {
                 type="button"
                 onClick={handleDeleteAccount}
                 disabled={deleting || saving}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-red-200 bg-white px-6 py-4 text-xs font-semibold font-mono uppercase tracking-widest text-red-600 transition-all duration-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[200px]"
+                className="inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-red-600 hover:underline disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[140px]"
               >
                 {deleting ? <Loader2 className="h-4 w-4 animate-spin text-red-600" /> : <Trash2 className="h-4 w-4" />}
                 Delete Profile

@@ -1,7 +1,7 @@
 import Link from "next/link";
+import BrandName from "@/components/brand-name";
 import { ABOUT_NARRATIVE } from "@/lib/marketing-content";
 import {
-  homeBody,
   homeContainer,
   homeDisplayTitle,
   homeEyebrow,
@@ -22,13 +22,9 @@ export default function HomeClosing({ showJoinLinks, hostHref, guestHref }: Home
       <div className={homeContainer}>
         <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-12 xl:gap-16">
           <div className="lg:col-span-6 xl:col-span-7">
-            <h2 className={homeDisplayTitle}>About WalkIn Locals</h2>
+            <h2 className={homeDisplayTitle}>About <BrandName /></h2>
             <p className="mt-6 font-serif text-xl font-light italic leading-snug text-[#002FA7] sm:text-2xl">
               {ABOUT_NARRATIVE.tagline}
-            </p>
-            <p className={`mt-6 max-w-xl ${homeBody}`}>
-              {ABOUT_NARRATIVE.paragraphs[0]} We&apos;re building real home visits in Dublin — tea, conversation, and
-              connections that last beyond the trip.
             </p>
             <Link href="/about-us" className={`mt-8 inline-block ${homeTextLink}`}>
               Read our full story →
@@ -42,7 +38,7 @@ export default function HomeClosing({ showJoinLinks, hostHref, guestHref }: Home
               <div className="grid gap-12 sm:grid-cols-2 sm:gap-10 lg:grid-cols-1 lg:gap-14">
                 <div>
                   <p className={homeEyebrow}>Hosts</p>
-                  <p className="mt-3 font-serif text-2xl font-normal leading-snug text-slate-950 sm:text-[1.65rem]">
+                  <p className="mt-3 font-serif text-2xl font-normal uppercase leading-snug text-slate-950 sm:text-[1.65rem]">
                     Host whenever you like.
                   </p>
                   <Link href={hostHref} className={`mt-4 inline-block ${homeTextLink}`}>
@@ -50,12 +46,12 @@ export default function HomeClosing({ showJoinLinks, hostHref, guestHref }: Home
                   </Link>
                 </div>
                 <div>
-                  <p className={homeEyebrow}>Travelers</p>
-                  <p className="mt-3 font-serif text-2xl font-normal italic leading-snug text-slate-950 sm:text-[1.65rem]">
+                  <p className={homeEyebrow}>Backpackers</p>
+                  <p className="mt-3 font-serif text-2xl font-normal uppercase italic leading-snug text-slate-950 sm:text-[1.65rem]">
                     Travel whenever you want.
                   </p>
                   <Link href={guestHref} className={`mt-4 inline-block ${homeTextLink}`}>
-                    Join as a Traveler →
+                    Join as a Backpacker →
                   </Link>
                 </div>
               </div>

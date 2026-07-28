@@ -1,6 +1,6 @@
 # Walk In
 
-A curated marketplace connecting travelers (**Guests**) with local Dublin hosts (**Hosts**)
+A curated marketplace connecting backpackers (**Guests**) with local Dublin hosts (**Hosts**)
 for storytelling experiences over tea, coffee, and traditional treats.
 
 Stack: **Next.js (App Router) · TypeScript · Tailwind CSS · Supabase (auth + DB + storage) ·
@@ -47,7 +47,7 @@ Stripe (Checkout + Identity) · Resend (email) · Google Maps**.
 | `app/profile/page.tsx` → `/profile` | Edit your own profile; reconciles OAuth role. |
 | `app/profile/[id]/page.tsx` → `/profile/<id>` | View another user; privacy wall on contact info. |
 | `app/host-directory/page.tsx` → `/host-directory` | Guest-only: host feed + map. |
-| `app/guest-directory/page.tsx` → `/guest-directory` | Host-only: traveler feed + privacy map. |
+| `app/guest-directory/page.tsx` → `/guest-directory` | Host-only: backpacker feed + privacy map. |
 | `app/matches/page.tsx` → `/matches` | Match dashboard: pay when Accepted, banner on success. |
 
 ### API routes
@@ -62,12 +62,9 @@ Stripe (Checkout + Identity) · Resend (email) · Google Maps**.
 | File | Used by |
 |---|---|
 | `app/components/Navbar.tsx` | Every page (auth-aware nav). |
-| `components/feedback-footer.tsx` | Homepage contact modal. |
-| `components/experience-map.tsx` | Both directories (map). |
-| `components/host-directory-view.tsx` | Host directory (cards + request + map). |
-| `components/guest-directory-view.tsx` | Guest directory (cards + accept + privacy map). |
+| `components/site-footer.tsx` | Site footer + contact modal. |
+| `components/directory-view.tsx` | Host and guest directories. |
 | `components/profile-actions.tsx` | Profile page (request/accept/verify buttons). |
-| `components/verify-to-connect-button.tsx` | Launches Stripe Identity where connections are gated. |
 
 ---
 
@@ -102,7 +99,8 @@ Key rules (enforced in RLS + code):
    - Supabase → Auth → Providers → Google: enable + paste Client ID **and Client Secret**.
    - Google Cloud Console → your OAuth client → Authorized redirect URIs:
      `https://<project>.supabase.co/auth/v1/callback`
-   - Supabase → Auth → URL Configuration → Redirect URLs: add `http://localhost:3000/**`.
+   - Supabase → Auth → URL Configuration → Redirect URLs: add `http://localhost:3000/**` and
+     your production origin (e.g. `https://yourdomain.com/auth/callback`).
 4. **Google Maps**: enable **billing** on the Google Cloud project (maps won't render otherwise)
    + restrict the key by HTTP referrer.
 5. **Stripe**:

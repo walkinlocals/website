@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { MapPin, Clock } from "lucide-react";
+import { useMemo } from "react";
 import type { DirectoryProfile } from "@/lib/directory";
 import type { DirectoryLiquidity } from "@/lib/directory";
 import {
@@ -7,13 +10,15 @@ import {
   formatDirectoryLocation,
   formatLastActivity,
 } from "@/lib/directory-display";
-import { PAGE_BG_DOTS, PAGE_CONTAINER, PAGE_SHELL } from "@/lib/page-layout";
+import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
+import { homeEyebrow, heroTitle } from "@/lib/homepage-ui";
 
 interface DirectoryViewProps {
   role: "Host" | "Guest";
   profiles: DirectoryProfile[];
   liquidity: DirectoryLiquidity;
   error: string | null;
+  initialSearchQuery?: string;
 }
 
 const COPY = {
@@ -25,109 +30,134 @@ const COPY = {
     emptyTitle: "No hosts are available yet — check back soon.",
     emptyHint:
       "Hosts stay visible here even when they have pending connections — activate your profile to appear too.",
+    emptySearchTitle: "No hosts match your search.",
     errorTitle: "Could not load hosts.",
     fallbackName: "Host",
   },
   Guest: {
-    title: "Travelers in",
+    title: "Backpackers in",
     titleAccent: "Dublin",
     description:
-      "Meet travelers hoping for an authentic afternoon. Click a traveler's card to read their story and welcome them in.",
-    emptyTitle: "No travelers are looking right now — check back soon.",
+      "Meet backpackers hoping for an authentic afternoon. Click a backpacker's card to read their story and welcome them in.",
+    emptyTitle: "No backpackers are looking right now — check back soon.",
     emptyHint:
-      "Travelers stay visible here even when they have pending connections — activate your profile to appear too.",
-    errorTitle: "Could not load travelers.",
-    fallbackName: "Traveler",
+      "Backpackers stay visible here even when they have pending connections — activate your profile to appear too.",
+    emptySearchTitle: "No backpackers match your search.",
+    errorTitle: "Could not load backpackers.",
+    fallbackName: "Backpacker",
   },
 } as const;
 
-export default function DirectoryView({ role, profiles, liquidity, error }: DirectoryViewProps) {
+function profileMatchesQuery(profile: DirectoryProfile, role: "Host" | "Guest", query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const parts = [
+    profile.full_name,
+    profile.bio,
+    profile.neighborhood,
+    profile.origin_location,
+    formatDirectoryLocation(profile, role),
+  ];
+  const haystack = parts.filter(Boolean).join(" ").toLowerCase();
+  return haystack.includes(q);
+}
+
+export default function DirectoryView({
+  role,
+  profiles,
+  liquidity,
+  error,
+  initialSearchQuery = "",
+}: DirectoryViewProps) {
   const copy = COPY[role];
 
-  return (
-    <div className={PAGE_SHELL}>
-      <div className={PAGE_BG_DOTS} />
+  const filteredProfiles = useMemo(
+    () => profiles.filter((p) => profileMatchesQuery(p, role, initialSearchQuery)),
+    [profiles, role, initialSearchQuery],
+  );
 
-      <main className={`${PAGE_CONTAINER} py-14 text-slate-900 sm:py-20`}>
-        <section className="relative mb-12 border-b border-slate-100 pb-12">
-          <h1 className="font-serif text-4xl font-normal tracking-tight text-slate-950 sm:text-6xl">
+  const isFiltering = initialSearchQuery.trim().length > 0;
+
+  return (
+    <div className={`${PAGE_SHELL} font-sans text-slate-950`}>
+      <main className={PAGE_MAIN}>
+        <section className="mb-12 border-b border-slate-200/80 pb-12 lg:mb-14 lg:pb-14">
+          <h1 className={heroTitle}>
             {copy.title}{" "}
-            <span className="italic text-[#002FA7]">{copy.titleAccent}</span>
+            {copy.titleAccent}
           </h1>
-          <p className="mt-4 max-w-2xl text-base font-light leading-relaxed text-slate-500 sm:text-lg">
+          <p className="mt-5 max-w-4xl text-lg leading-relaxed text-slate-950 sm:text-xl sm:leading-relaxed">
             {copy.description}
           </p>
-          <p className="mt-3 font-mono text-[10px] uppercase tracking-wider text-slate-400">
+          <p className={`mt-4 ${homeEyebrow}`}>
             {liquidity.activeHosts} active hosts · {liquidity.activeGuests} active guests
           </p>
+          {isFiltering ? (
+            <p className="mt-4 text-lg text-slate-600 sm:text-xl">
+              {filteredProfiles.length} result{filteredProfiles.length === 1 ? "" : "s"} for &ldquo;
+              {initialSearchQuery.trim()}&rdquo; (from site search)
+            </p>
+          ) : null}
         </section>
 
         {error ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50/50 p-12 text-center space-y-3">
-            <p className="font-serif text-lg italic text-red-600">{copy.errorTitle}</p>
-            <p className="text-sm font-light text-red-500">{error}</p>
+          <div className="border-b border-red-200/80 py-16 text-center">
+            <p className="text-xl text-red-700 sm:text-2xl">{copy.errorTitle}</p>
+            <p className="mt-3 text-lg text-red-600">{error}</p>
           </div>
-        ) : profiles.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 p-12 text-center bg-slate-50/50 space-y-3">
-            <p className="font-serif text-lg italic text-slate-500">{copy.emptyTitle}</p>
-            <p className="text-sm font-light text-slate-400 max-w-md mx-auto leading-relaxed">{copy.emptyHint}</p>
+        ) : filteredProfiles.length === 0 ? (
+          <div className="py-16 text-center">
+            <p className="text-xl text-slate-700 sm:text-2xl">
+              {isFiltering ? copy.emptySearchTitle : copy.emptyTitle}
+            </p>
+            <p className="mt-3 text-lg leading-relaxed text-slate-600 sm:text-xl">
+              {isFiltering ? "Try another search from the navbar." : copy.emptyHint}
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {profiles.map((profile) => {
+          <div className="grid grid-cols-1 gap-x-12 gap-y-0 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+            {filteredProfiles.map((profile) => {
               const location = formatDirectoryLocation(profile, role);
               return (
                 <Link key={profile.id} href={`/profile/${profile.id}`} className={DIRECTORY_CARD_CLASS}>
                   <div>
                     <div className="flex items-start gap-4">
-                      <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full border border-slate-150 bg-slate-50">
+                      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full bg-slate-100 sm:h-24 sm:w-24">
                         {profile.avatar_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={profile.avatar_url}
-                            alt={profile.full_name ?? copy.fallbackName}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            alt=""
+                            className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-xl font-light text-slate-400">
+                          <div className="flex h-full w-full items-center justify-center text-lg text-slate-400">
                             {profile.full_name?.charAt(0) ?? "?"}
                           </div>
                         )}
                       </div>
-
-                      <div className="space-y-1 min-w-0">
-                        <h2 className="font-serif text-xl font-normal text-slate-950 transition-colors duration-300 group-hover:text-[#002FA7] truncate">
+                      <div className="min-w-0">
+                        <p className="text-lg font-semibold text-slate-950 truncate sm:text-xl lg:text-2xl">
                           {profile.full_name ?? copy.fallbackName}
-                        </h2>
-                        <div className="flex flex-col gap-0.5">
-                          {location && (
-                            <p className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider text-slate-400">
-                              <MapPin className="h-3 w-3 text-[#002FA7]/70 shrink-0" />
-                              <span className="truncate">{location}</span>
-                            </p>
-                          )}
-                          <p className="flex items-center gap-1 font-mono text-[8px] tracking-normal text-slate-400/60">
-                            <Clock className="h-2 w-2 text-slate-300 group-hover:text-[#002FA7]/40 transition-colors duration-300 shrink-0" />
-                            <span>{formatLastActivity(profile.last_activity_at)}</span>
+                        </p>
+                        {location ? (
+                          <p className="mt-1 flex items-center gap-1.5 text-base text-slate-600 sm:text-lg">
+                            <MapPin className="h-5 w-5 shrink-0 text-[#002FA7]/70" />
+                            <span className="truncate">{location}</span>
                           </p>
-                        </div>
+                        ) : null}
                       </div>
                     </div>
-
-                    {profile.bio && (
-                      <p className="mt-4 line-clamp-3 text-sm font-light leading-relaxed text-slate-500 transition-colors duration-300 group-hover:text-slate-700">
+                    {profile.bio ? (
+                      <p className="mt-4 text-lg leading-relaxed text-slate-600 line-clamp-4 sm:text-xl sm:leading-[1.65]">
                         {profile.bio}
                       </p>
-                    )}
+                    ) : null}
                   </div>
-
-                  <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
-                    <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#002FA7] transition-colors duration-300 group-hover:text-slate-950">
-                      View profile
-                    </span>
-                    <span className="font-mono text-xs text-slate-300 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-[#002FA7]">
-                      →
-                    </span>
-                  </div>
+                  <p className="flex items-center gap-2 text-base text-slate-500 sm:text-lg">
+                    <Clock className="h-5 w-5" />
+                    {formatLastActivity(profile.last_activity_at)}
+                  </p>
                 </Link>
               );
             })}

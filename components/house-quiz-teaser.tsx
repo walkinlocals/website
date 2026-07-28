@@ -5,7 +5,6 @@ import {
   homeBody,
   homeContainer,
   homeDisplayTitle,
-  homeEyebrow,
   homePrimaryButton,
   homeSectionBorder,
   homeSectionY,
@@ -17,15 +16,14 @@ export default function HouseQuizTeaser() {
       <div className={homeContainer}>
         <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-5">
-            <p className={homeEyebrow}>Dublin homes</p>
-            <h2 className={`mt-3 ${homeDisplayTitle} lg:text-[2rem]`}>
+            <h2 className={`mt-3 ${homeDisplayTitle}`}>
               Which Dublin house are you?
             </h2>
             <p className={`mt-4 ${homeBody}`}>
-              Ten quick questions on architecture, mood, and neighbourhood — then browse hosts that match your style.
+              Ten quick questions, let&apos;s see what matches your style.
             </p>
             <Link href="/quiz" className={`mt-8 ${homePrimaryButton}`}>
-              Take the house quiz
+              Take the quiz
             </Link>
           </div>
 

@@ -46,7 +46,7 @@ export default function HostInvitePicker({ guestId, hostId, disabled }: Props) {
     return (
       <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
         <p className="font-serif text-xs italic font-light leading-relaxed text-slate-400">
-          Complete and activate your profile before inviting travelers.
+          Complete and activate your profile before inviting backpackers.
         </p>
       </div>
     );
@@ -66,10 +66,10 @@ export default function HostInvitePicker({ guestId, hostId, disabled }: Props) {
   }
 
   return (
-    <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_4px_15px_rgba(0,47,167,0.01)]">
+    <div className="space-y-5 border-t border-slate-200/80 pt-6">
       <div className="space-y-2">
         <span className="block font-mono text-[9px] uppercase tracking-[0.15em] text-slate-400 font-bold">
-          Invite this traveler
+          Invite this backpacker
         </span>
         <div className="flex items-start gap-2 rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-xs font-light leading-relaxed text-slate-500">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#002FA7]" />

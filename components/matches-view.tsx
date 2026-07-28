@@ -13,9 +13,11 @@ import {
   MapPin,
   PartyPopper,
   Info,
+  MessageCircle,
 } from "lucide-react";
 import { MAX_PARTY_SIZE, HOST_PAYOUT_EUR } from "@/lib/pricing";
-import { PAGE_CONTAINER } from "@/lib/page-layout";
+import { PAGE_MAIN } from "@/lib/page-layout";
+import { heroTitle } from "@/lib/homepage-ui";
 import { formatDirectoryLocation } from "@/lib/directory-display";
 import ChatBox from "@/components/chat-box";
 import LocationMap from "@/components/location-map";
@@ -60,6 +62,8 @@ interface Props {
   matches: MatchRow[];
   loadError: string | null;
   justPaid: boolean;
+  paymentReturnPending?: boolean;
+  paidMatchId?: string | null;
   connectComplete?: boolean;
 }
 
@@ -77,10 +81,40 @@ export default function MatchesView({
   matches,
   loadError,
   justPaid,
+  paymentReturnPending = false,
+  paidMatchId = null,
   connectComplete = false,
 }: Props) {
   const router = useRouter();
   const [payoutsReady, setPayoutsReady] = useState(false);
+  const [paymentSyncing, setPaymentSyncing] = useState(paymentReturnPending);
+
+  useEffect(() => {
+    if (!paymentReturnPending) return;
+
+    let cancelled = false;
+    setPaymentSyncing(true);
+
+    (async () => {
+      try {
+        await fetch("/api/matches/sync-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ matchId: paidMatchId ?? undefined }),
+        });
+      } finally {
+        if (!cancelled) {
+          router.replace("/matches");
+          router.refresh();
+          setPaymentSyncing(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [paymentReturnPending, paidMatchId, router]);
 
   useEffect(() => {
     if (!connectComplete) return;
@@ -102,38 +136,53 @@ export default function MatchesView({
   }, [connectComplete, router]);
 
   return (
-    <main className={`${PAGE_CONTAINER} py-14 text-slate-900 sm:py-20`}>
-      <h1 className="font-serif text-3xl font-normal tracking-tight text-slate-950 sm:text-4xl">Your matches</h1>
-      <p className="mt-2 text-sm text-slate-500 font-light leading-relaxed">
+    <main className={PAGE_MAIN}>
+      <h1 className={heroTitle}>
+        Your matches
+      </h1>
+      <p className="mt-5 text-lg leading-relaxed text-slate-950 sm:text-xl sm:leading-relaxed">
         Manage connection requests, respond to invitations, and unlock contact details after payment.
       </p>
 
       {payoutsReady && (
-        <div className="mt-8 flex items-center gap-2.5 rounded-3xl border border-emerald-100 bg-emerald-50/50 px-5 py-4 text-sm text-emerald-800 font-light leading-relaxed">
-          <Check className="h-5 w-5 text-emerald-600" />
+        <p className="mt-8 flex items-center gap-2 text-base text-emerald-800">
+          <Check className="h-5 w-5 shrink-0 text-emerald-600" />
           <span>Bank details saved — tap <strong>Accept</strong> on your pending visit to confirm it.</span>
-        </div>
+        </p>
       )}
 
-      {justPaid && (
-        <div className="mt-8 flex items-center gap-2.5 rounded-3xl border border-emerald-100 bg-emerald-50/50 px-5 py-4 text-sm text-emerald-800 font-light leading-relaxed">
-          <PartyPopper className="h-5 w-5 text-emerald-600" />
+      {paymentSyncing && (
+        <p className="mt-8 flex items-center gap-2 text-base text-slate-700 sm:text-lg">
+          <Loader2 className="h-5 w-5 shrink-0 animate-spin text-[#002FA7]" />
+          <span>Confirming your payment with Stripe…</span>
+        </p>
+      )}
+
+      {justPaid && !paymentSyncing && (
+        <p className="mt-8 flex items-center gap-2 text-base text-emerald-800">
+          <PartyPopper className="h-5 w-5 shrink-0 text-emerald-600" />
           <span>Payment received — your connection is unlocked below.</span>
-        </div>
+        </p>
       )}
 
       {loadError && (
-        <p className="mt-6 text-sm text-rose-600 font-light" role="alert">
+        <p className="mt-6 text-base text-red-600" role="alert">
           Could not load your matches: {loadError}
         </p>
       )}
 
-      <div className="mt-8 space-y-6">
+      <div className="mt-12 border-t border-slate-200/80">
         {matches.length === 0 && !loadError && (
-          <p className="text-sm text-slate-400 font-light italic">You don&apos;t have any matches yet.</p>
+          <p className="py-16 text-base text-slate-600 sm:text-lg">You don&apos;t have any matches yet.</p>
         )}
         {matches.map((m) => (
-          <MatchCard key={m.id} match={m} currentUserId={currentUserId} myRole={myRole} />
+          <MatchCard
+            key={m.id}
+            match={m}
+            currentUserId={currentUserId}
+            myRole={myRole}
+            paymentSyncing={paymentSyncing}
+          />
         ))}
       </div>
     </main>
@@ -144,10 +193,12 @@ function MatchCard({
   match,
   currentUserId,
   myRole,
+  paymentSyncing = false,
 }: {
   match: MatchRow;
   currentUserId: string;
   myRole: "Guest" | "Host";
+  paymentSyncing?: boolean;
 }) {
   const router = useRouter();
   const [working, setWorking] = useState<null | "accept" | "hold" | "decline" | "payout">(null);
@@ -202,7 +253,7 @@ function MatchCard({
       : "";
   const mapZoom = iAmHost ? 5 : 13;
   const mapLabel = iAmHost
-    ? `Where ${other?.full_name ?? "this traveler"} is from`
+    ? `Where ${other?.full_name ?? "this backpacker"} is from`
     : `${other?.full_name ?? "this host"}'s area`;
 
   async function act(kind: "accept" | "hold" | "decline") {
@@ -253,56 +304,58 @@ function MatchCard({
   }
 
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_4px_15px_rgba(0,47,167,0.01)] transition-all duration-300 hover:shadow-[0_12px_30px_rgba(0,47,167,0.02)]">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/profile/${other?.id ?? ""}`}
-            className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full bg-slate-50 border border-slate-150"
-          >
-            {other?.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={other.avatar_url} alt={other.full_name ?? ""} className="h-full w-full object-cover" />
-            ) : (
-              <span className="flex h-full w-full items-center justify-center text-sm font-light text-slate-400">
-                {other?.full_name?.charAt(0) ?? "?"}
-              </span>
-            )}
-          </Link>
-          <div>
-            <Link href={`/profile/${other?.id ?? ""}`} className="font-serif text-lg font-normal text-slate-950 hover:text-[#002FA7] transition-colors duration-300">
-              {other?.full_name ?? (iAmHost ? "Traveler" : "Host")}
+    <article className="border-b border-slate-200/80 py-12 last:border-b-0 lg:py-14">
+      <div className="lg:grid lg:grid-cols-12 lg:gap-12 xl:gap-16">
+        <div className="lg:col-span-4">
+          <div className="flex items-start gap-4">
+            <Link
+              href={`/profile/${other?.id ?? ""}`}
+              className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full bg-slate-100 sm:h-24 sm:w-24"
+            >
+              {other?.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={other.avatar_url} alt={other.full_name ?? ""} className="h-full w-full object-cover" />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center text-lg text-slate-400">
+                  {other?.full_name?.charAt(0) ?? "?"}
+                </span>
+              )}
             </Link>
-            {otherLocation && (
-              <p className="flex items-center gap-1 text-xs text-slate-400 font-light mt-0.5">
-                <MapPin className="h-3.5 w-3.5 text-[#002FA7]/70" />
-                {otherLocation}
-              </p>
-            )}
+            <div className="min-w-0">
+              <Link
+                href={`/profile/${other?.id ?? ""}`}
+                className="text-2xl font-bold text-slate-950 hover:text-[#002FA7] sm:text-3xl"
+              >
+                {other?.full_name ?? (iAmHost ? "Backpacker" : "Host")}
+              </Link>
+              {otherLocation && (
+                <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-600 sm:text-base">
+                  <MapPin className="h-4 w-4 shrink-0 text-[#002FA7]/70" />
+                  {otherLocation}
+                </p>
+              )}
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <span className={`rounded-full px-3 py-1 text-sm font-medium ${STATUS_STYLE[match.status]}`}>
+                  {match.status}
+                </span>
+                <span className="text-sm text-slate-600 sm:text-base">
+                  {partySize} {partySize === 1 ? "person" : "people"} · €{total}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          <span className={`rounded-full px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider ${STATUS_STYLE[match.status]}`}>
-            {match.status}
-          </span>
-          <span className="text-[11px] font-mono text-slate-400">
-            {partySize} {partySize === 1 ? "person" : "people"} · €{total}
-          </span>
-        </div>
-      </div>
 
-      {mapQuery && (
-        <div className="mt-6">
-          <span className="block font-mono text-[11px] uppercase tracking-widest text-[#002FA7] font-semibold mb-3">
-            {mapLabel}
-          </span>
-          <div className="overflow-hidden rounded-2xl border border-slate-150 shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)]">
-            <LocationMap query={mapQuery} zoom={mapZoom} label="" />
+        <div className="mt-10 w-full min-w-0 space-y-6 lg:col-span-8 lg:mt-0">
+        {mapQuery && (
+          <div>
+            <span className="text-sm font-semibold uppercase tracking-wide text-[#002FA7]">{mapLabel}</span>
+            <div className="mt-3 overflow-hidden rounded-xl border border-slate-200/80">
+              <LocationMap query={mapQuery} zoom={mapZoom} label="" />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="mt-5 w-full min-w-0 space-y-4">
         {!paid && match.status !== "Denied" && (
           <MatchDateNegotiation
             match={match}
@@ -313,8 +366,8 @@ function MatchCard({
 
         {isGuestAcceptingHostInvite && dateReady && (
           <div className="space-y-1.5 max-w-xs">
-            <label htmlFor={`party-confirm-${match.id}`} className="block text-[10px] font-mono uppercase tracking-wider text-slate-400">
-              Confirm how many people? (€35 each, max {MAX_PARTY_SIZE})
+            <label htmlFor={`party-confirm-${match.id}`} className="block text-sm font-medium text-slate-700">
+              How many people?
             </label>
             <p className="flex items-start gap-1.5 text-xs text-slate-500 font-light leading-relaxed">
               <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-[#002FA7]/70" />
@@ -341,7 +394,7 @@ function MatchCard({
               You have <strong>€{payoutPromptEur}</strong> waiting from this visit.
             </p>
             <p className="text-sm text-emerald-800/90 font-light leading-relaxed">
-              Add your IBAN through Stripe to accept the booking and receive your payout when the traveler pays.
+              Add your IBAN through Stripe to accept the booking and receive your payout when the backpacker pays.
             </p>
             <button
               type="button"
@@ -416,16 +469,22 @@ function MatchCard({
         )}
 
         {iAmHost && match.status === "Accepted" && (
-          <p className="text-xs font-mono uppercase tracking-widest text-[#002FA7]">Accepted — awaiting traveler payment.</p>
+          <p className="text-xs font-mono uppercase tracking-widest text-[#002FA7]">Accepted — awaiting backpacker payment.</p>
         )}
 
-        {!iAmHost && match.status === "Accepted" && match.stripe_link && (
+        {!iAmHost && match.status === "Accepted" && match.stripe_link && !paymentSyncing && (
           <a
             href={match.stripe_link}
             className="inline-flex rounded-full bg-[#002FA7] px-6 py-3 text-xs font-mono font-semibold uppercase tracking-widest text-white transition-all duration-300 hover:bg-[#001e6c] shadow-[0_4px_15px_rgba(0,47,167,0.18)]"
           >
             Pay €{total} to Unlock Connection ({partySize} × €35)
           </a>
+        )}
+
+        {!iAmHost && match.status === "Accepted" && match.stripe_link && paymentSyncing && (
+          <p className="text-sm text-slate-600 sm:text-base">
+            Payment processing — contact details will appear here in a moment.
+          </p>
         )}
 
         {match.status === "Denied" && (
@@ -435,57 +494,60 @@ function MatchCard({
         )}
 
         {error && (
-          <p className="mt-2 text-sm text-rose-600 font-light" role="alert">
+          <p className="mt-2 text-base text-rose-600" role="alert">
             {error}
           </p>
         )}
-      </div>
 
-      {paid && other && (
-        <div className="mt-6 border-t border-slate-100 pt-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="block font-mono text-[9px] uppercase tracking-[0.25em] text-[#002FA7] font-bold">
-              Member Info
-            </span>
-          </div>
+        {paid && other && (
+          <div className="border-t border-slate-200/80 pt-8 space-y-6">
+            <p className="text-sm font-semibold uppercase tracking-wide text-[#002FA7]">Contact unlocked</p>
 
-          {/* Structured Contact Vector Grid */}
-          <div className="grid gap-3 sm:grid-cols-2 font-mono text-xs text-slate-600">
-            <div className="flex items-center gap-2.5 rounded-xl bg-slate-50/70 px-4 py-3 border border-slate-100 shadow-sm">
-              <Phone className="h-4 w-4 text-[#002FA7] shrink-0" />
-              <div className="min-w-0 flex-1">
-                <span className="block text-[8px] uppercase tracking-wider text-slate-400 font-bold">Phone Number</span>
-                <span className="text-slate-800 tracking-wider font-medium">{other.phone || "—"}</span>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 text-base text-slate-700">
+              <div className="flex items-start gap-3">
+                <Phone className="h-5 w-5 text-[#002FA7] shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <span className="text-sm text-slate-500 sm:text-base">Phone</span>
+                  <p className="font-medium text-slate-950 sm:text-lg">{other.phone || "—"}</p>
+                </div>
               </div>
-              {other.phone && (
-                <WhatsAppButton
-                  phone={other.phone}
-                  message={`Hi ${other.full_name || "there"}! This is ${
-                    myRole === "Host" ? match.host?.full_name : match.guest?.full_name
-                  } from WalkIn Locals. Our connection is confirmed! Let's arrange our cozy sit-down. ✦`}
-                />
-              )}
+
+              <div className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-[#002FA7] shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <span className="text-sm text-slate-500 sm:text-base">Email</span>
+                  <p className="font-medium text-slate-950 break-all sm:text-lg">{other.contact_email || "—"}</p>
+                </div>
+              </div>
+
+              {other.phone ? (
+                <div className="flex items-start gap-3">
+                  <MessageCircle className="h-5 w-5 text-[#002FA7] shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <span className="text-sm text-slate-500 sm:text-base">WhatsApp</span>
+                    <div className="mt-1">
+                      <WhatsAppButton
+                        phone={other.phone}
+                        message={`Hi ${other.full_name || "there"}! This is ${
+                          myRole === "Host" ? match.host?.full_name : match.guest?.full_name
+                        } from WALKINLOCALS. Our connection is confirmed! Let's arrange our cozy sit-down. ✦`}
+                        className="h-10 w-10"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
 
-            <div className="flex items-center gap-2.5 rounded-xl bg-slate-50/70 px-4 py-3 border border-slate-100 shadow-sm">
-              <Mail className="h-4 w-4 text-[#002FA7] shrink-0" />
-              <div className="min-w-0">
-                <span className="block text-[8px] uppercase tracking-wider text-slate-400 font-bold">Email Coordinate</span>
-                <span className="text-slate-800 break-all font-medium">{other.contact_email || "—"}</span>
-              </div>
-            </div>
-          </div>
+            <p className="text-sm leading-relaxed text-slate-600">
+              Use in-app chat below to coordinate your visit.
+            </p>
 
-          <div className="rounded-2xl border border-slate-100 bg-slate-50/40 p-4 text-xs font-light leading-relaxed text-slate-500 mt-2">
-            Your connection is protected by WalkIn Locals — use the secure ledger in-app chat frame below to coordinate arrival times.
-          </div>
-
-          <div className="mt-4">
             <ChatBox matchId={match.id} currentUserId={currentUserId} />
           </div>
+        )}
         </div>
-      )}
+      </div>
     </article>
   );
 }

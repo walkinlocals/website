@@ -2,6 +2,21 @@ import { homeImage } from "@/lib/home-images";
 
 export type HouseArchetype = "georgian" | "victorian" | "midcentury" | "modern";
 
+/** Option row images: first quiz option → p1, second → p2, etc. */
+export const QUIZ_OPTION_IMAGES = [
+  homeImage("quiz", "p1.jpg"),
+  homeImage("quiz", "p2.webp"),
+  homeImage("quiz", "p3.jpeg"),
+  homeImage("quiz", "p4.jpg.webp"),
+] as const;
+
+const QUIZ_RESULT_IMAGE: Record<HouseArchetype, string> = {
+  georgian: QUIZ_OPTION_IMAGES[0],
+  victorian: QUIZ_OPTION_IMAGES[1],
+  midcentury: QUIZ_OPTION_IMAGES[2],
+  modern: QUIZ_OPTION_IMAGES[3],
+};
+
 export type QuizScores = Record<HouseArchetype, number>;
 
 export type QuizQuestion = {
@@ -29,176 +44,176 @@ export type HouseResult = {
 export const HOUSE_QUIZ_QUESTIONS: QuizQuestion[] = [
   {
     id: "morning",
-    prompt: "It’s your first free morning in Dublin. What sounds most like you?",
+    prompt: "You have a free morning in Dublin. What do you want to do?",
     options: [
       {
-        label: "A quiet stroll past fanlit doors and iron railings near a leafy square",
+        label: "Walk past old doors and pretty squares in the city centre",
         scores: { georgian: 3, victorian: 1 },
       },
       {
-        label: "Coffee on a red-brick terrace, watching the street wake up",
+        label: "Have coffee on a red brick street and watch people pass",
         scores: { victorian: 3, georgian: 1 },
       },
       {
-        label: "A long walk through wide avenues with front gardens and bay windows",
+        label: "Walk wide streets with gardens and big windows",
         scores: { midcentury: 3, victorian: 1 },
       },
       {
-        label: "A waterfront wander among glass towers and converted warehouses",
+        label: "Walk by the water near new tall buildings",
         scores: { modern: 3, georgian: 1 },
       },
     ],
   },
   {
     id: "door",
-    prompt: "Which front door would you pause to admire?",
+    prompt: "Which front door do you like most?",
     options: [
       {
-        label: "A tall Georgian door in deep heritage colour with a brass knocker",
+        label: "A tall old door with bright colour and a brass knocker",
         scores: { georgian: 3 },
       },
       {
-        label: "A Victorian red-brick entrance with stained glass and a tiled step",
+        label: "A red brick door with stained glass",
         scores: { victorian: 3 },
       },
       {
-        label: "A painted semi-detached door with a neat hedge and a bicycle outside",
+        label: "A simple painted door with a small garden out front",
         scores: { midcentury: 3 },
       },
       {
-        label: "A sleek lobby entrance with clean lines and city views",
+        label: "A modern glass door in a tall building",
         scores: { modern: 3 },
       },
     ],
   },
   {
     id: "interior",
-    prompt: "Stepping inside, what feels most inviting?",
+    prompt: "Inside a home, what feels best to you?",
     options: [
       {
-        label: "High ceilings, cornices, and a sense of old Dublin grandeur",
+        label: "High ceilings and old Dublin style",
         scores: { georgian: 3, victorian: 1 },
       },
       {
-        label: "A warm living room with bookshelves, rugs, and layered family history",
+        label: "A cosy living room with books and rugs",
         scores: { victorian: 3, midcentury: 1 },
       },
       {
-        label: "An open-plan kitchen-diner that spills into a back garden",
+        label: "An open kitchen that opens to a garden",
         scores: { midcentury: 3, modern: 1 },
       },
       {
-        label: "Floor-to-ceiling windows and a minimalist, light-filled space",
+        label: "Big windows and a clean, bright room",
         scores: { modern: 3 },
       },
     ],
   },
   {
     id: "neighbourhood",
-    prompt: "Which neighbourhood energy draws you in?",
+    prompt: "Which area feels right for you?",
     options: [
       {
-        label: "Historic, cultured, and walkable — museums and squares nearby",
+        label: "Historic streets near museums and squares",
         scores: { georgian: 3 },
       },
       {
-        label: "Village-y, leafy, and lived-in — cafés tucked between terraces",
+        label: "Quiet village streets with cafés",
         scores: { victorian: 3, midcentury: 1 },
       },
       {
-        label: "Family-friendly and grounded — schools, parks, and corner shops",
+        label: "Family areas with parks and shops",
         scores: { midcentury: 3 },
       },
       {
-        label: "Young, buzzing, and forward-looking — docks, startups, nightlife",
+        label: "Busy areas near the docks and new bars",
         scores: { modern: 3 },
       },
     ],
   },
   {
     id: "era",
-    prompt: "If you could time-travel through Dublin’s housing history, you’d stop at…",
+    prompt: "Which kind of Dublin home do you like?",
     options: [
       {
-        label: "The Georgian era — symmetry, fanlights, and city elegance",
+        label: "Georgian: tall doors and classic city style",
         scores: { georgian: 3 },
       },
       {
-        label: "The Victorian & Edwardian boom — red brick and bay windows",
+        label: "Victorian: red brick and bay windows",
         scores: { victorian: 3 },
       },
       {
-        label: "The mid-century suburbs — semis, gardens, and community life",
+        label: "Mid century: semis with gardens",
         scores: { midcentury: 3 },
       },
       {
-        label: "Today’s Dublin — apartments, redevelopments, and new skylines",
+        label: "Modern: new apartments and glass buildings",
         scores: { modern: 3 },
       },
     ],
   },
   {
     id: "social",
-    prompt: "Your ideal host visit feels like…",
+    prompt: "Your ideal visit with a host feels like…",
     options: [
       {
-        label: "Tea in a beautifully worn drawing room full of stories",
+        label: "Tea in a beautiful old room full of stories",
         scores: { georgian: 2, victorian: 2 },
       },
       {
-        label: "Chatting at a kitchen table while something simmers on the hob",
+        label: "Talking at the kitchen table while food cooks",
         scores: { victorian: 2, midcentury: 2 },
       },
       {
-        label: "Sitting in the garden with homemade treats and neighbourhood gossip",
+        label: "Sitting in the garden with snacks and chat",
         scores: { midcentury: 3, victorian: 1 },
       },
       {
-        label: "A rooftop coffee with panoramic views and bold conversation",
+        label: "Coffee on a rooftop with a city view",
         scores: { modern: 3 },
       },
     ],
   },
   {
     id: "material",
-    prompt: "Which building material speaks to you most?",
+    prompt: "Which building style do you like?",
     options: [
       {
-        label: "Limestone and stucco — pale, formal, timeless",
+        label: "Pale stone and white walls",
         scores: { georgian: 3 },
       },
       {
-        label: "Red brick — warm, textured, unmistakably Dublin",
+        label: "Warm red brick",
         scores: { victorian: 3 },
       },
       {
-        label: "Pebbledash and concrete — honest, suburban, familiar",
+        label: "Concrete and pebbledash in the suburbs",
         scores: { midcentury: 3 },
       },
       {
-        label: "Glass and steel — bright, urban, contemporary",
+        label: "Glass and steel",
         scores: { modern: 3 },
       },
     ],
   },
   {
     id: "pace",
-    prompt: "How do you like to explore a city?",
+    prompt: "How do you like to explore?",
     options: [
       {
-        label: "Slowly, on foot, noticing architectural details on every street",
+        label: "Slow walks looking at buildings",
         scores: { georgian: 2, victorian: 2 },
       },
       {
-        label: "Wandering village streets until you find the perfect local spot",
+        label: "Wandering village streets until I find a nice spot",
         scores: { victorian: 3 },
       },
       {
-        label: "Taking the bus out to quieter residential pockets for contrast",
+        label: "Bus rides to quieter residential areas",
         scores: { midcentury: 3 },
       },
       {
-        label: "Following the energy — canals, docks, and what’s new",
+        label: "Following busy streets and new places",
         scores: { modern: 3, georgian: 1 },
       },
     ],
@@ -208,41 +223,41 @@ export const HOUSE_QUIZ_QUESTIONS: QuizQuestion[] = [
     prompt: "Outside space matters to you because…",
     options: [
       {
-        label: "I love a hidden courtyard or small walled garden in the city",
+        label: "I love a small hidden garden in the city",
         scores: { georgian: 2, victorian: 2 },
       },
       {
-        label: "A long narrow Victorian garden feels wonderfully Dublin",
+        label: "A long narrow garden feels very Dublin",
         scores: { victorian: 3 },
       },
       {
-        label: "A real front and back garden is where life happens",
+        label: "A front and back garden is where life happens",
         scores: { midcentury: 3 },
       },
       {
-        label: "A balcony or shared terrace with a view is enough for me",
+        label: "A balcony with a view is enough for me",
         scores: { modern: 3 },
       },
     ],
   },
   {
     id: "souvenir",
-    prompt: "What would you most want to take home from a Dublin home visit?",
+    prompt: "What do you want to remember from a home visit?",
     options: [
       {
-        label: "A story about who lived behind those tall windows centuries ago",
+        label: "Stories about the old city",
         scores: { georgian: 3 },
       },
       {
-        label: "A recipe, a local tip, and the feeling of being welcomed in",
+        label: "A local tip and a warm welcome",
         scores: { victorian: 3, midcentury: 1 },
       },
       {
-        label: "A glimpse of everyday Dublin family life away from the postcards",
+        label: "How real families live in Dublin",
         scores: { midcentury: 3 },
       },
       {
-        label: "A fresh perspective on how Dublin is changing right now",
+        label: "How Dublin is changing today",
         scores: { modern: 3 },
       },
     ],
@@ -253,55 +268,54 @@ export const HOUSE_RESULTS: Record<HouseArchetype, HouseResult> = {
   georgian: {
     id: "georgian",
     title: "The Georgian Romantic",
-    subtitle: "City-centre elegance",
+    subtitle: "City centre elegance",
     personality:
-      "You’re drawn to history with a pulse — grand proportions, fanlit doors, and the quiet drama of Dublin’s historic core. You notice symmetry, colour, and the stories embedded in stone. For you, a home isn’t just shelter; it’s a chapter in the city’s past.",
+      "You love old Dublin in the city centre. Tall doors, pretty colours, and streets full of history speak to you. A home here feels like part of the city’s story.",
     houseDescription:
-      "Georgian townhouses dominate Dublin’s city centre — tall, formal, and unmistakable. Streets around Merrion Square, Fitzwilliam Square, Mountjoy Square, and Henrietta Street are built almost entirely in this style.",
-    image: homeImage("quiz", "georgian.jpeg"),
-    imageAlt: "Georgian building with classic Dublin architecture",
+      "Georgian houses are tall and formal. You see them around Merrion Square, Fitzwilliam Square, and much of the historic centre.",
+    image: QUIZ_RESULT_IMAGE.georgian,
+    imageAlt: "Georgian building in Dublin",
     areas: ["City Centre", "The Liberties", "Smithfield", "Stoneybatter", "Temple Bar"],
-    directoryHint: "Look for hosts in the historic core and its fringes — where Dublin’s grandest doors still open onto real lives.",
+    directoryHint: "Look for hosts in the historic centre and nearby streets.",
   },
   victorian: {
     id: "victorian",
-    title: "The Red-Brick Dreamer",
-    subtitle: "Inner-suburb character",
+    title: "The Red Brick Dreamer",
+    subtitle: "Inner suburb character",
     personality:
-      "You love warmth, texture, and the lived-in charm of Dublin’s village streets. Bay windows, stained glass, and long terraces feel like home to you — not museum pieces, but places where tea, conversation, and neighbourhood life still flourish.",
+      "You like warm red brick streets and village feel. Bay windows, stained glass, and cosy terraces feel like home to you.",
     houseDescription:
-      "Victorian and Edwardian red-bricks fill the inner suburbs just beyond the canals — multi-storey terraces with personality in every brick. This is the Dublin most visitors picture when they imagine a real local home.",
-    image: homeImage("quiz", "victorian.jpeg"),
-    imageAlt: "Red-brick house with a car parked out front",
+      "Victorian red brick fills the inner suburbs past the canals. This is the Dublin many visitors picture when they think of a real local home.",
+    image: QUIZ_RESULT_IMAGE.victorian,
+    imageAlt: "Red brick house in Dublin",
     areas: ["Rathmines", "Ranelagh", "Portobello", "Terenure", "Drumcondra", "Clontarf", "Sandymount"],
-    directoryHint: "Browse hosts in the inner suburbs — Rathmines, Ranelagh, Portobello, Drumcondra, and Clontarf are classic starting points.",
+    directoryHint: "Try hosts in Rathmines, Ranelagh, Portobello, Drumcondra, or Clontarf.",
   },
   midcentury: {
     id: "midcentury",
     title: "The Garden Suburb Soul",
-    subtitle: "Mid-century Dublin life",
+    subtitle: "Mid century Dublin life",
     personality:
-      "You’re curious about the Dublin tourists rarely see — the everyday city of front gardens, corner shops, and families who’ve stayed for generations. You value space, honesty, and the unpretentious beauty of suburban Dublin.",
+      "You are curious about everyday Dublin: front gardens, corner shops, and family neighbourhoods away from the busy centre.",
     houseDescription:
-      "From the 1930s to the 1970s, Dublin’s middle ring filled with semi-detached and terraced corporation housing — concrete, pebbledash, and generous gardens replacing the red-bricks further in.",
-    image: homeImage("quiz", "midcentury.jpeg"),
-    imageAlt: "Old terraced houses with a hedge and gate in front",
+      "From the 1930s to the 1970s, Dublin grew with semis and terraces with gardens in the middle ring of the city.",
+    image: QUIZ_RESULT_IMAGE.midcentury,
+    imageAlt: "Terraced houses with a garden",
     areas: ["Terenure", "Phibsborough", "Glasnevin", "Ballsbridge"],
-    directoryHint:
-      "Hosts across Dublin’s residential belts often open doors in these quieter, family-rooted neighbourhoods — ask about their area when you connect.",
+    directoryHint: "Many hosts live in quieter family neighbourhoods. Ask about their area when you connect.",
   },
   modern: {
     id: "modern",
     title: "The Contemporary Explorer",
     subtitle: "New Dublin, new skylines",
     personality:
-      "You’re energised by a city in motion — glass, light, converted docks, and the Dublin that’s still being built. You want conversations about where the city is going, not only where it’s been.",
+      "You like the new Dublin: glass towers, the docks, and talk about where the city is going next.",
     houseDescription:
-      "Modern Dublin clusters around the Docklands and outer suburbs — apartment complexes, duplexes, and redeveloped waterfronts where 21st-century life meets the Liffey and the bay.",
-    image: homeImage("quiz", "modern.jpeg"),
-    imageAlt: "Waterfront with modern buildings in the background",
+      "Modern Dublin is strong around the Docklands and in newer apartment areas by the water and canals.",
+    image: QUIZ_RESULT_IMAGE.modern,
+    imageAlt: "Modern buildings by the waterfront",
     areas: ["Docklands", "Grand Canal Dock", "City Centre", "Sandymount"],
-    directoryHint: "Start with hosts in the Docklands and Grand Canal Dock — or city-centre hosts in newer apartment living.",
+    directoryHint: "Start with hosts in the Docklands or Grand Canal Dock, or city centre apartments.",
   },
 };
 

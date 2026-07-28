@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, X, Heart } from "lucide-react";
 import { KLEIN_BLUE } from "@/lib/brand";
+import { heroTitle } from "@/lib/homepage-ui";
 
 type SubmitState =
   | { status: "idle" }
@@ -95,7 +96,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
           </div>
         ) : (
           <>
-            <h2 id="feedback-title" className="font-serif text-2xl text-slate-950">Contact us</h2>
+            <h2 id="feedback-title" className={heroTitle}>Contact us</h2>
             <p className="mt-1 text-sm font-light text-slate-500">Questions, ideas, or a Dublin story to share.</p>
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <input

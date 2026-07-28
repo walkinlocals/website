@@ -2,7 +2,21 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 5.5rem;
+  scroll-padding-top: 7.2rem;
+  /* Site-wide scale: ~20% above prior root sizes (rem-based UI follows automatically). */
+  font-size: 20.4px;
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 21.6px;
+  }
+}
+
+@media (min-width: 1280px) {
+  html {
+    font-size: 24px;
+  }
 }
 
 @keyframes discovery-marquee {

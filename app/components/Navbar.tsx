@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { pingActivity } from "@/lib/activity-client";
+import { directorySearchHref, searchSite } from "@/lib/site-search";
+import { SITE_GUTTER } from "@/lib/page-layout";
+import { brandWordmark, BRAND_NAME } from "@/lib/homepage-ui";
 import { Loader2, Menu, Search, X } from "lucide-react";
 
 type Role = "Host" | "Guest" | "Admin";
@@ -16,14 +19,31 @@ interface NavProfile {
   is_active: boolean;
 }
 
-const MENU_LINKS = [
+const PUBLIC_MENU_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/about-us", label: "About Us" },
-  { href: "/how-it-works", label: "How It Works" },
-  { href: "/get-paid", label: "Get Paid" },
-  { href: "/pay", label: "Pay" },
-  { href: "/terms", label: "Terms" },
+  { href: "/how-it-works", label: "How it works" },
 ] as const;
+
+function buildAuthedMenuLinks(role: Role | null) {
+  const links: { href: string; label: string }[] = [];
+
+  if (role === "Host") {
+    links.push({ href: "/guest-directory", label: "Guests" });
+  } else {
+    links.push({ href: "/host-directory", label: "Hosts" });
+  }
+
+  links.push({ href: "/matches", label: "Matches" });
+  links.push({ href: "/how-it-works", label: "How it works" });
+
+  if (role === "Host") {
+    links.push({ href: "/get-paid", label: "Get paid" });
+  } else {
+    links.push({ href: "/pay", label: "Pay" });
+  }
+
+  return links;
+}
 
 export default function Navbar() {
   const router = useRouter();
@@ -35,6 +55,9 @@ export default function Navbar() {
   const [signingOut, setSigningOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchWrapRef = useRef<HTMLDivElement>(null);
+  const mobileSearchWrapRef = useRef<HTMLDivElement>(null);
   const [syncTrigger, setSyncTrigger] = useState(0);
 
   useEffect(() => {
@@ -100,6 +123,74 @@ export default function Navbar() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    function onPointerDown(event: MouseEvent) {
+      const target = event.target as Node;
+      if (
+        !searchWrapRef.current?.contains(target) &&
+        !mobileSearchWrapRef.current?.contains(target)
+      ) {
+        setSearchOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, []);
+
+  const searchResults = useMemo(() => {
+    const trimmed = searchQuery.trim();
+    if (trimmed.length < 2) return [];
+
+    const site = searchSite(trimmed, 8);
+    const directoryHits: typeof site = [];
+
+    if (isAuthed) {
+      const directoryRole = profile?.role === "Host" ? "Guest" : "Host";
+      directoryHits.push({
+        id: "search-directory",
+        title: `Search ${directoryRole === "Host" ? "hosts" : "guests"} for “${trimmed}”`,
+        description: "Names, stories, and locations in the directory",
+        href: directorySearchHref(directoryRole, trimmed),
+        group: "Directory",
+        score: 200,
+      });
+    } else {
+      directoryHits.push({
+        id: "search-hosts-signup",
+        title: `Find hosts matching “${trimmed}”`,
+        description: "Sign up as a guest to browse the host directory",
+        href: `/login?mode=signup&role=Guest`,
+        group: "Directory",
+        score: 150,
+      });
+    }
+
+    return [...directoryHits, ...site].slice(0, 10);
+  }, [searchQuery, isAuthed, profile?.role]);
+
+  function goToSearchResult(href: string) {
+    setSearchOpen(false);
+    setMenuOpen(false);
+    setSearchQuery("");
+    router.push(href);
+  }
+
+  function handleSearchSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (searchResults.length > 0) {
+      goToSearchResult(searchResults[0].href);
+      return;
+    }
+    const trimmed = searchQuery.trim();
+    if (!trimmed) return;
+    if (!isAuthed) {
+      router.push(`/login?mode=signup&role=Guest`);
+      return;
+    }
+    const directoryRole = profile?.role === "Host" ? "Guest" : "Host";
+    goToSearchResult(directorySearchHref(directoryRole, trimmed));
+  }
+
   async function handleSignOut() {
     setSigningOut(true);
     setMenuOpen(false);
@@ -110,61 +201,70 @@ export default function Navbar() {
     router.refresh();
   }
 
-  function handleSearchSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    setMenuOpen(false);
-    if (!isAuthed) {
-      router.push("/login?mode=signup&role=Guest");
-      return;
-    }
-    if (profile?.role === "Host") {
-      router.push("/guest-directory");
-      return;
-    }
-    router.push("/host-directory");
-  }
-
-  const menuLinks = isAuthed
-    ? [
-        { href: "/", label: "Home" },
-        ...(profile?.role === "Host"
-          ? [{ href: "/guest-directory", label: "Guests" }]
-          : [{ href: "/host-directory", label: "Hosts" }]),
-        { href: "/matches", label: "Matches" },
-        { href: "/profile", label: "Profile" },
-        { href: "/about-us", label: "About Us" },
-        { href: "/how-it-works", label: "How It Works" },
-        { href: "/get-paid", label: "Get Paid" },
-        { href: "/pay", label: "Pay" },
-        { href: "/terms", label: "Terms" },
-      ]
-    : MENU_LINKS.map((link) => ({ ...link }));
+  const menuLinks = isAuthed ? buildAuthedMenuLinks(profile?.role ?? null) : [...PUBLIC_MENU_LINKS];
+  const showSearchPanel = searchOpen && searchQuery.trim().length >= 2;
 
   return (
     <header id="site-navbar" className="sticky top-0 z-50 border-b border-slate-200 bg-white relative">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <nav className="flex items-center gap-3 py-3 sm:gap-4 sm:py-4">
-          <Link href="/" className="flex shrink-0 items-center gap-2.5">
-            <span className="text-base font-semibold tracking-tight text-slate-950 sm:text-lg">
-              WalkIn<span className="text-[#002FA7]">Locals</span>
+      <div className={`w-full ${SITE_GUTTER}`}>
+        <nav className="flex items-center gap-4 py-4 sm:gap-6 sm:py-5 lg:py-6">
+          <Link href="/" className="flex shrink-0 items-center gap-3">
+            <span className={brandWordmark}>
+              {BRAND_NAME}
             </span>
-            <img src="/images/logo.png" alt="" className="h-8 w-8 object-contain sm:h-9 sm:w-9" />
+            <img src="/images/logo.png" alt="" className="h-11 w-11 object-contain sm:h-12 sm:w-12" />
           </Link>
 
-          <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-3">
+          <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-3 sm:gap-4">
             <form
               onSubmit={handleSearchSubmit}
-              className="hidden min-w-0 md:block md:w-[min(100%,280px)] lg:w-[min(100%,320px)]"
+              className="hidden min-w-0 md:block md:w-[min(100%,320px)] lg:w-[min(100%,416px)]"
             >
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <div ref={searchWrapRef} className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 sm:h-[1.125rem] sm:w-[1.125rem]" />
                 <input
                   type="search"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search Dublin hosts…"
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#002FA7] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#002FA7]"
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setSearchOpen(true);
+                  }}
+                  onFocus={() => setSearchOpen(true)}
+                  placeholder="Search pages, areas, food…"
+                  aria-expanded={showSearchPanel}
+                  aria-controls="site-search-results"
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-base text-slate-800 placeholder:text-slate-400 focus:border-[#002FA7] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#002FA7] sm:py-3 sm:pl-11 sm:text-lg"
                 />
+                {showSearchPanel ? (
+                  <div
+                    id="site-search-results"
+                    className="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+                  >
+                    {searchResults.length === 0 ? (
+                      <p className="px-5 py-4 text-base text-slate-500">No matches — try another word.</p>
+                    ) : (
+                      <ul className="max-h-[min(70vh,360px)] overflow-y-auto py-1.5">
+                        {searchResults.map((result) => (
+                          <li key={result.id}>
+                            <button
+                              type="button"
+                              onClick={() => goToSearchResult(result.href)}
+                              className="block w-full px-5 py-3 text-left hover:bg-[#002FA7]/5"
+                            >
+                              <span className="text-xs font-semibold uppercase tracking-wide text-[#002FA7]">
+                                {result.group}
+                              </span>
+                              <span className="mt-1 block text-base font-medium text-slate-900">{result.title}</span>
+                              <span className="mt-1 block text-sm leading-snug text-slate-500 line-clamp-2">
+                                {result.description}
+                              </span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ) : null}
               </div>
             </form>
 
@@ -172,13 +272,13 @@ export default function Navbar() {
               <>
                 <Link
                   href="/login"
-                  className="hidden text-sm font-medium text-slate-700 hover:text-[#002FA7] sm:inline"
+                  className="hidden text-lg font-medium text-slate-700 hover:text-[#002FA7] sm:inline"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/login?mode=signup"
-                  className="hidden rounded-lg bg-[#002FA7] px-4 py-2 text-sm font-medium text-white hover:bg-[#001e6c] sm:inline"
+                  className="hidden rounded-lg bg-[#002FA7] px-6 py-3 text-lg font-medium text-white hover:bg-[#001e6c] sm:inline"
                 >
                   Sign Up
                 </Link>
@@ -187,7 +287,7 @@ export default function Navbar() {
 
             {isAuthed && profile ? (
               <Link href="/profile" className="hidden sm:block">
-                <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
+                <span className="flex h-[3.6rem] w-[3.6rem] items-center justify-center overflow-hidden rounded-full bg-slate-100 text-xl font-medium ring-1 ring-slate-200">
                   {profile.avatar_url ? (
                     <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
                   ) : (
@@ -202,23 +302,56 @@ export default function Navbar() {
               onClick={() => setMenuOpen((open) => !open)}
               aria-expanded={menuOpen}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:border-[#002FA7]/30 hover:text-[#002FA7]"
+              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:border-[#002FA7]/30 hover:text-[#002FA7] sm:h-14 sm:w-14"
             >
-              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {menuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
             </button>
           </div>
         </nav>
 
-        <form onSubmit={handleSearchSubmit} className="pb-3 md:hidden">
-          <div className="relative">
+        <form onSubmit={handleSearchSubmit} className="pb-4 md:hidden">
+          <div ref={mobileSearchWrapRef} className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="search"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Dublin hosts…"
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7]"
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSearchOpen(true);
+              }}
+              onFocus={() => setSearchOpen(true)}
+              placeholder="Search pages, areas, food…"
+              aria-expanded={showSearchPanel}
+              aria-controls="site-search-results-mobile"
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-base focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7] sm:text-lg"
             />
+            {showSearchPanel ? (
+              <div
+                id="site-search-results-mobile"
+                className="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+              >
+                {searchResults.length === 0 ? (
+                  <p className="px-5 py-4 text-base text-slate-500">No matches — try another word.</p>
+                ) : (
+                  <ul className="max-h-[min(50vh,320px)] overflow-y-auto py-1.5">
+                    {searchResults.map((result) => (
+                      <li key={result.id}>
+                        <button
+                          type="button"
+                          onClick={() => goToSearchResult(result.href)}
+                          className="block w-full px-5 py-3 text-left hover:bg-[#002FA7]/5"
+                        >
+                          <span className="text-xs font-semibold uppercase tracking-wide text-[#002FA7]">
+                            {result.group}
+                          </span>
+                          <span className="mt-1 block text-base font-medium text-slate-900">{result.title}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : null}
           </div>
         </form>
       </div>
@@ -233,11 +366,11 @@ export default function Navbar() {
           />
           <div
             id="site-menu-panel"
-            className="absolute right-4 top-full z-50 mt-1 w-[min(100vw-2rem,280px)] rounded-xl border border-slate-200 bg-white py-2 shadow-lg sm:right-6"
+            className="absolute right-5 top-full z-50 mt-1.5 w-[min(100vw-2.5rem,400px)] rounded-xl border border-slate-200 bg-white py-2 shadow-lg sm:right-7"
           >
             {loading ? (
-              <div className="flex justify-center py-6">
-                <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
               </div>
             ) : (
               <ul className="flex flex-col">
@@ -246,21 +379,21 @@ export default function Navbar() {
                     <Link
                       href={link.href}
                       onClick={() => setMenuOpen(false)}
-                      className="block px-4 py-3 text-sm font-medium text-slate-700 hover:bg-[#002FA7]/5 hover:text-[#002FA7]"
+                      className="block px-5 py-4 text-lg font-medium text-slate-700 hover:bg-[#002FA7]/5 hover:text-[#002FA7]"
                     >
                       {link.label}
                     </Link>
                   </li>
                 ))}
                 {isAuthed ? (
-                  <li>
+                  <li className="mt-1 border-t border-slate-200 pt-1">
                     <button
                       type="button"
                       onClick={handleSignOut}
                       disabled={signingOut}
-                      className="block w-full px-4 py-3 text-left text-sm font-medium text-slate-700 hover:bg-[#002FA7]/5 hover:text-[#002FA7] disabled:opacity-50"
+                      className="block w-full px-5 py-4 text-left text-lg font-medium text-slate-700 hover:bg-[#002FA7]/5 hover:text-[#002FA7] disabled:opacity-50"
                     >
-                      {signingOut ? "Signing out…" : "Sign Out"}
+                      {signingOut ? "Signing out…" : "Sign out"}
                     </button>
                   </li>
                 ) : null}

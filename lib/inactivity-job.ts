@@ -40,7 +40,7 @@ export async function runInactivityJob(): Promise<InactivityJobResult> {
 
     const result = await sendEmail({
       to: profile.contact_email,
-      subject: "Your WalkIn Locals profile is about to go to sleep",
+      subject: "Your WALKINLOCALS profile is about to go to sleep",
       html: emailShell(
         "Stay active to remain visible",
         `
@@ -48,7 +48,7 @@ export async function runInactivityJob(): Promise<InactivityJobResult> {
             Hello ${profile.full_name ?? "there"},
           </p>
           <p style="font-size: 16px; font-weight: 300; line-height: 1.6;">
-            You have not visited WalkIn Locals in over ${INACTIVITY_WARNING_DAYS} days.
+            You have not visited WALKINLOCALS in over ${INACTIVITY_WARNING_DAYS} days.
             In ${INACTIVITY_SLEEP_DAYS - INACTIVITY_WARNING_DAYS} days your profile will be hidden from directories
             unless you sign in or save your profile.
           </p>

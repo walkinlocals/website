@@ -130,6 +130,7 @@ export async function POST(request: Request) {
   const platformFee = PLATFORM_FEE_CENTS * partySize;
 
   let checkoutUrl: string | null;
+  let checkoutSessionId: string | null = null;
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -165,6 +166,7 @@ export async function POST(request: Request) {
       },
     });
     checkoutUrl = session.url;
+    checkoutSessionId = session.id;
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Could not create Stripe checkout session." },
@@ -181,7 +183,8 @@ export async function POST(request: Request) {
     .update({
       status: "Accepted",
       stripe_link: checkoutUrl,
-      party_size: partySize
+      stripe_session_id: checkoutSessionId,
+      party_size: partySize,
     })
     .eq("id", match.id);
 
@@ -198,7 +201,7 @@ export async function POST(request: Request) {
 
     if (targetProfile?.contact_email) {
       await resend.emails.send({
-        from: "WalkIn Locals <updates@walkinlocals.com>",
+        from: "WALKINLOCALS <updates@walkinlocals.com>",
         to: [targetProfile.contact_email],
         subject: "🎉 Connection Request Accepted!",
         html: `

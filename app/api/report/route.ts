@@ -62,7 +62,7 @@ Reason: ${trimmedReason}`,
       "Community conduct report",
       `
         <p style="font-size: 16px; font-weight: 300; line-height: 1.6;">
-          A member has reported another user for review under the WalkIn Locals Code of Conduct.
+          A member has reported another user for review under the WALKINLOCALS Code of Conduct.
         </p>
         <div style="background-color: #f8fafc; border-radius: 16px; padding: 20px; margin: 20px 0; font-family: monospace; font-size: 13px;">
           <p style="margin: 0 0 8px;"><strong>Reporter:</strong> ${reporter?.full_name ?? user.id}</p>

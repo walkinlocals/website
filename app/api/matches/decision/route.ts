@@ -70,12 +70,12 @@ export async function POST(request: Request) {
     if (targetProfile?.contact_email) {
       const isHold = decision === "Hold";
       await resend.emails.send({
-        from: "WalkIn Locals <updates@walkinlocals.com>",
+        from: "WALKINLOCALS <updates@walkinlocals.com>",
         to: [targetProfile.contact_email],
         subject: isHold ? "⏳ Connection Update: On Hold" : "🛑 Connection Update: Declined",
         html: `
           <div style="font-family: serif; color: #0f172a; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <p style="font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #002FA7;">WalkIn Locals Notification</p>
+            <p style="font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #002FA7;">WALKINLOCALS Notification</p>
             <h2 style="font-weight: normal; font-size: 24px; margin-top: 10px;">Update on your request</h2>
             <p style="font-size: 16px; font-weight: 300;">Hello ${targetProfile.full_name},</p>
             <p style="font-size: 16px; font-weight: 300; line-height: 1.6;">

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import ContactModal from "@/components/contact-modal";
+import { SITE_GUTTER } from "@/lib/page-layout";
+import { brandWordmark, BRAND_NAME, siteTitleSm } from "@/lib/homepage-ui";
 
 /* Official payment mark SVGs in public/images/payments */
 
@@ -26,7 +28,7 @@ function PaymentAcceptRow() {
             key={badge.label}
             src={badge.src}
             alt={badge.label}
-            className={`h-7 w-11 shrink-0 aspect-[3/2] object-contain object-center ${
+            className={`h-8 w-12 shrink-0 aspect-[3/2] object-contain object-center sm:h-9 sm:w-14 ${
               isAmex ? "scale-x-125 scale-y-105" : ""
             }`}
             loading="lazy"
@@ -47,8 +49,8 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-[#002FA7]">{title}</h3>
-      <ul className="mt-4 space-y-2.5 text-sm text-slate-600">{children}</ul>
+      <h3 className={siteTitleSm}>{title}</h3>
+      <ul className="mt-4 space-y-3 text-base text-slate-600 sm:text-lg">{children}</ul>
     </div>
   );
 }
@@ -69,32 +71,31 @@ export default function SiteFooter() {
   return (
     <>
       <footer className="border-t border-slate-200/80 bg-[#faf9f6] text-slate-700">
-        <div className="mx-auto max-w-6xl px-6 pt-12 pb-12 sm:px-8">
-          <div className="flex flex-col gap-6 border-b border-slate-200/80 pb-8 sm:flex-row sm:items-center sm:justify-between">
-            <Link href="/" className="flex shrink-0 items-center gap-2.5">
-              <span className="text-base font-semibold tracking-tight text-slate-950 sm:text-lg">
-                WalkIn<span className="text-[#002FA7]">Locals</span>
+        <div className={`w-full pt-14 pb-14 sm:pt-16 sm:pb-16 ${SITE_GUTTER}`}>
+          <div className="flex flex-col gap-6 border-b border-slate-200/80 pb-10 sm:flex-row sm:items-center sm:justify-between">
+            <Link href="/" className="flex shrink-0 items-center gap-3">
+              <span className={brandWordmark}>
+                {BRAND_NAME}
               </span>
-              <img src="/images/logo.png" alt="WalkIn Locals" className="h-8 w-8 object-contain sm:h-9 sm:w-9" />
+              <img src="/images/logo.png" alt={BRAND_NAME} className="h-10 w-10 object-contain sm:h-11 sm:w-11" />
             </Link>
             <button
               type="button"
               onClick={() => setContactOpen(true)}
-              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:border-[#002FA7]/30 hover:text-[#002FA7]"
+              className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-base font-medium text-slate-700 shadow-sm hover:border-[#002FA7]/30 hover:text-[#002FA7] sm:text-lg"
             >
               Contact us
             </button>
           </div>
 
           <div className="mt-10 grid grid-cols-2 gap-10 md:grid-cols-3 lg:grid-cols-6">
-            <FooterColumn title="About WalkIn Locals">
+            <FooterColumn title={`About ${BRAND_NAME}`}>
               <FooterLink href="/about-us">Our story</FooterLink>
               <FooterLink href="/how-it-works">How it works</FooterLink>
               <FooterLink href="/terms">Terms &amp; conditions</FooterLink>
             </FooterColumn>
 
             <FooterColumn title="Guests">
-              <FooterLink href="/how-it-works">How visits work</FooterLink>
               <FooterLink href="/pay">Connection pricing</FooterLink>
               <FooterLink href="/login?mode=signup&role=Guest">Sign up as a guest</FooterLink>
               <FooterLink href="/terms">Guest policies</FooterLink>
@@ -102,7 +103,6 @@ export default function SiteFooter() {
 
             <FooterColumn title="Hosts">
               <FooterLink href="/get-paid">Host payouts</FooterLink>
-              <FooterLink href="/how-it-works">Hosting process</FooterLink>
               <FooterLink href="/login?mode=signup&role=Host">Become a host</FooterLink>
               <FooterLink href="/terms">Host policies</FooterLink>
             </FooterColumn>
@@ -141,21 +141,21 @@ export default function SiteFooter() {
             </FooterColumn>
 
             <div className="col-span-2 lg:col-span-2">
-              <h3 className="text-sm font-semibold text-[#002FA7]">We accept</h3>
+              <h3 className={siteTitleSm}>We accept</h3>
 
               <div className="mt-4">
                 <PaymentAcceptRow />
               </div>
 
-              <p className="mt-3 text-[11px] font-light text-slate-500">
+              <p className="mt-3 text-sm font-light text-slate-500 sm:text-base">
                 Secure payments via Stripe. Availability may vary by region.
               </p>
             </div>
           </div>
 
-          <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-slate-200/80 pt-8 text-center text-xs text-slate-400 sm:flex-row sm:text-left">
+          <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-slate-200/80 pt-8 text-center text-sm text-slate-400 sm:flex-row sm:text-left sm:text-base">
             <p>Made with care in Dublin by Pam, Ughroxx &amp; Sammy</p>
-            <p>&copy; {new Date().getFullYear()} Walkinlocals. All rights reserved.</p>
+            <p className="text-[#002FA7]">&copy; {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.</p>
           </div>
         </div>
       </footer>
