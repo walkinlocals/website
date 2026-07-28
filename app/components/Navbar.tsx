@@ -207,15 +207,19 @@ export default function Navbar() {
   return (
     <header id="site-navbar" className="sticky top-0 z-50 border-b border-slate-200 bg-white relative">
       <div className={`w-full ${SITE_GUTTER}`}>
-        <nav className="flex items-center gap-4 py-4 sm:gap-6 sm:py-5 lg:py-6">
-          <Link href="/" className="flex min-w-0 max-w-full items-center gap-2 sm:gap-3">
-            <span className={`${brandWordmark} min-w-0`}>
+        <nav className="flex min-w-0 items-center gap-2 py-3 sm:gap-4 sm:py-5 lg:py-6">
+          <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <span className={`${brandWordmark} min-w-0 leading-none`}>
               {BRAND_NAME}
             </span>
-            <img src="/images/logo.png" alt="" className="h-9 w-9 shrink-0 object-contain sm:h-12 sm:w-12" />
+            <img
+              src="/images/logo.png"
+              alt=""
+              className="hidden h-9 w-9 shrink-0 object-contain md:block md:h-11 lg:h-12"
+            />
           </Link>
 
-          <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-3 sm:gap-4">
+          <div className="ml-auto flex shrink-0 items-center justify-end gap-2 sm:gap-3">
             <form
               onSubmit={handleSearchSubmit}
               className="hidden min-w-0 md:block md:w-[min(100%,320px)] lg:w-[min(100%,416px)]"
@@ -269,24 +273,36 @@ export default function Navbar() {
             </form>
 
             {!loading && !isAuthed ? (
-              <>
+              <div className="hidden items-center gap-3 lg:flex">
                 <Link
                   href="/login"
-                  className="hidden text-lg font-medium text-slate-700 hover:text-[#002FA7] sm:inline"
+                  className="whitespace-nowrap text-lg font-medium text-slate-700 hover:text-[#002FA7]"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/login?mode=signup"
-                  className="hidden rounded-lg bg-[#002FA7] px-6 py-3 text-lg font-medium text-white hover:bg-[#001e6c] sm:inline"
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-[#002FA7] px-5 py-2.5 text-lg font-medium text-white hover:bg-[#001e6c] lg:px-6 lg:py-3"
                 >
                   Sign Up
                 </Link>
-              </>
+              </div>
             ) : null}
 
             {isAuthed && profile ? (
-              <Link href="/profile" className="hidden sm:block">
+              <Link href="/profile" className="shrink-0 lg:hidden">
+                <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-lg font-medium ring-1 ring-slate-200">
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    profile.full_name?.charAt(0)?.toUpperCase() ?? "?"
+                  )}
+                </span>
+              </Link>
+            ) : null}
+
+            {isAuthed && profile ? (
+              <Link href="/profile" className="hidden shrink-0 lg:block">
                 <span className="flex h-[3.6rem] w-[3.6rem] items-center justify-center overflow-hidden rounded-full bg-slate-100 text-xl font-medium ring-1 ring-slate-200">
                   {profile.avatar_url ? (
                     <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
@@ -302,7 +318,7 @@ export default function Navbar() {
               onClick={() => setMenuOpen((open) => !open)}
               aria-expanded={menuOpen}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
-              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:border-[#002FA7]/30 hover:text-[#002FA7] sm:h-14 sm:w-14"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:border-[#002FA7]/30 hover:text-[#002FA7] sm:h-12 sm:w-12 lg:h-14 lg:w-14"
             >
               {menuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
             </button>
@@ -385,6 +401,24 @@ export default function Navbar() {
                     </Link>
                   </li>
                 ))}
+                {!loading && !isAuthed ? (
+                  <li className="mt-1 border-t border-slate-200 pt-1 lg:hidden">
+                    <Link
+                      href="/login"
+                      onClick={() => setMenuOpen(false)}
+                      className="block px-5 py-4 text-lg font-medium text-slate-700 hover:bg-[#002FA7]/5 hover:text-[#002FA7]"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/login?mode=signup"
+                      onClick={() => setMenuOpen(false)}
+                      className="block px-5 py-4 text-lg font-medium text-[#002FA7] hover:bg-[#002FA7]/5"
+                    >
+                      Sign Up
+                    </Link>
+                  </li>
+                ) : null}
                 {isAuthed ? (
                   <li className="mt-1 border-t border-slate-200 pt-1">
                     <button

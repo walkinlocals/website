@@ -2,9 +2,9 @@ import Link from "next/link";
 import { GUEST_PAY_COPY } from "@/lib/marketing-content";
 import { MAX_PARTY_SIZE } from "@/lib/pricing";
 import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
-import { WaitlistPrimaryCta } from "@/components/waitlist-marketing-ctas";
 import {
   homeDisplayTitle,
+  homePrimaryButton,
   homeTextLink,
   marketingBody,
   marketingFeeAmount,
@@ -84,7 +84,9 @@ export default function PayPage() {
             ))}
           </ol>
           <div className="mt-12 flex justify-center">
-            <WaitlistPrimaryCta role="Guest" label="Find a Dublin host" />
+            <Link href="/login?mode=signup&role=Guest" className={homePrimaryButton}>
+              Find a Dublin host
+            </Link>
           </div>
         </section>
       </div>

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { HOST_PAYOUT_COPY } from "@/lib/marketing-content";
 import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
-import { WaitlistPrimaryCta } from "@/components/waitlist-marketing-ctas";
 import {
   homeDisplayTitle,
+  homePrimaryButton,
   homeTextLink,
   marketingBody,
   marketingFeeAmount,
@@ -80,7 +80,9 @@ export default function GetPaidPage() {
             ))}
           </ol>
           <div className="mt-12 flex justify-center">
-            <WaitlistPrimaryCta role="Host" label="Start hosting in Dublin" />
+            <Link href="/login?mode=signup&role=Host" className={homePrimaryButton}>
+              Start hosting in Dublin
+            </Link>
           </div>
         </section>
       </div>

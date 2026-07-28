@@ -99,13 +99,13 @@ export default function SiteFooter() {
 
             <FooterColumn title="Guests">
               <FooterLink href="/pay">Connection pricing</FooterLink>
-              <FooterLink href="/#waitlist">Join guest waitlist</FooterLink>
+              <FooterLink href="/login?mode=signup&role=Guest">Sign up as a guest</FooterLink>
               <FooterLink href="/terms">Guest policies</FooterLink>
             </FooterColumn>
 
             <FooterColumn title="Hosts">
               <FooterLink href="/get-paid">Host payouts</FooterLink>
-              <FooterLink href="/#waitlist">Join host waitlist</FooterLink>
+              <FooterLink href="/login?mode=signup&role=Host">Become a host</FooterLink>
               <FooterLink href="/terms">Host policies</FooterLink>
             </FooterColumn>
 
