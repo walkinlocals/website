@@ -208,11 +208,11 @@ export default function Navbar() {
     <header id="site-navbar" className="sticky top-0 z-50 border-b border-slate-200 bg-white relative">
       <div className={`w-full ${SITE_GUTTER}`}>
         <nav className="flex items-center gap-4 py-4 sm:gap-6 sm:py-5 lg:py-6">
-          <Link href="/" className="flex shrink-0 items-center gap-3">
-            <span className={brandWordmark}>
+          <Link href="/" className="flex min-w-0 max-w-full items-center gap-2 sm:gap-3">
+            <span className={`${brandWordmark} min-w-0`}>
               {BRAND_NAME}
             </span>
-            <img src="/images/logo.png" alt="" className="h-11 w-11 object-contain sm:h-12 sm:w-12" />
+            <img src="/images/logo.png" alt="" className="h-9 w-9 shrink-0 object-contain sm:h-12 sm:w-12" />
           </Link>
 
           <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-3 sm:gap-4">

@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { HOST_PAYOUT_COPY } from "@/lib/marketing-content";
 import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
+import { WaitlistPrimaryCta } from "@/components/waitlist-marketing-ctas";
 import {
   homeDisplayTitle,
-  homePrimaryButton,
   homeTextLink,
   marketingBody,
+  marketingFeeAmount,
+  marketingFeeCircle,
+  marketingFeePerLabel,
   marketingPageTitle,
   siteTitleTypography,
 } from "@/lib/homepage-ui";
@@ -49,16 +52,12 @@ export default function GetPaidPage() {
 
         <section className="text-center">
           <p className={homeDisplayTitle}>Your earnings</p>
-          <div
-            className="mx-auto mt-6 flex h-44 w-44 items-center justify-center rounded-full bg-[#002FA7] p-4 sm:mt-8 sm:h-52 sm:w-52 lg:h-64 lg:w-64"
-          >
-            <span className="max-w-full text-center font-serif text-[3.63rem] font-normal leading-none tracking-tight text-white sm:text-[4.54rem] lg:text-[5.45rem]">
+          <div className={marketingFeeCircle}>
+            <span className={marketingFeeAmount}>
               €{HOST_PAYOUT_COPY.feePerGuest}
             </span>
           </div>
-          <p className="mt-6 text-[1.125rem] text-slate-600 sm:mt-8 sm:text-[1.35rem] lg:text-[1.6875rem]">
-            per guest
-          </p>
+          <p className={marketingFeePerLabel}>per guest</p>
         </section>
 
         <section>
@@ -81,9 +80,7 @@ export default function GetPaidPage() {
             ))}
           </ol>
           <div className="mt-12 flex justify-center">
-            <Link href="/login?mode=signup&role=Host" className={homePrimaryButton}>
-              Start hosting in Dublin
-            </Link>
+            <WaitlistPrimaryCta role="Host" label="Start hosting in Dublin" />
           </div>
         </section>
       </div>

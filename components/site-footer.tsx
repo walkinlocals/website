@@ -72,24 +72,26 @@ export default function SiteFooter() {
     <>
       <footer className="border-t border-slate-200/80 bg-[#faf9f6] text-slate-700">
         <div className={`w-full pt-14 pb-14 sm:pt-16 sm:pb-16 ${SITE_GUTTER}`}>
-          <div className="flex flex-col gap-6 border-b border-slate-200/80 pb-10 sm:flex-row sm:items-center sm:justify-between">
-            <Link href="/" className="flex shrink-0 items-center gap-3">
-              <span className={brandWordmark}>
-                {BRAND_NAME}
-              </span>
-              <img src="/images/logo.png" alt={BRAND_NAME} className="h-10 w-10 object-contain sm:h-11 sm:w-11" />
+          <div className="flex flex-col gap-4 border-b border-slate-200/80 pb-10 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+            <Link href="/" className="flex min-w-0 max-w-full items-center gap-2 sm:gap-3">
+              <span className={brandWordmark}>{BRAND_NAME}</span>
+              <img
+                src="/images/logo.png"
+                alt={BRAND_NAME}
+                className="h-9 w-9 shrink-0 object-contain sm:h-11 sm:w-11"
+              />
             </Link>
             <button
               type="button"
               onClick={() => setContactOpen(true)}
-              className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-base font-medium text-slate-700 shadow-sm hover:border-[#002FA7]/30 hover:text-[#002FA7] sm:text-lg"
+              className="w-full rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-base font-medium text-slate-700 shadow-sm hover:border-[#002FA7]/30 hover:text-[#002FA7] sm:w-auto sm:text-lg"
             >
               Contact us
             </button>
           </div>
 
-          <div className="mt-10 grid grid-cols-2 gap-10 md:grid-cols-3 lg:grid-cols-6">
-            <FooterColumn title={`About ${BRAND_NAME}`}>
+          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10 md:grid-cols-3 lg:grid-cols-6 lg:gap-10">
+            <FooterColumn title="About us">
               <FooterLink href="/about-us">Our story</FooterLink>
               <FooterLink href="/how-it-works">How it works</FooterLink>
               <FooterLink href="/terms">Terms &amp; conditions</FooterLink>
@@ -97,20 +99,20 @@ export default function SiteFooter() {
 
             <FooterColumn title="Guests">
               <FooterLink href="/pay">Connection pricing</FooterLink>
-              <FooterLink href="/login?mode=signup&role=Guest">Sign up as a guest</FooterLink>
+              <FooterLink href="/#waitlist">Join guest waitlist</FooterLink>
               <FooterLink href="/terms">Guest policies</FooterLink>
             </FooterColumn>
 
             <FooterColumn title="Hosts">
               <FooterLink href="/get-paid">Host payouts</FooterLink>
-              <FooterLink href="/login?mode=signup&role=Host">Become a host</FooterLink>
+              <FooterLink href="/#waitlist">Join host waitlist</FooterLink>
               <FooterLink href="/terms">Host policies</FooterLink>
             </FooterColumn>
 
             <FooterColumn title="Follow us">
               <li>
                 <a
-                  href="https://www.instagram.com/"
+                  href="https://www.instagram.com/walkinlocals/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition hover:text-[#002FA7] hover:underline"
@@ -118,29 +120,9 @@ export default function SiteFooter() {
                   Instagram
                 </a>
               </li>
-              <li>
-                <a
-                  href="https://www.tiktok.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition hover:text-[#002FA7] hover:underline"
-                >
-                  TikTok
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://www.trustpilot.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition hover:text-[#002FA7] hover:underline"
-                >
-                  Trustpilot
-                </a>
-              </li>
             </FooterColumn>
 
-            <div className="col-span-2 lg:col-span-2">
+            <div className="sm:col-span-2 lg:col-span-2">
               <h3 className={siteTitleSm}>We accept</h3>
 
               <div className="mt-4">

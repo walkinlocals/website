@@ -9,14 +9,14 @@ export const homeSectionBorder = "border-t border-slate-200/80";
 
 /** Shared site title typography — “Home is where you feel loved”. */
 export const siteTitleTypography =
-  "font-sans font-semibold uppercase tracking-[0.32em] text-[#002FA7]";
+  "font-sans font-semibold uppercase tracking-[0.18em] text-[#002FA7] sm:tracking-[0.26em] lg:tracking-[0.32em]";
 
 export const BRAND_NAME = "WALKINLOCALS";
 
 /** In-body brand — hero typography at the surrounding text size. */
 export const brandNameInline = `${siteTitleTypography} text-[length:inherit] leading-[inherit]`;
 
-export const heroTitle = `${siteTitleTypography} text-xl sm:text-2xl lg:text-3xl`;
+export const heroTitle = `${siteTitleTypography} text-balance text-xl sm:text-2xl lg:text-3xl`;
 
 export const homeEyebrow =
   "font-sans text-xs font-semibold uppercase tracking-[0.22em] text-[#002FA7] sm:text-sm";
@@ -46,6 +46,16 @@ export const marketingBody =
 
 export const marketingPageTitle = heroTitle;
 
+/** Pay / get-paid fee circle — scales down on narrow screens. */
+export const marketingFeeCircle =
+  "mx-auto mt-6 flex h-[min(11rem,40vw)] w-[min(11rem,40vw)] items-center justify-center rounded-full bg-[#002FA7] p-3 sm:mt-8 sm:h-52 sm:w-52 lg:h-64 lg:w-64";
+
+export const marketingFeeAmount =
+  "max-w-full text-center font-serif text-[clamp(2.75rem,10vw,5.45rem)] font-normal leading-none tracking-tight text-white";
+
+export const marketingFeePerLabel =
+  "mt-6 text-base text-slate-600 sm:mt-8 sm:text-lg lg:text-xl";
+
 export const homeCarouselScroll =
   "overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:thin] [scrollbar-color:rgba(0,47,167,0.28)_transparent] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#002FA7]/28";
 
@@ -53,4 +63,4 @@ export const quizProgressMeta =
   "font-sans text-2xl leading-snug text-slate-600 sm:text-[1.75rem] sm:leading-[1.65] lg:text-[1.875rem]";
 
 /** Navbar / footer wordmark — same typography as hero tagline. */
-export const brandWordmark = `${siteTitleTypography} text-xl sm:text-2xl`;
+export const brandWordmark = `${siteTitleTypography} min-w-0 text-base leading-tight sm:text-xl lg:text-2xl`;
