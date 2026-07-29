@@ -14,7 +14,7 @@ const HOST_FLOW = [
   "Create your host profile and tell us about your home, neighbourhood, and what you love to share.",
   "Set your availability. You choose when your door is open.",
   "Receive connection requests from verified backpackers and accept the ones that feel right.",
-  "Welcome guests for tea, coffee, and conversation, then get paid through Stripe.",
+  "Welcome guests for tea, coffee, and conversation, then get paid for your kindness and time.",
 ] as const;
 
 const GUEST_FLOW = [
@@ -56,9 +56,7 @@ export default function HowItWorksPage() {
                         src={image}
                         alt=""
                         className={`${HOW_IT_WORKS_STEP_IMAGE_CLASS} ${
-                          imageObject === "top"
-                            ? "origin-top scale-[1.05] object-top"
-                            : "object-center"
+                          imageObject === "top" ? "object-top" : "object-center"
                         }`}
                         loading="lazy"
                         decoding="async"
@@ -91,8 +89,7 @@ export default function HowItWorksPage() {
         </section>
 
         <section className="border-t border-slate-200/80 pt-12 sm:pt-16 lg:pt-20">
-          <div className="origin-top scale-[1.05]">
-            <div className="grid grid-cols-1 gap-14 lg:grid-cols-2 lg:gap-12 xl:gap-20">
+          <div className="grid grid-cols-1 gap-14 lg:grid-cols-2 lg:gap-12 xl:gap-20">
             <div>
               <span className={homeEyebrow}>For hosts</span>
               <h2 className={`mt-4 ${heroTitle}`}>
@@ -131,7 +128,6 @@ export default function HowItWorksPage() {
               <Link href="/pay" className={`mt-10 inline-block ${homeTextLink}`}>
                 See connection pricing →
               </Link>
-            </div>
             </div>
           </div>
         </section>
