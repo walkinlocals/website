@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme inline {
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
 body {
   overflow-x: hidden;
 }
@@ -54,7 +59,22 @@ html {
   }
 }
 
+@keyframes archetype-fade-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 @layer utilities {
+  .animate-archetype-fade-in {
+    animation: archetype-fade-in 0.4s ease-out;
+  }
+
   .animate-coming-soon-marquee {
     animation: coming-soon-marquee 28s linear infinite;
   }

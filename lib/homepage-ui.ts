@@ -39,7 +39,7 @@ export const homeTextLink =
   "font-sans text-base font-medium text-[#002FA7] underline decoration-[#002FA7]/35 underline-offset-4 transition hover:decoration-[#002FA7] sm:text-lg";
 
 export const homePrimaryButton =
-  "inline-flex items-center justify-center rounded-lg bg-[#002FA7] px-8 py-3.5 font-sans text-base font-semibold text-white transition hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#002FA7] sm:text-lg";
+  "inline-flex items-center justify-center rounded-lg bg-[#002FA7] px-8 py-3.5 font-sans text-base font-semibold text-white shadow-md shadow-[#002FA7]/20 transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#002FA7]/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#002FA7] sm:text-lg";
 
 export const marketingBody =
   "font-sans text-lg leading-relaxed text-slate-950 sm:text-xl sm:leading-[1.65]";
@@ -48,7 +48,7 @@ export const marketingPageTitle = heroTitle;
 
 /** Pay / get-paid fee circle — scales down on narrow screens. */
 export const marketingFeeCircle =
-  "mx-auto mt-6 flex h-[min(11rem,40vw)] w-[min(11rem,40vw)] items-center justify-center rounded-full bg-[#002FA7] p-3 sm:mt-8 sm:h-52 sm:w-52 lg:h-64 lg:w-64";
+  "mx-auto mt-6 flex h-[min(11rem,40vw)] w-[min(11rem,40vw)] items-center justify-center rounded-full bg-[#002FA7] p-3 shadow-xl shadow-[#002FA7]/25 sm:mt-8 sm:h-52 sm:w-52 lg:h-64 lg:w-64";
 
 export const marketingFeeAmount =
   "max-w-full text-center font-serif text-[clamp(2.75rem,10vw,5.45rem)] font-normal leading-none tracking-tight text-white";
@@ -60,7 +60,7 @@ export const homeCarouselScroll =
   "overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:thin] [scrollbar-color:rgba(0,47,167,0.28)_transparent] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#002FA7]/28";
 
 export const quizProgressMeta =
-  "font-sans text-2xl leading-snug text-slate-600 sm:text-[1.75rem] sm:leading-[1.65] lg:text-[1.875rem]";
+  "font-sans text-sm font-medium leading-snug text-slate-600 sm:text-base";
 
 /** Navbar / footer wordmark — same typography as hero tagline. */
 export const brandWordmark = `${siteTitleTypography} min-w-0 text-base leading-tight sm:text-xl lg:text-2xl`;

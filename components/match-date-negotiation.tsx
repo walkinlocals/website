@@ -117,7 +117,7 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
           <VisitDatePicker
             hostId={hostId}
             value={calendarDate}
-            timeValue={counterTime}
+            timeValue={calendarTime}
             onChange={handleCalendarChange}
             onTimeChange={setCounterTime}
             disabled={working !== null}

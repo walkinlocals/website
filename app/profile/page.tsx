@@ -2,11 +2,12 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { buildFullName, isProfileComplete, isBrowsableProfile, isAtLeast18FromDate, maxDateOfBirthFor18Plus, normalizeDateOfBirth, profileActivationBlockers } from "@/lib/profile";
 import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
-import { BRAND_NAME, homePrimaryButton, marketingPageTitle, heroTitle, siteTitleSm } from "@/lib/homepage-ui";
+import { BRAND_NAME, homePrimaryButton, heroTitle, siteTitleSm } from "@/lib/homepage-ui";
 import { formatDirectoryLocation } from "@/lib/directory-display";
 import { ensureProfileRole, parseAppRole } from "@/lib/profile-role";
 import { buildActivityUpdate } from "@/lib/activity";
@@ -94,7 +95,6 @@ function ProfileInner() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [verifying, setVerifying] = useState(false);
-  const [connectingStripe, setConnectingStripe] = useState(false);
   const [requestingManualReview, setRequestingManualReview] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -543,40 +543,6 @@ function ProfileInner() {
     }
   }
 
-  async function startConnect() {
-    setConnectingStripe(true);
-    setError(null);
-    try {
-      const dob = normalizeDateOfBirth(form.dateOfBirth);
-      if (!isAtLeast18FromDate(dob) && !form.ageVerified) {
-        setError("Enter your date of birth and save your profile before setting up payouts.");
-        return;
-      }
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user && dob) {
-        await supabase
-          .from("profiles")
-          .update({ date_of_birth: dob, age_verified: true })
-          .eq("id", user.id);
-      }
-
-      const res = await fetch("/api/stripe/connect", { method: "POST" });
-      const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
-      if (!res.ok || !body.url) {
-        setError(body.error ?? "Could not start payout setup.");
-        return;
-      }
-      window.location.href = body.url;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Network error");
-    } finally {
-      setConnectingStripe(false);
-    }
-  }
-
   async function startVerification() {
     setVerifying(true);
     setError(null);
@@ -751,7 +717,6 @@ function ProfileInner() {
   const fullName = buildFullName(form.firstName, form.lastName) || "Walk In member";
   const ageRequirementMet =
     isAtLeast18FromDate(form.dateOfBirth) || form.ageVerified;
-  const canSetUpPayouts = ageRequirementMet;
   const isVerified =
     form.role === "Host"
       ? form.payoutsEnabled || ageRequirementMet
@@ -813,11 +778,11 @@ function ProfileInner() {
             </div>
           </div>
 
-          <div className="mt-12 grid items-start gap-12 md:grid-cols-12">
+          <div className="mt-12 grid items-start gap-12 rounded-2xl border border-slate-200/80 p-8 shadow-sm md:grid-cols-12 lg:p-10">
             <div className="md:col-span-4 flex flex-col items-center md:items-start text-center md:text-left">
-              <div className="h-40 w-40 overflow-hidden rounded-full bg-slate-100 sm:h-44 sm:w-44">
+              <div className="relative h-40 w-40 overflow-hidden rounded-full bg-slate-100 shadow-lg shadow-slate-900/10 sm:h-44 sm:w-44">
                 {form.avatarUrl ? (
-                  <img src={form.avatarUrl} alt={fullName} className="h-full w-full object-cover" />
+                  <Image src={form.avatarUrl} alt={fullName} fill sizes="176px" className="object-cover" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-4xl font-light text-slate-400">
                     {form.firstName.charAt(0) || "?"}
@@ -934,7 +899,7 @@ function ProfileInner() {
         </div>
 
         {isAsleep ? (
-          <div className="mt-8 border-b border-slate-200/80 pb-8 flex flex-col gap-4">
+          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-[#002FA7]/15 bg-[#002FA7]/5 p-6">
             <div className="flex items-start gap-3">
               <Moon className="h-5 w-5 text-[#002FA7] shrink-0 mt-0.5" />
               <div>
@@ -955,14 +920,14 @@ function ProfileInner() {
             </button>
           </div>
         ) : (
-          <div className="mt-6 flex flex-col gap-3 border-b border-slate-200/80 pb-8 text-slate-700">
+          <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-6 text-slate-700">
             <div className="flex items-start gap-3">
               <Lock className="h-4 w-4 mt-0.5 text-slate-400 shrink-0 stroke-[1.5]" />
               <div className="text-xs font-light leading-relaxed text-slate-500">
                 Your profile details are private. Complete the fields below, then click Activate Account to appear in the directory.
               </div>
             </div>
-            <div className="border-t border-slate-100 pt-3 flex flex-col gap-2">
+            <div className="border-t border-slate-200/80 pt-3 flex flex-col gap-2">
               <div className="flex items-center gap-2 text-[9px] font-mono uppercase tracking-wider text-[#002FA7]">
                 <Moon className="h-3.5 w-3.5" />
                 <span>Auto-Sleep Mode: {INACTIVITY_SLEEP_DAYS} Days of Inactivity</span>
@@ -985,7 +950,14 @@ function ProfileInner() {
                 aria-label="Upload profile photo"
               >
                 {shownAvatar ? (
-                  <img src={shownAvatar} alt="Profile preview" className="h-full w-full object-cover" />
+                  <Image
+                    src={shownAvatar}
+                    alt="Profile preview"
+                    fill
+                    sizes="112px"
+                    unoptimized={shownAvatar.startsWith("blob:")}
+                    className="object-cover"
+                  />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center text-slate-400 group-hover:text-[#002FA7] transition-colors duration-300">
                     <Camera className="h-5 w-5 stroke-[1.25]" />

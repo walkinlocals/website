@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { BadgeCheck, MapPin, Lock, Phone, Mail, MessageCircle, ArrowLeft, Heart } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
@@ -124,13 +125,14 @@ export default async function ProfileDetailPage({
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
             <div className="border-b border-slate-200/80 pb-8 text-center lg:border-b-0 lg:pb-0 lg:text-left">
               {/* Profile Picture Frame */}
-              <div className="mx-auto lg:mx-0 h-32 w-32 overflow-hidden rounded-full border border-slate-200 bg-slate-50 shadow-inner">
+              <div className="relative mx-auto lg:mx-0 h-32 w-32 overflow-hidden rounded-full border border-slate-200 bg-slate-50 shadow-lg shadow-slate-900/10">
                 {profile.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={profile.avatar_url}
                     alt={profile.full_name ?? "Profile photo"}
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="128px"
+                    className="object-cover"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-4xl font-light text-slate-400">
@@ -194,7 +196,7 @@ export default async function ProfileDetailPage({
           <div className="lg:col-span-8 space-y-8">
 
             {/* Biography Context Wrapper */}
-            <div className="border-b border-slate-200/80 pb-8">
+            <div className="rounded-2xl border border-slate-200/80 p-6 shadow-sm sm:p-8">
               <div className="flex items-center gap-1.5 pb-4">
                 <Heart className="h-3.5 w-3.5 fill-[#002FA7] text-[#002FA7]" />
                 <span className="font-sans text-[11px] font-semibold uppercase tracking-[0.22em] text-[#002FA7]">
@@ -207,7 +209,7 @@ export default async function ProfileDetailPage({
             </div>
 
             {/* Verification Metrics / Secured Content */}
-            <div className="border-b border-slate-200/80 pb-8">
+            <div className="rounded-2xl border border-slate-200/80 p-6 shadow-sm sm:p-8">
               <span className="block font-sans text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 pb-4">
                 Contact
               </span>

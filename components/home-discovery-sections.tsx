@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   BEST_BRUNCH_DUBLIN,
   BEST_RESTAURANTS_DUBLIN,
@@ -22,14 +25,14 @@ function DiscoveryCardTile({ card }: { card: DiscoveryCard }) {
   const content = (
     <>
       <div
-        className="relative h-[408px] w-full overflow-hidden rounded-xl bg-slate-200 sm:h-[480px] lg:h-[552px]"
+        className="relative h-[408px] w-full overflow-hidden rounded-xl bg-slate-200 shadow-sm transition-shadow duration-300 group-hover:shadow-lg group-hover:shadow-slate-900/15 sm:h-[480px] lg:h-[552px]"
       >
-        <img
+        <Image
           src={card.image}
           alt=""
-          className="absolute inset-0 h-full w-full object-cover object-center transition duration-300 group-hover:scale-[1.03]"
-          loading="lazy"
-          decoding="async"
+          fill
+          sizes="(min-width: 1280px) 24vw, (min-width: 1024px) 480px, (min-width: 640px) 432px, 88vw"
+          className="object-cover object-center transition duration-300 group-hover:scale-[1.03]"
         />
       </div>
       <h3 className={`${homeCardTitle} group-hover:underline`}>
@@ -53,13 +56,66 @@ function DiscoveryCardTile({ card }: { card: DiscoveryCard }) {
 }
 
 function DiscoveryCarousel({ cards }: { cards: DiscoveryCard[] }) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    function updateScrollState() {
+      if (!el) return;
+      setCanScrollLeft(el.scrollLeft > 4);
+      setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+    }
+
+    updateScrollState();
+    el.addEventListener("scroll", updateScrollState, { passive: true });
+    window.addEventListener("resize", updateScrollState);
+    return () => {
+      el.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, []);
+
+  function scrollByAmount(direction: 1 | -1) {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: direction * el.clientWidth * 0.85, behavior: "smooth" });
+  }
+
   return (
-    <div className={homeCarouselScroll} aria-label="Scroll through listings">
-      <div className="flex gap-5 pb-3 sm:gap-6 lg:gap-8">
-        {cards.map((card) => (
-          <DiscoveryCardTile key={card.title} card={card} />
-        ))}
+    <div className="relative">
+      <div ref={scrollerRef} className={homeCarouselScroll} aria-label="Scroll through listings">
+        <div className="flex gap-5 pb-3 sm:gap-6 lg:gap-8">
+          {cards.map((card) => (
+            <DiscoveryCardTile key={card.title} card={card} />
+          ))}
+        </div>
       </div>
+
+      {canScrollLeft ? (
+        <button
+          type="button"
+          onClick={() => scrollByAmount(-1)}
+          aria-label="Scroll left"
+          className="absolute left-1 top-[204px] z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-700 shadow-lg ring-1 ring-slate-200 transition hover:text-[#002FA7] sm:top-[240px] sm:flex lg:top-[276px]"
+        >
+          <ChevronLeft className="h-5 w-5" aria-hidden />
+        </button>
+      ) : null}
+
+      {canScrollRight ? (
+        <button
+          type="button"
+          onClick={() => scrollByAmount(1)}
+          aria-label="Scroll right"
+          className="absolute right-1 top-[204px] z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-700 shadow-lg ring-1 ring-slate-200 transition hover:text-[#002FA7] sm:top-[240px] sm:flex lg:top-[276px]"
+        >
+          <ChevronRight className="h-5 w-5" aria-hidden />
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -84,7 +140,7 @@ function DiscoverySection({
       <div className={homeContainer}>
         <h2 className={homeDisplayTitle}>{title}</h2>
       </div>
-      <div className={`mt-8 sm:mt-10 ${homeCarouselScroll} ${SITE_GUTTER}`}>
+      <div className={`mt-8 sm:mt-10 ${SITE_GUTTER}`}>
         <DiscoveryCarousel cards={cards} />
       </div>
     </section>

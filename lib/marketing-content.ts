@@ -6,8 +6,7 @@ import {
 
 const PLATFORM_FEE_EUR = PLATFORM_FEE_CENTS / 100;
 
-export const HOW_IT_WORKS_STEP_IMAGE_CLASS =
-  "aspect-[16/10] w-full object-cover sm:aspect-[5/3]";
+export const HOW_IT_WORKS_STEP_IMAGE_CLASS = "aspect-[16/10] sm:aspect-[5/3]";
 
 export const HOMEPAGE_STEPS = [
   {

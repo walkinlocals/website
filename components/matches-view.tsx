@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -93,7 +94,6 @@ export default function MatchesView({
     if (!paymentReturnPending) return;
 
     let cancelled = false;
-    setPaymentSyncing(true);
 
     (async () => {
       try {
@@ -171,9 +171,11 @@ export default function MatchesView({
         </p>
       )}
 
-      <div className="mt-12 border-t border-slate-200/80">
+      <div className="mt-12 space-y-6">
         {matches.length === 0 && !loadError && (
-          <p className="py-16 text-base text-slate-600 sm:text-lg">You don&apos;t have any matches yet.</p>
+          <p className="rounded-2xl border border-slate-200/80 py-16 text-center text-base text-slate-600 sm:text-lg">
+            You don&apos;t have any matches yet.
+          </p>
         )}
         {matches.map((m) => (
           <MatchCard
@@ -304,17 +306,16 @@ function MatchCard({
   }
 
   return (
-    <article className="border-b border-slate-200/80 py-12 last:border-b-0 lg:py-14">
+    <article className="rounded-2xl border border-slate-200/80 p-6 shadow-sm sm:p-8 lg:p-10">
       <div className="lg:grid lg:grid-cols-12 lg:gap-12 xl:gap-16">
         <div className="lg:col-span-4">
           <div className="flex items-start gap-4">
             <Link
               href={`/profile/${other?.id ?? ""}`}
-              className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full bg-slate-100 sm:h-24 sm:w-24"
+              className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200/80 sm:h-24 sm:w-24"
             >
               {other?.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={other.avatar_url} alt={other.full_name ?? ""} className="h-full w-full object-cover" />
+                <Image src={other.avatar_url} alt={other.full_name ?? ""} fill sizes="96px" className="object-cover" />
               ) : (
                 <span className="flex h-full w-full items-center justify-center text-lg text-slate-400">
                   {other?.full_name?.charAt(0) ?? "?"}

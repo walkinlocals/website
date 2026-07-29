@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -212,9 +213,12 @@ export default function Navbar() {
             <span className={`${brandWordmark} min-w-0 leading-none`}>
               {BRAND_NAME}
             </span>
-            <img
+            <Image
               src="/images/logo.png"
               alt=""
+              width={44}
+              height={44}
+              priority
               className="h-9 w-9 shrink-0 object-contain sm:h-11 sm:w-11"
             />
           </Link>
@@ -228,6 +232,9 @@ export default function Navbar() {
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 sm:h-[1.125rem] sm:w-[1.125rem]" />
                 <input
                   type="search"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-haspopup="listbox"
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -291,9 +298,9 @@ export default function Navbar() {
 
             {isAuthed && profile ? (
               <Link href="/profile" className="shrink-0 xl:hidden">
-                <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-lg font-medium ring-1 ring-slate-200">
+                <span className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-lg font-medium ring-1 ring-slate-200">
                   {profile.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                    <Image src={profile.avatar_url} alt="" fill sizes="40px" className="object-cover" />
                   ) : (
                     profile.full_name?.charAt(0)?.toUpperCase() ?? "?"
                   )}
@@ -303,9 +310,9 @@ export default function Navbar() {
 
             {isAuthed && profile ? (
               <Link href="/profile" className="hidden shrink-0 xl:block">
-                <span className="flex h-[3.6rem] w-[3.6rem] items-center justify-center overflow-hidden rounded-full bg-slate-100 text-xl font-medium ring-1 ring-slate-200">
+                <span className="relative flex h-[3.6rem] w-[3.6rem] items-center justify-center overflow-hidden rounded-full bg-slate-100 text-xl font-medium ring-1 ring-slate-200">
                   {profile.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                    <Image src={profile.avatar_url} alt="" fill sizes="58px" className="object-cover" />
                   ) : (
                     profile.full_name?.charAt(0)?.toUpperCase() ?? "?"
                   )}
@@ -330,6 +337,9 @@ export default function Navbar() {
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="search"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-haspopup="listbox"
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);

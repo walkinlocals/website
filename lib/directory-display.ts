@@ -33,4 +33,4 @@ export function formatDirectoryLocation(
 }
 
 export const DIRECTORY_CARD_CLASS =
-  "group flex flex-col justify-between gap-4 border-b border-slate-200/80 py-8 transition-colors hover:bg-[#faf9f6]/80 sm:py-10";
+  "group flex h-full flex-col justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#002FA7]/30 hover:shadow-md sm:p-7";

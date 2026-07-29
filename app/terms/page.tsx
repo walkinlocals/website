@@ -16,6 +16,17 @@ type SubmitState =
   | { status: "success" }
   | { status: "error"; message: string };
 
+const TOC_SECTIONS = [
+  { id: "scope", label: "1. Scope & legal capacity" },
+  { id: "verification", label: "2. Verification limitations" },
+  { id: "fees", label: "3. Fees & no escrow" },
+  { id: "inactivity", label: "4. Account lifecycle" },
+  { id: "liability", label: "5. Liability waiver" },
+  { id: "indemnity", label: "6. Hold harmless" },
+  { id: "severability", label: "7. Severability" },
+  { id: "jurisdiction", label: "8. Governing law" },
+] as const;
+
 export default function TermsPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
@@ -69,12 +80,32 @@ export default function TermsPage() {
       <h1 className="font-serif text-4xl font-normal tracking-tight text-slate-950">
         Terms of Service &amp; Absolute Liability Release
       </h1>
-      <p className={`mt-3 text-slate-500 ${termsBody}`}>
+      <p className={`mt-3 max-w-3xl text-slate-500 ${termsBody}`}>
         Last updated July 2026. This is a legally binding contract between you and the individual developer partnership operating WalkIn Locals (&quot;we,&quot; &quot;us,&quot; &quot;our,&quot; or the &quot;Partnership&quot;). By creating an account, you explicitly assent to these terms.
       </p>
 
+      <div className="mt-12 lg:grid lg:grid-cols-12 lg:gap-12 xl:gap-16">
+        <nav aria-label="Table of contents" className="hidden lg:col-span-3 lg:block">
+          <div className="sticky top-28 space-y-1 border-l border-slate-200/80 pl-5">
+            <p className="mb-3 font-sans text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+              On this page
+            </p>
+            {TOC_SECTIONS.map((section) => (
+              <a
+                key={section.id}
+                href={`#${section.id}`}
+                className="block py-1.5 text-sm text-slate-600 transition hover:text-[#002FA7]"
+              >
+                {section.label}
+              </a>
+            ))}
+          </div>
+        </nav>
+
+        <div className="lg:col-span-9">
+
       {/* SECTION 1: NATURE OF THE PLATFORM */}
-      <section className="mt-12 space-y-4">
+      <section id="scope" className="scroll-mt-28 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">1. Scope of Utility &amp; Legal Capacity</h2>
         <p className={`${termsBody} text-slate-600`}>
           WalkIn Locals is an independent, experimental peer-to-peer software project owned and operated by an un-incorporated developer partnership. The software functions strictly as a passive online directory and marketplace utility to facilitate initial introductions between independent travelers (&quot;Guests&quot;) and local residents (&quot;Hosts&quot;).
@@ -85,7 +116,7 @@ export default function TermsPage() {
       </section>
 
       {/* SECTION 2: REGISTRATION & STRIPE IDENTITY DISCLAIMER */}
-      <section className="mt-10 space-y-4">
+      <section id="verification" className="mt-10 scroll-mt-28 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">2. Verification Limitations &amp; Account Controls</h2>
         <p className={`${termsBody} text-slate-600`}>
           You must be at least <strong>18 years old</strong> to register. Identity verification checks are performed via an integrated third-party api protocol (Stripe Identity).
@@ -96,7 +127,7 @@ export default function TermsPage() {
       </section>
 
       {/* SECTION 3: TRANSACTIONAL RULES */}
-      <section className="mt-10 space-y-4">
+      <section id="fees" className="mt-10 scroll-mt-28 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">3. Fee Structures, Disintermediation, &amp; No Escrow</h2>
         <p className={`${termsBody} text-slate-600`}>
           Platform marketplace pricing is structural: Guests pay <strong>€35.00 per person</strong>, Hosts receive a fixed payout of <strong>€25.00 per person</strong>, and the Partnership retains a <strong>€10.00 per person</strong> technology facilitation fee. Maximum party sizes are hardcapped at <strong>6 individuals</strong>.
@@ -115,7 +146,7 @@ export default function TermsPage() {
       </section>
 
       {/* SECTION 4: INACTIVITY SEQUENCE */}
-      <section className="mt-10 space-y-4">
+      <section id="inactivity" className="mt-10 scroll-mt-28 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">4. Automated Account Lifecycle</h2>
         <p className={`${termsBody} text-slate-600`}>
           To minimize data liability and ensure systemic privacy compliance under regional regulations, accounts undergo an automated dormancy routine: system warning at 80 days of continuous inactivity, profile hiding from public view directories at 90 days, and full, permanent account erasure from backend databases at 180 days.
@@ -123,7 +154,7 @@ export default function TermsPage() {
       </section>
 
       {/* SECTION 5: MAXIMUM POSSIBLE LIABILITY PROTECTION */}
-      <section className="mt-10 space-y-4">
+      <section id="liability" className="mt-10 scroll-mt-28 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950 font-bold text-red-600">5. TOTAL WAIVER OF LIABILITY &amp; FINANCIAL CEILING</h2>
         <p className={`uppercase tracking-wider text-slate-950 font-bold ${termsBodySm}`}>
           THIS SECTION WAIVES CRITICAL CIVIL RIGHTS TO FILE LAWSUITS. READ IT CAREFULLY.
@@ -142,7 +173,7 @@ export default function TermsPage() {
       </section>
 
       {/* SECTION 6: USER AGREEMENT TO PAY FOR LAWSUITS */}
-      <section className="mt-10 space-y-4">
+      <section id="indemnity" className="mt-10 scroll-mt-28 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">6. Hold Harmless &amp; Active Indemnification</h2>
         <p className={`${termsBody} text-slate-600`}>
           You agree to completely indemnify, defend, and hold harmless the Partnership and each of its individual developers from and against any third-party claims, lawsuits, damages, losses, liabilities, and expenses (including all legal fees, solicitor costs, and court disbursements) arising out of or relating to your misconduct, your breach of these Terms, or your negligent behavior during an offline match or home visit.
@@ -150,7 +181,7 @@ export default function TermsPage() {
       </section>
 
       {/* SECTION 7: SEVERABILITY & CONTRACTUAL CONTINUANCE */}
-      <section className="mt-10 space-y-4">
+      <section id="severability" className="mt-10 scroll-mt-28 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">7. Third-Party Rights &amp; Severability</h2>
         <p className={`${termsBody} text-slate-600`}>
           <strong>Severability:</strong> If any provision, sentence, or specific clause of these Terms is found by an Irish court or regulatory authority to be invalid, illegal, or completely unenforceable, that specific provision shall be severed from the contract. The remainder of these Terms shall continue in full force and effect as if the severed provision had never been included.
@@ -161,7 +192,7 @@ export default function TermsPage() {
       </section>
 
       {/* SECTION 8: JURISDICTION */}
-      <section className="mt-10 space-y-4">
+      <section id="jurisdiction" className="mt-10 scroll-mt-28 space-y-4">
         <h2 className="font-serif text-2xl text-slate-950">8. Governing Law &amp; Forum Selection</h2>
         <p className={`${termsBody} text-slate-600`}>
           These Terms, and any non-contractual obligations or disputes arising out of them, are governed exclusively by the laws of <strong>Ireland</strong>. You and the Partnership explicitly agree that the courts located in <strong>Dublin, Ireland</strong> hold exclusive jurisdiction to settle any legal claim or lawsuit arising under this agreement.
@@ -179,6 +210,9 @@ export default function TermsPage() {
         </button>{" "}
         directly.
       </p>
+
+        </div>
+      </div>
 
       {/* Interlinked Contact Modal Terminal */}
       {isOpen && (

@@ -34,7 +34,7 @@ export default function ProfileActions({
   const supabase = createClient();
   const router = useRouter();
   const [state, setState] = useState<State>({ s: "idle" });
-  const [partySize, setPartySize] = useState(1);
+  const partySize = 1;
   const [viewerId, setViewerId] = useState<string | null>(null);
 
   useEffect(() => {

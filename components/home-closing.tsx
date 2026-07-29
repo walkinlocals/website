@@ -38,7 +38,7 @@ export default function HomeClosing({ showJoinLinks, hostHref, guestHref }: Home
               <div className="grid gap-12 md:grid-cols-2 md:gap-10 lg:grid-cols-1 lg:gap-14">
                 <div>
                   <p className={homeEyebrow}>Hosts</p>
-                  <p className="mt-3 font-serif text-2xl font-normal uppercase leading-snug text-slate-950 sm:text-[1.65rem]">
+                  <p className="mt-3 font-sans text-2xl font-semibold uppercase leading-snug text-slate-950 sm:text-[1.65rem]">
                     Host whenever you like.
                   </p>
                   <Link href={hostHref} className={`mt-4 inline-block ${homeTextLink}`}>
@@ -47,7 +47,7 @@ export default function HomeClosing({ showJoinLinks, hostHref, guestHref }: Home
                 </div>
                 <div>
                   <p className={homeEyebrow}>Backpackers</p>
-                  <p className="mt-3 font-serif text-2xl font-normal uppercase italic leading-snug text-slate-950 sm:text-[1.65rem]">
+                  <p className="mt-3 font-sans text-2xl font-semibold uppercase leading-snug text-slate-950 sm:text-[1.65rem]">
                     Travel whenever you want.
                   </p>
                   <Link href={guestHref} className={`mt-4 inline-block ${homeTextLink}`}>

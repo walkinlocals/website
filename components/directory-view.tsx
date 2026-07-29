@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Clock } from "lucide-react";
 import { useMemo } from "react";
@@ -115,20 +116,21 @@ export default function DirectoryView({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-x-12 gap-y-0 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
             {filteredProfiles.map((profile) => {
               const location = formatDirectoryLocation(profile, role);
               return (
                 <Link key={profile.id} href={`/profile/${profile.id}`} className={DIRECTORY_CARD_CLASS}>
                   <div>
                     <div className="flex items-start gap-4">
-                      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full bg-slate-100 sm:h-24 sm:w-24">
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200/80 transition group-hover:ring-[#002FA7]/30 sm:h-24 sm:w-24">
                         {profile.avatar_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
+                          <Image
                             src={profile.avatar_url}
                             alt=""
-                            className="h-full w-full object-cover"
+                            fill
+                            sizes="96px"
+                            className="object-cover transition duration-300 group-hover:scale-105"
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-lg text-slate-400">

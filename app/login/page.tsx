@@ -22,30 +22,30 @@ function LoginInner() {
   const params = useSearchParams();
   const supabase = createClient();
 
-  const [mode, setMode] = useState<AuthMode>("signin");
+  const [mode, setMode] = useState<AuthMode>(() => (params.get("mode") === "signup" ? "signup" : "signin"));
   const [role, setRole] = useState<UserRole>("Guest");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() =>
+    params.get("error") === "auth_callback"
+      ? "Google sign-in could not be completed. Try again or use email and password."
+      : null,
+  );
   const [info, setInfo] = useState<string | null>(null);
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  useEffect(() => {
-    const initialMode = params.get("mode");
-    if (initialMode === "signup") {
-      setMode("signup");
-    } else {
-      setMode("signin");
-    }
-
-    const authError = params.get("error");
-    if (authError === "auth_callback") {
+  // Re-derive mode/error from the URL when params change after mount (no full remount).
+  const [prevParams, setPrevParams] = useState(params);
+  if (params !== prevParams) {
+    setPrevParams(params);
+    setMode(params.get("mode") === "signup" ? "signup" : "signin");
+    if (params.get("error") === "auth_callback") {
       setError("Google sign-in could not be completed. Try again or use email and password.");
     }
-  }, [params]);
+  }
 
   useEffect(() => {
     const footer = document.querySelector("footer");
@@ -132,7 +132,7 @@ function LoginInner() {
       }
       router.push("/profile");
       router.refresh();
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setSubmitting(false);

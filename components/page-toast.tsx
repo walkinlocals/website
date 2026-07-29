@@ -128,6 +128,9 @@ export function PageToastProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Portal target (document.body) only exists client-side; this must run post-hydration
+    // to avoid a server/client mismatch, so a direct setState-in-effect is unavoidable here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

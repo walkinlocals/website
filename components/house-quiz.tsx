@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, MapPin, RotateCcw } from "lucide-react";
 import {
@@ -119,13 +120,21 @@ export default function HouseQuiz({ nextStep, embedded = false }: HouseQuizProps
                     <button
                       type="button"
                       onClick={() => handleAnswer(index)}
-                      className={`group flex w-full items-center justify-between gap-4 text-left leading-relaxed text-slate-950 transition hover:text-[#002FA7] ${
+                      className={`group flex w-full items-center gap-4 text-left leading-relaxed text-slate-950 transition hover:text-[#002FA7] ${
                         embedded
                           ? "py-5 text-lg sm:py-6 sm:text-xl sm:leading-relaxed"
                           : "py-4 text-base sm:py-5"
                       }`}
                     >
-                      <span>{option.label}</span>
+                      <span
+                        className={`flex shrink-0 items-center justify-center rounded-full bg-slate-100 font-semibold text-slate-500 transition group-hover:bg-[#002FA7] group-hover:text-white ${
+                          embedded ? "h-9 w-9 text-base" : "h-8 w-8 text-sm"
+                        }`}
+                        aria-hidden
+                      >
+                        {String.fromCharCode(65 + index)}
+                      </span>
+                      <span className="flex-1">{option.label}</span>
                       <ArrowRight
                         className={`shrink-0 text-slate-300 transition group-hover:text-[#002FA7] ${
                           embedded ? "h-5 w-5" : "h-4 w-4"
@@ -170,21 +179,21 @@ function QuizResult({
 }) {
   return (
     <div className={`space-y-12 border-t border-slate-200/80 pt-10 sm:pt-12 ${embedded ? "text-left" : ""}`}>
-      <div className="overflow-hidden rounded-2xl">
-        <img
+      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl shadow-lg shadow-slate-900/10 sm:aspect-[21/9]">
+        <Image
           src={result.image}
           alt=""
-          className="aspect-[16/10] w-full object-cover sm:aspect-[21/9]"
+          fill
+          sizes="(min-width: 1024px) 800px, 100vw"
+          className="object-cover"
         />
       </div>
 
       <div className="space-y-3">
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#002FA7] sm:text-base">
+        <p className="inline-flex items-center rounded-full bg-[#002FA7]/10 px-3 py-1 text-sm font-semibold uppercase tracking-[0.22em] text-[#002FA7] sm:text-base">
           Your match
         </p>
-        <h3
-          className="inline-block max-w-full bg-[#002FA7] px-3 py-2 font-sans text-xl font-semibold uppercase tracking-[0.32em] text-white sm:px-4 sm:py-2.5 sm:text-2xl lg:text-3xl"
-        >
+        <h3 className="font-serif text-3xl font-medium text-slate-950 sm:text-4xl lg:text-5xl">
           {result.title}
         </h3>
         <p className="font-sans text-lg text-slate-600 sm:text-xl">{result.subtitle}</p>
@@ -192,7 +201,9 @@ function QuizResult({
 
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-7 space-y-5">
-          <p className={`${homeBody} text-slate-950`}>{result.personality}</p>
+          <p className="border-l-2 border-[#002FA7]/30 pl-5 font-serif text-xl italic leading-relaxed text-slate-950 sm:text-2xl sm:leading-relaxed">
+            {result.personality}
+          </p>
           <p className={homeBody}>{result.houseDescription}</p>
         </div>
 

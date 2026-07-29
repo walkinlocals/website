@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { HOMEPAGE_STEPS, HOW_IT_WORKS_STEP_IMAGE_CLASS } from "@/lib/marketing-content";
 import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
@@ -51,15 +52,17 @@ export default function HowItWorksPage() {
                   }`}
                 >
                   <div className="mx-auto w-full max-w-[84%] lg:mx-0 lg:w-[46%] lg:max-w-none lg:shrink-0">
-                    <div className="overflow-hidden rounded-2xl bg-slate-200 shadow-sm ring-1 ring-slate-200/80">
-                      <img
+                    <div
+                      className={`relative overflow-hidden rounded-2xl bg-slate-200 shadow-lg shadow-slate-900/10 ring-1 ring-slate-200/80 ${HOW_IT_WORKS_STEP_IMAGE_CLASS}`}
+                    >
+                      <Image
                         src={image}
                         alt=""
-                        className={`${HOW_IT_WORKS_STEP_IMAGE_CLASS} ${
+                        fill
+                        sizes="(min-width: 1024px) 46vw, 84vw"
+                        className={`object-cover ${
                           imageObject === "top" ? "object-top" : "object-center"
                         }`}
-                        loading="lazy"
-                        decoding="async"
                       />
                     </div>
                   </div>
@@ -67,7 +70,7 @@ export default function HowItWorksPage() {
                   <div className="lg:min-w-0 lg:flex-1 lg:py-2">
                     <div className="flex items-start gap-4 sm:gap-5">
                       <span
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#002FA7] font-sans text-lg font-semibold text-white sm:h-12 sm:w-12 sm:text-xl"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#002FA7] font-sans text-lg font-semibold text-white shadow-md shadow-[#002FA7]/20 sm:h-12 sm:w-12 sm:text-xl"
                         aria-hidden
                       >
                         {number}
@@ -89,8 +92,8 @@ export default function HowItWorksPage() {
         </section>
 
         <section className="border-t border-slate-200/80 pt-12 sm:pt-16 lg:pt-20">
-          <div className="grid grid-cols-1 gap-14 lg:grid-cols-2 lg:gap-12 xl:gap-20">
-            <div>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10">
+            <div className="rounded-2xl border border-slate-200/80 p-8 shadow-sm lg:p-10">
               <span className={homeEyebrow}>For hosts</span>
               <h2 className={`mt-4 ${heroTitle}`}>
                 Hosting on your terms
@@ -110,7 +113,7 @@ export default function HowItWorksPage() {
               </Link>
             </div>
 
-            <div className="border-t border-slate-200/80 pt-14 lg:border-l lg:border-t-0 lg:pt-0 lg:pl-12 xl:pl-20">
+            <div className="rounded-2xl border border-slate-200/80 p-8 shadow-sm lg:p-10">
               <span className={homeEyebrow}>For backpackers</span>
               <h2 className={`mt-4 ${heroTitle}`}>
                 Travelling with intention

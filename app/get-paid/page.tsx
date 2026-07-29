@@ -61,9 +61,12 @@ export default function GetPaidPage() {
         </section>
 
         <section>
-          <ol className="space-y-8 sm:space-y-10">
+          <ol className="grid gap-5 sm:grid-cols-2 sm:gap-6">
             {PAYOUT_DETAILS.map((item, index) => (
-              <li key={item.title} className="flex gap-4 sm:gap-5">
+              <li
+                key={item.title}
+                className="flex gap-4 rounded-2xl border border-slate-200/80 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:gap-5 sm:p-7"
+              >
                 <span
                   className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#002fa7]/10 font-sans text-lg font-semibold text-[#002FA7] sm:h-12 sm:w-12 sm:text-xl"
                   aria-hidden

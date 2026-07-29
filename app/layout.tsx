@@ -1,9 +1,16 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import { PageToastProvider } from "@/components/page-toast";
 import LiveNotifications from "@/components/live-notifications";
 import SiteFooter from "@/components/site-footer";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -30,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <body className="flex min-h-screen min-w-0 flex-col overflow-x-hidden text-slate-950 antialiased bg-white">
         <PageToastProvider>
           <Navbar />

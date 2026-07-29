@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import ContactModal from "@/components/contact-modal";
@@ -24,15 +25,15 @@ function PaymentAcceptRow() {
         const isAmex = badge.label === "American Express";
 
         return (
-          <img
+          <Image
             key={badge.label}
             src={badge.src}
             alt={badge.label}
+            width={56}
+            height={37}
             className={`h-8 w-12 shrink-0 aspect-[3/2] object-contain object-center sm:h-9 sm:w-14 ${
               isAmex ? "scale-x-125 scale-y-105" : ""
             }`}
-            loading="lazy"
-            decoding="async"
           />
         );
       })}
@@ -75,9 +76,11 @@ export default function SiteFooter() {
           <div className="flex flex-col gap-4 border-b border-slate-200/80 pb-10 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
             <Link href="/" className="flex min-w-0 max-w-full items-center gap-2 sm:gap-3">
               <span className={brandWordmark}>{BRAND_NAME}</span>
-              <img
+              <Image
                 src="/images/logo.png"
                 alt={BRAND_NAME}
+                width={44}
+                height={44}
                 className="h-9 w-9 shrink-0 object-contain sm:h-11 sm:w-11"
               />
             </Link>

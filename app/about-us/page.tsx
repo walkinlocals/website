@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import BrandName from "@/components/brand-name";
 import { ABOUT_NARRATIVE } from "@/lib/marketing-content";
@@ -25,12 +26,13 @@ export default function AboutUsPage() {
 
           <div className="mt-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-12 xl:mt-16 xl:gap-20">
             <div className="lg:col-span-5">
-              <img
+              <Image
                 src="/images/mugs.jpg"
                 alt=""
-                className="w-full rounded-xl object-cover"
-                loading="eager"
-                decoding="async"
+                width={3508}
+                height={2480}
+                priority
+                className="h-auto w-full rounded-xl object-cover shadow-lg shadow-slate-900/10"
               />
             </div>
 
@@ -39,7 +41,9 @@ export default function AboutUsPage() {
                 <span className={brandWordmark}>Home is where you feel loved</span> and we&apos;re building a way to
                 share that feeling across <span className="font-semibold text-[#002FA7]">Dublin</span> and beyond.
               </p>
-              <p className={`${marketingBody} italic`}>{ABOUT_NARRATIVE.paragraphs[1]}</p>
+              <p className="border-l-2 border-[#002FA7]/30 pl-5 font-serif text-xl italic leading-relaxed text-slate-950 sm:text-2xl sm:leading-relaxed">
+                {ABOUT_NARRATIVE.paragraphs[1]}
+              </p>
               <p className={marketingBody}>
                 That&apos;s how <BrandName /> was born.
               </p>
@@ -65,8 +69,8 @@ export default function AboutUsPage() {
             Whether you want to open your door or walk through someone else&apos;s, there&apos;s a place for you here.
           </p>
 
-          <div className="mt-12 grid gap-12 sm:grid-cols-2 sm:gap-10 lg:gap-16">
-            <div>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 sm:gap-8">
+            <div className="rounded-2xl border border-slate-200/80 p-8 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md lg:p-10">
               <p className={homeEyebrow}>Hosts</p>
               <p className={`mt-4 ${heroTitle}`}>
                 Host whenever you like.
@@ -75,7 +79,7 @@ export default function AboutUsPage() {
                 Become a Dublin Host →
               </Link>
             </div>
-            <div>
+            <div className="rounded-2xl border border-slate-200/80 p-8 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md lg:p-10">
               <p className={homeEyebrow}>Backpackers</p>
               <p className={`mt-4 ${heroTitle} italic`}>
                 Travel whenever you want.
