@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { SITE_GUTTER } from "@/lib/page-layout";
 import { BRAND_NAME, heroTitle } from "@/lib/homepage-ui";
@@ -60,9 +61,12 @@ export default function DoorHero({
     : "Open the door — sign in or discover hosts";
 
   const doorImage = (
-    <img
+    <Image
       src="/images/logo.png"
       alt={`${BRAND_NAME} door`}
+      width={434}
+      height={440}
+      priority
       className="h-auto w-[min(92vw,20rem)] max-h-[min(50vh,26rem)] object-contain sm:w-[min(88vw,28rem)] sm:max-h-[min(55vh,32rem)] lg:w-[min(36rem,42vw)] xl:w-[min(42rem,38vw)]"
     />
   );

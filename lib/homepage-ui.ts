@@ -60,7 +60,7 @@ export const homeCarouselScroll =
   "overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:thin] [scrollbar-color:rgba(0,47,167,0.28)_transparent] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#002FA7]/28";
 
 export const quizProgressMeta =
-  "font-sans text-2xl leading-snug text-slate-600 sm:text-[1.75rem] sm:leading-[1.65] lg:text-[1.875rem]";
+  "font-sans text-sm font-medium leading-snug text-slate-600 sm:text-base";
 
 /** Navbar / footer wordmark — same typography as hero tagline. */
 export const brandWordmark = `${siteTitleTypography} min-w-0 text-base leading-tight sm:text-xl lg:text-2xl`;

@@ -9,6 +9,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { Loader2, X } from "lucide-react";
+
+const modalTitle = "font-sans text-lg font-semibold uppercase tracking-wide text-[#002FA7] sm:text-xl";
 
 type WaitlistRole = "Host" | "Guest";
 
@@ -100,12 +103,12 @@ export function WaitlistModalProvider({ children }: { children: ReactNode }) {
       } else {
         setMessage({
           type: "success",
-          text: "✦ Application Received! We review details manually to keep our neighborhood safe. Look out for a welcome message on WhatsApp within 24 hours.",
+          text: "You're on the list! We'll send you a welcome message on WhatsApp within 24 hours.",
         });
 
         const businessNumber = process.env.NEXT_PUBLIC_BUSINESS_WHATSAPP;
         if (businessNumber && selectedRole) {
-          const whatsappText = `Hi WALKINLOCALS! I just joined the Dublin ${selectedRole} waitlist. My name is ${fullName}. Can't wait for the neighborhood doors to unlock! ✦`;
+          const whatsappText = `Hi WALKINLOCALS! I just joined the Dublin ${selectedRole} waitlist. My name is ${fullName}. Can't wait for the neighborhood doors to unlock!`;
           setWhatsappLink(
             `https://wa.me/${businessNumber}?text=${encodeURIComponent(whatsappText)}`,
           );
@@ -129,95 +132,77 @@ export function WaitlistModalProvider({ children }: { children: ReactNode }) {
       {children}
 
       {showModal ? (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
-          <div
-            className="relative w-full max-w-md bg-white rounded-3xl border border-slate-200 p-8 shadow-[0_20px_50px_rgba(0,47,167,0.15)] max-h-[90vh] overflow-y-auto"
-          >
+        <div role="dialog" aria-modal="true" aria-labelledby="waitlist-title" className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => setShowModal(false)}
+            className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
+          />
+          <div className="relative z-10 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-8 shadow-xl ring-1 ring-slate-100">
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 font-mono text-[11px] uppercase tracking-wider transition-colors"
+              aria-label="Close"
+              className="absolute right-5 top-5 rounded-full p-1.5 text-slate-400 transition hover:bg-slate-50 hover:text-slate-950"
             >
-              ✦ Close
+              <X className="h-4 w-4" />
             </button>
 
-            <h3 className="font-serif text-2xl font-normal text-slate-950 mb-1">
-              Join the {selectedRole === "Host" ? "Host" : "Backpacker"} Waitlist
+            <h3 id="waitlist-title" className={modalTitle}>
+              Join the {selectedRole === "Host" ? "Host" : "Guest"} waitlist
             </h3>
-            <p className="text-xs font-light text-slate-500 mb-6">
-              We will reach out to you directly once the Dublin neighborhood doors unlock.
+            <p className="mt-1 text-sm font-light text-slate-500">
+              We&apos;ll reach out once doors open in Dublin.
             </p>
 
-            <form onSubmit={handleWaitlistSubmit} className="space-y-4">
+            <form onSubmit={handleWaitlistSubmit} className="mt-6 space-y-4">
+              <input
+                type="text"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Your name"
+                className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm shadow-sm transition focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7]"
+              />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm shadow-sm transition focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7]"
+              />
               <div>
-                <label className="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 font-mono mb-1">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Jane Doe"
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3.5 text-sm text-slate-950 focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7] transition-all font-light"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 font-mono mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="jane@example.com"
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3.5 text-sm text-slate-950 focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7] transition-all font-light"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 font-mono mb-1">
-                  Mobile Number
-                </label>
                 <input
                   type="tel"
                   required
                   value={phone}
                   onChange={(e) => handlePhoneChange(e.target.value)}
-                  placeholder="e.g. +353871234567"
-                  className={`w-full rounded-2xl border px-4 py-3.5 text-sm text-slate-950 focus:outline-none focus:ring-1 transition-all font-light ${
+                  placeholder="Phone, e.g. +353871234567"
+                  className={`w-full rounded-2xl border px-4 py-3 text-sm shadow-sm transition focus:outline-none focus:ring-1 ${
                     phoneError
                       ? "border-red-300 focus:border-red-500 focus:ring-red-500"
                       : "border-slate-200 focus:border-[#002FA7] focus:ring-[#002FA7]"
                   }`}
                 />
-                {phoneError ? (
-                  <p className="text-[11px] text-red-500 mt-1.5 font-sans font-light">{phoneError}</p>
-                ) : null}
+                {phoneError ? <p className="mt-1.5 text-sm text-red-600">{phoneError}</p> : null}
               </div>
 
               {message ? (
-                <div className="space-y-4 mt-3">
-                  <p
-                    className={`text-xs font-light leading-relaxed ${
-                      message.type === "success" ? "text-emerald-600" : "text-red-600"
-                    }`}
-                  >
+                <div className="space-y-2">
+                  <p className={`text-sm ${message.type === "success" ? "text-emerald-600" : "text-red-600"}`}>
                     {message.text}
                   </p>
                   {message.type === "success" && whatsappLink ? (
-                    <div className="pt-1">
-                      <a
-                        href={whatsappLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-[#002FA7] hover:text-[#001e6c] hover:underline decoration-wavy transition-all"
-                      >
-                        ✦ Can&apos;t wait? Drop us a quick message on WhatsApp
-                      </a>
-                    </div>
+                    <a
+                      href={whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block text-sm font-medium text-[#002FA7] underline decoration-[#002FA7]/35 underline-offset-4 transition hover:decoration-[#002FA7]"
+                    >
+                      Message us on WhatsApp instead
+                    </a>
                   ) : null}
                 </div>
               ) : null}
@@ -225,9 +210,10 @@ export function WaitlistModalProvider({ children }: { children: ReactNode }) {
               <button
                 type="submit"
                 disabled={submitting || !!phoneError || !phone}
-                className="w-full rounded-full bg-[#002FA7] py-3.5 text-xs font-semibold font-mono uppercase tracking-widest text-white transition-all duration-300 hover:bg-[#001e6c] disabled:bg-slate-100 disabled:text-slate-450 disabled:cursor-not-allowed mt-2"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#002FA7] py-4 text-sm font-medium text-white shadow-md shadow-[#002FA7]/20 transition hover:bg-[#001e6c] disabled:opacity-50"
               >
-                {submitting ? "Submitting..." : "Submit Application ✦"}
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {submitting ? "Submitting…" : "Submit"}
               </button>
             </form>
           </div>

@@ -1,44 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import ContactModal from "@/components/contact-modal";
+import { OpenWaitlistButton } from "@/components/open-waitlist-button";
 import { SITE_GUTTER } from "@/lib/page-layout";
 import { brandWordmark, BRAND_NAME, siteTitleSm } from "@/lib/homepage-ui";
-
-/* Official payment mark SVGs in public/images/payments */
-
-const PAYMENT_BADGES = [
-  { src: "/images/payments/master.svg", label: "Mastercard" },
-  { src: "/images/payments/visa.svg", label: "Visa" },
-  { src: "/images/payments/amex.png", label: "American Express" },
-  { src: "/images/payments/apple_pay.svg", label: "Apple Pay" },
-  { src: "/images/payments/google_pay.svg", label: "Google Pay" },
-  { src: "/images/payments/stripe.svg", label: "Stripe" },
-] as const;
-
-function PaymentAcceptRow() {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      {PAYMENT_BADGES.map((badge) => {
-        const isAmex = badge.label === "American Express";
-
-        return (
-          <img
-            key={badge.label}
-            src={badge.src}
-            alt={badge.label}
-            className={`h-8 w-12 shrink-0 aspect-[3/2] object-contain object-center sm:h-9 sm:w-14 ${
-              isAmex ? "scale-x-125 scale-y-105" : ""
-            }`}
-            loading="lazy"
-            decoding="async"
-          />
-        );
-      })}
-    </div>
-  );
-}
 
 function FooterColumn({
   title,
@@ -75,9 +43,11 @@ export default function SiteFooter() {
           <div className="flex flex-col gap-4 border-b border-slate-200/80 pb-10 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
             <Link href="/" className="flex min-w-0 max-w-full items-center gap-2 sm:gap-3">
               <span className={brandWordmark}>{BRAND_NAME}</span>
-              <img
+              <Image
                 src="/images/logo.png"
                 alt={BRAND_NAME}
+                width={44}
+                height={44}
                 className="h-9 w-9 shrink-0 object-contain sm:h-11 sm:w-11"
               />
             </Link>
@@ -90,23 +60,21 @@ export default function SiteFooter() {
             </button>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10 md:grid-cols-3 lg:grid-cols-6 lg:gap-10">
-            <FooterColumn title="About us">
-              <FooterLink href="/about-us">Our story</FooterLink>
-              <FooterLink href="/how-it-works">How it works</FooterLink>
-              <FooterLink href="/terms">Terms &amp; conditions</FooterLink>
-            </FooterColumn>
-
+          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10 md:grid-cols-4">
             <FooterColumn title="Guests">
-              <FooterLink href="/pay">Connection pricing</FooterLink>
-              <FooterLink href="/#waitlist">Join guest waitlist</FooterLink>
-              <FooterLink href="/terms">Guest policies</FooterLink>
+              <li>
+                <OpenWaitlistButton role="Guest" className="transition hover:text-[#002FA7] hover:underline">
+                  Join guest waitlist
+                </OpenWaitlistButton>
+              </li>
             </FooterColumn>
 
             <FooterColumn title="Hosts">
-              <FooterLink href="/get-paid">Host payouts</FooterLink>
-              <FooterLink href="/#waitlist">Join host waitlist</FooterLink>
-              <FooterLink href="/terms">Host policies</FooterLink>
+              <li>
+                <OpenWaitlistButton role="Host" className="transition hover:text-[#002FA7] hover:underline">
+                  Join host waitlist
+                </OpenWaitlistButton>
+              </li>
             </FooterColumn>
 
             <FooterColumn title="Follow us">
@@ -122,17 +90,9 @@ export default function SiteFooter() {
               </li>
             </FooterColumn>
 
-            <div className="sm:col-span-2 lg:col-span-2">
-              <h3 className={siteTitleSm}>We accept</h3>
-
-              <div className="mt-4">
-                <PaymentAcceptRow />
-              </div>
-
-              <p className="mt-3 text-sm font-light text-slate-500 sm:text-base">
-                Secure payments via Stripe. Availability may vary by region.
-              </p>
-            </div>
+            <FooterColumn title="Legal">
+              <FooterLink href="/privacy">Privacy</FooterLink>
+            </FooterColumn>
           </div>
 
           <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-slate-200/80 pt-8 text-center text-sm text-slate-400 sm:flex-row sm:text-left sm:text-base">

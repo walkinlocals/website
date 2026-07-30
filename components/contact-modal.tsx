@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Loader2, X, Heart } from "lucide-react";
 import { KLEIN_BLUE } from "@/lib/brand";
-import { heroTitle } from "@/lib/homepage-ui";
+
+const modalTitle = "font-sans text-lg font-semibold uppercase tracking-wide text-[#002FA7] sm:text-xl";
 
 type SubmitState =
   | { status: "idle" }
@@ -72,31 +73,35 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
         onClick={closeModal}
         className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
       />
-      <div className="relative z-10 w-full max-w-md rounded-3xl bg-white p-8 shadow-xl ring-1 ring-slate-100">
+      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl bg-white p-8 shadow-xl ring-1 ring-slate-100">
+        <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-full bg-[#002FA7]/5 blur-2xl" />
+
         <button
           type="button"
           onClick={closeModal}
           aria-label="Close"
-          className="absolute right-5 top-5 rounded-full p-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-950"
+          className="absolute right-5 top-5 rounded-full p-1.5 text-slate-400 transition hover:bg-slate-50 hover:text-slate-950"
         >
           <X className="h-4 w-4" />
         </button>
 
         {submit.status === "success" ? (
-          <div className="py-6 text-center space-y-4">
-            <Heart className="mx-auto h-6 w-6" style={{ fill: KLEIN_BLUE, stroke: KLEIN_BLUE }} />
+          <div className="relative space-y-4 py-6 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#002FA7]/10">
+              <Heart className="h-6 w-6" style={{ fill: KLEIN_BLUE, stroke: KLEIN_BLUE }} />
+            </div>
             <p className="font-serif text-xl text-slate-950">Thank you — we&apos;ll be in touch soon.</p>
             <button
               type="button"
               onClick={closeModal}
-              className="rounded-full bg-[#002FA7] px-6 py-3 text-sm font-medium text-white hover:bg-[#001e6c]"
+              className="rounded-full bg-[#002FA7] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#001e6c]"
             >
               Close
             </button>
           </div>
         ) : (
-          <>
-            <h2 id="feedback-title" className={heroTitle}>Contact us</h2>
+          <div className="relative">
+            <h2 id="feedback-title" className={modalTitle}>Contact us</h2>
             <p className="mt-1 text-sm font-light text-slate-500">Questions, ideas, or a Dublin story to share.</p>
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <input
@@ -104,14 +109,14 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
-                className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7]"
+                className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm shadow-sm transition focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7]"
               />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7]"
+                className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm shadow-sm transition focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7]"
               />
               <textarea
                 required
@@ -119,7 +124,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="How can we help?"
-                className="w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7]"
+                className="w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm shadow-sm transition focus:border-[#002FA7] focus:outline-none focus:ring-1 focus:ring-[#002FA7]"
               />
               {submit.status === "error" ? (
                 <p className="text-sm text-red-600" role="alert">{submit.message}</p>
@@ -127,13 +132,13 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
               <button
                 type="submit"
                 disabled={submit.status === "submitting"}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#002FA7] py-4 text-sm font-medium text-white hover:bg-[#001e6c] disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#002FA7] py-4 text-sm font-medium text-white shadow-md shadow-[#002FA7]/20 transition hover:bg-[#001e6c] disabled:opacity-50"
               >
                 {submit.status === "submitting" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Send message
               </button>
             </form>
-          </>
+          </div>
         )}
       </div>
     </div>
