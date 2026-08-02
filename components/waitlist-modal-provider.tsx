@@ -103,7 +103,7 @@ export function WaitlistModalProvider({ children }: { children: ReactNode }) {
       } else {
         setMessage({
           type: "success",
-          text: "You're on the list! We'll send you a welcome message on WhatsApp within 24 hours.",
+          text: "You're on the list! We'll get in touch as soon as we can.",
         });
 
         const businessNumber = process.env.NEXT_PUBLIC_BUSINESS_WHATSAPP;
