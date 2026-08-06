@@ -11,6 +11,7 @@ const routes = [
   "/pay",
   "/quiz",
   "/terms",
+  "/privacy",
   "/guest-directory",
   "/host-directory",
 ];

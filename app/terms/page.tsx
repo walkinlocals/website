@@ -87,8 +87,34 @@ export default function TermsPage() {
               </ul>
             </section>
 
+            <section id="refunds" className="mt-10 scroll-mt-28 space-y-4">
+              <h2 className="font-serif text-2xl text-slate-950">4. Cancellations &amp; Refunds</h2>
+              <p className={`${termsBody} text-slate-600`}>
+                Guests are only charged the connection fee after a Host has accepted their visit
+                request. Because the fee unlocks contact details and in-app chat immediately on
+                payment, <strong>connection fees are non-refundable</strong> once paid, except as
+                described below or where required by applicable law.
+              </p>
+              <ul className={`list-disc space-y-2 pl-5 text-slate-600 ${termsBody}`}>
+                <li>
+                  <strong>Host cancels after payment.</strong> If a Host cancels or does not
+                  honour a paid, accepted visit, the Guest is entitled to a full refund of the
+                  connection fee. Contact us and we will process it.
+                </li>
+                <li>
+                  <strong>Guest cancels.</strong> If a Guest cancels after paying, the connection
+                  fee is not refunded, as it has already unlocked the Host&apos;s contact details.
+                </li>
+                <li>
+                  <strong>How to request a refund.</strong> Refund requests are currently reviewed
+                  individually — contact us using the link at the bottom of this page and include
+                  your account email and the date of the affected visit.
+                </li>
+              </ul>
+            </section>
+
             <section id="inactivity" className="mt-10 scroll-mt-28 space-y-4">
-              <h2 className="font-serif text-2xl text-slate-950">4. Account Inactivity</h2>
+              <h2 className="font-serif text-2xl text-slate-950">5. Account Inactivity</h2>
               <p className={`${termsBody} text-slate-600`}>
                 To keep our directories accurate and to limit the personal data we retain,
                 inactive accounts follow this schedule: a reminder notice at 80 days of
@@ -98,7 +124,7 @@ export default function TermsPage() {
             </section>
 
             <section id="liability" className="mt-10 scroll-mt-28 space-y-4">
-              <h2 className="font-serif text-2xl text-slate-950">5. Limitation of Liability</h2>
+              <h2 className="font-serif text-2xl text-slate-950">6. Limitation of Liability</h2>
               <p className={`${termsBody} text-slate-600`}>
                 To the maximum extent permitted by the laws of Ireland and the European Union,
                 the Partnership and its individual partners are not liable for any indirect,
@@ -116,7 +142,7 @@ export default function TermsPage() {
             </section>
 
             <section id="indemnity" className="mt-10 scroll-mt-28 space-y-4">
-              <h2 className="font-serif text-2xl text-slate-950">6. Indemnification</h2>
+              <h2 className="font-serif text-2xl text-slate-950">7. Indemnification</h2>
               <p className={`${termsBody} text-slate-600`}>
                 You agree to indemnify and hold harmless the Partnership and its individual
                 partners from any third-party claims, damages, losses, or expenses (including
@@ -126,7 +152,7 @@ export default function TermsPage() {
             </section>
 
             <section id="severability" className="mt-10 scroll-mt-28 space-y-4">
-              <h2 className="font-serif text-2xl text-slate-950">7. Severability &amp; Third Parties</h2>
+              <h2 className="font-serif text-2xl text-slate-950">8. Severability &amp; Third Parties</h2>
               <p className={`${termsBody} text-slate-600`}>
                 <strong>Severability.</strong> If a court or regulator finds any provision of
                 these Terms invalid or unenforceable, that provision will be severed and the
@@ -139,7 +165,7 @@ export default function TermsPage() {
             </section>
 
             <section id="jurisdiction" className="mt-10 scroll-mt-28 space-y-4">
-              <h2 className="font-serif text-2xl text-slate-950">8. Governing Law</h2>
+              <h2 className="font-serif text-2xl text-slate-950">9. Governing Law</h2>
               <p className={`${termsBody} text-slate-600`}>
                 These Terms, and any dispute arising from them, are governed by the laws of{" "}
                 <strong>Ireland</strong>. The courts of <strong>Dublin, Ireland</strong> have

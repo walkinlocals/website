@@ -98,6 +98,7 @@ export default function SiteFooter() {
               <FooterLink href="/about-us">Our story</FooterLink>
               <FooterLink href="/how-it-works">How it works</FooterLink>
               <FooterLink href="/terms">Terms &amp; conditions</FooterLink>
+              <FooterLink href="/privacy">Privacy policy</FooterLink>
             </FooterColumn>
 
             <FooterColumn title="Guests">
