@@ -3,7 +3,6 @@ import Link from "next/link";
 import { HOMEPAGE_STEPS, HOW_IT_WORKS_STEP_IMAGE_CLASS } from "@/lib/marketing-content";
 import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
 import {
-  homeDisplayTitle,
   homeEyebrow,
   homeTextLink,
   marketingBody,
@@ -36,54 +35,42 @@ export default function HowItWorksPage() {
           <h1 className={`mt-8 ${marketingPageTitle}`}>How It Works</h1>
         </header>
 
-        <section className="mt-10 sm:mt-12">
-          <h2 className={homeDisplayTitle}>Three simple steps</h2>
-          <ul className="mt-10 space-y-14 sm:mt-12 sm:space-y-16 lg:space-y-20">
-            {HOMEPAGE_STEPS.map((step, index) => {
+        <section>
+          <ul className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+            {HOMEPAGE_STEPS.map((step) => {
               const { number, title, body, image } = step;
               const imageObject = "imageObject" in step ? step.imageObject : "center";
-              const imageFirst = index % 2 === 0;
 
               return (
                 <li
                   key={title}
-                  className={`flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-10 xl:gap-14 ${
-                    imageFirst ? "" : "lg:flex-row-reverse"
-                  }`}
+                  className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 >
-                  <div className="mx-auto w-full max-w-[84%] lg:mx-0 lg:w-[46%] lg:max-w-none lg:shrink-0">
-                    <div
-                      className={`relative overflow-hidden rounded-2xl bg-slate-200 shadow-lg shadow-slate-900/10 ring-1 ring-slate-200/80 ${HOW_IT_WORKS_STEP_IMAGE_CLASS}`}
-                    >
-                      <Image
-                        src={image}
-                        alt=""
-                        fill
-                        sizes="(min-width: 1024px) 46vw, 84vw"
-                        className={`object-cover ${
-                          imageObject === "top" ? "object-top" : "object-center"
-                        }`}
-                      />
-                    </div>
+                  <div className={`relative bg-slate-200 ${HOW_IT_WORKS_STEP_IMAGE_CLASS}`}>
+                    <Image
+                      src={image}
+                      alt=""
+                      fill
+                      sizes="(min-width: 1024px) 31vw, (min-width: 640px) 46vw, 92vw"
+                      className={`object-cover ${
+                        imageObject === "top" ? "object-top" : "object-center"
+                      }`}
+                    />
                   </div>
 
-                  <div className="lg:min-w-0 lg:flex-1 lg:py-2">
-                    <div className="flex items-start gap-4 sm:gap-5">
+                  <div className="p-6 lg:p-7">
+                    <h3 className="flex items-start gap-3 font-sans text-xl font-bold uppercase tracking-tight text-slate-950 sm:text-2xl">
                       <span
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#002FA7] font-sans text-lg font-semibold text-white shadow-md shadow-[#002FA7]/20 sm:h-12 sm:w-12 sm:text-xl"
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#002FA7] font-sans text-base font-semibold text-white shadow-sm shadow-[#002FA7]/25"
                         aria-hidden
                       >
                         {number}
                       </span>
-                      <div>
-                        <h3 className="font-sans text-2xl font-bold uppercase tracking-tight text-slate-950 sm:text-[1.75rem] lg:text-3xl">
-                          {title}
-                        </h3>
-                        <p className="mt-4 text-lg leading-relaxed text-slate-600 sm:text-xl sm:leading-[1.65]">
-                          {body}
-                        </p>
-                      </div>
-                    </div>
+                      {title}
+                    </h3>
+                    <p className="mt-3 text-base leading-relaxed text-slate-600 sm:text-lg">
+                      {body}
+                    </p>
                   </div>
                 </li>
               );
