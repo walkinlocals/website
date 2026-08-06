@@ -32,7 +32,7 @@ export default function AboutUsPage() {
                 width={3508}
                 height={2480}
                 priority
-                className="h-auto w-full rounded-xl object-cover shadow-lg shadow-slate-900/10"
+                className="h-auto w-full rounded-xl object-cover"
               />
             </div>
 
