@@ -1,8 +1,8 @@
 import Image from "next/image";
 
 const DOOR_IMAGES = [
-  "/images/doors/d1.png",
-  "/images/doors/d2.png",
+  "/images/doors/d1.jpg",
+  "/images/doors/d2.jpg",
 ] as const;
 
 export default function LoginDoorCollage() {
