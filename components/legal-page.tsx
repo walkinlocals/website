@@ -66,8 +66,8 @@ export default function LegalPage() {
               <section id="fees" className="mt-10 scroll-mt-28 space-y-4">
                 <h2 className="font-serif text-2xl text-slate-950">3. Fees &amp; Payments</h2>
                 <p className={`${termsBody} text-slate-600`}>
-                  Guests pay a connection fee of <strong>€35 per person</strong>. Hosts receive{" "}
-                  <strong>€25 per person</strong> from that fee, and the Partnership retains{" "}
+                  Guests pay a connection fee of <strong>€25 per person</strong>. Hosts receive{" "}
+                  <strong>€15 per person</strong> from that fee, and the Partnership retains{" "}
                   <strong>€10 per person</strong> as a service fee. A single connection request is
                   limited to a maximum of <strong>6 people</strong>.
                 </p>

@@ -16,7 +16,7 @@ import {
   Info,
   MessageCircle,
 } from "lucide-react";
-import { MAX_PARTY_SIZE, HOST_PAYOUT_EUR } from "@/lib/pricing";
+import { MAX_PARTY_SIZE, HOST_PAYOUT_EUR, MATCH_FEE_EUR } from "@/lib/pricing";
 import { PAGE_MAIN } from "@/lib/page-layout";
 import { heroTitle } from "@/lib/homepage-ui";
 import { formatDirectoryLocation } from "@/lib/directory-display";
@@ -26,7 +26,7 @@ import MatchDateNegotiation from "@/components/match-date-negotiation";
 import WhatsAppButton from "@/components/whatsapp-button";
 import { isDateNegotiationComplete } from "@/lib/match-dates";
 
-const FEE_PER_PERSON = 35;
+const FEE_PER_PERSON = MATCH_FEE_EUR;
 
 type Status = "Pending" | "Hold" | "Accepted" | "Denied" | "Paid";
 
@@ -372,7 +372,7 @@ function MatchCard({
             </label>
             <p className="flex items-start gap-1.5 text-xs text-slate-500 font-light leading-relaxed">
               <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-[#002FA7]/70" />
-              €35 per person unlocks chat and contact details. Your host receives €25 per person.
+              €25 per person unlocks chat and contact details. Your host receives €15 per person.
             </p>
             <select
               id={`party-confirm-${match.id}`}
@@ -478,7 +478,7 @@ function MatchCard({
             href={match.stripe_link}
             className="inline-flex rounded-full bg-[#002FA7] px-6 py-3 text-xs font-mono font-semibold uppercase tracking-widest text-white transition-all duration-300 hover:bg-[#001e6c] shadow-[0_4px_15px_rgba(0,47,167,0.18)]"
           >
-            Pay €{total} to Unlock Connection ({partySize} × €35)
+            Pay €{total} to Unlock Connection ({partySize} × €{MATCH_FEE_EUR})
           </a>
         )}
 

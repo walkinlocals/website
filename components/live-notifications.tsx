@@ -114,7 +114,7 @@ export default function LiveNotifications() {
           pushToast({
             title: iAmGuest ? "Visit accepted — pay to unlock" : "Match accepted",
             message: iAmGuest
-              ? `${name} accepted your visit. Open Matches to pay €35 per person and unlock chat & contact details.`
+              ? `${name} accepted your visit. Open Matches to pay €25 per person and unlock chat & contact details.`
               : `${name} accepted the connection. You'll be notified when they pay.`,
             href: "/matches",
           });

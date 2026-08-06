@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Heart, Info, Loader2 } from "lucide-react";
 import VisitDatePicker from "@/components/visit-date-picker";
-import { MAX_PARTY_SIZE } from "@/lib/pricing";
+import { MAX_PARTY_SIZE, MATCH_FEE_EUR } from "@/lib/pricing";
 import { formatVisitDateTime } from "@/lib/match-dates";
 
 interface Props {
@@ -99,7 +99,7 @@ export default function HostBookingPicker({ hostId, guestId, disabled }: Props) 
         <div className="flex items-start gap-2 rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-xs font-light leading-relaxed text-slate-500">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#002FA7]" />
           <p>
-            <strong className="font-semibold text-slate-800">€35 per person</strong> unlocks contact details. Hosts receive €25 per person.
+            <strong className="font-semibold text-slate-800">€25 per person</strong> unlocks contact details. Hosts receive €15 per person.
           </p>
         </div>
         <select
@@ -111,7 +111,7 @@ export default function HostBookingPicker({ hostId, guestId, disabled }: Props) 
         >
           {Array.from({ length: MAX_PARTY_SIZE }, (_, i) => i + 1).map((n) => (
             <option key={n} value={n}>
-              {n} {n === 1 ? "person" : "people"} — €{n * 35}
+              {n} {n === 1 ? "person" : "people"} — €{n * MATCH_FEE_EUR}
             </option>
           ))}
         </select>

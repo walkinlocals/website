@@ -22,7 +22,7 @@ const PAYOUT_DETAILS = [
   },
   {
     title: `€${HOST_PAYOUT_COPY.feePerGuest} per guest`,
-    body: "When a backpacker connects with you, you earn €25 for each person in their party. Payouts go directly to your bank.",
+    body: "When a backpacker connects with you, you earn €15 for each person in their party. Payouts go directly to your bank.",
   },
   {
     title: "Verified guests only",
