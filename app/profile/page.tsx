@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { buildFullName, isProfileComplete, isBrowsableProfile, isAtLeast18FromDate, maxDateOfBirthFor18Plus, normalizeDateOfBirth, profileActivationBlockers } from "@/lib/profile";
+import { buildFullName, hasEnoughBio, MIN_BIO_CHARS, isProfileComplete, isBrowsableProfile, isAtLeast18FromDate, maxDateOfBirthFor18Plus, normalizeDateOfBirth, profileActivationBlockers } from "@/lib/profile";
 import { PAGE_MAIN, PAGE_SHELL } from "@/lib/page-layout";
 import { BRAND_NAME, homePrimaryButton, heroTitle, siteTitleSm } from "@/lib/homepage-ui";
 import { formatDirectoryLocation } from "@/lib/directory-display";
@@ -968,11 +968,13 @@ function ProfileInner() {
               <p className="mt-3 text-sm text-slate-600">Profile photo (max 5MB)</p>
 
               <div className="mt-6 w-full max-w-md text-center sm:text-left">
-                {form.role === "Host" ? (
-                  <p className="text-xs text-slate-500 font-light leading-relaxed">
-                    No Stripe setup needed to go live. We&apos;ll ask for your bank details only when you accept a paid visit.
+                {form.role === "Host" && (
+                  <p className="mb-4 text-xs text-slate-500 font-light leading-relaxed">
+                    No Stripe payout setup needed to go live. We&apos;ll ask for your bank details only when you accept
+                    a paid visit.
                   </p>
-                ) : form.idVerified ? (
+                )}
+                {form.idVerified ? (
                   <p className="flex items-center justify-center gap-2 text-sm text-emerald-700 sm:justify-start">
                     <ShieldCheck className="h-4 w-4" />
                     Identity verified
@@ -1139,17 +1141,31 @@ function ProfileInner() {
 
             <div>
               <label htmlFor="bio" className={fieldLabel}>
-                Your Story
+                Your Story{" "}
+                <span className="text-slate-400 font-light normal-case">(at least 3 lines)</span>
               </label>
+              <p className="mt-1 text-xs font-light leading-relaxed text-slate-500">
+                Write at least three lines: who you are, who you live with, and whether you have any pets.
+              </p>
               <textarea
                 id="bio"
-                rows={5}
+                rows={6}
                 required
+                minLength={MIN_BIO_CHARS}
                 value={form.bio}
                 onChange={(e) => setForm((p) => ({ ...p, bio: e.target.value }))}
-                className={`${inputClass} resize-none`}
-                placeholder="Tell us a bit about yourself..."
+                className={`${inputClass} mt-2 resize-none`}
+                placeholder="I'm Sam, originally from Cork and living in Stoneybatter for six years. I share the house with my partner Alex and we both work from home. We have a very friendly rescue dog called Biscuit and two cats who will ignore you completely."
               />
+              <p
+                className={`mt-2 text-xs font-light ${
+                  hasEnoughBio(form.bio) ? "text-emerald-600" : "text-slate-500"
+                }`}
+              >
+                {hasEnoughBio(form.bio)
+                  ? "Thanks — that's plenty to introduce you."
+                  : `${MIN_BIO_CHARS - form.bio.trim().length} more characters needed.`}
+              </p>
             </div>
 
             <div>

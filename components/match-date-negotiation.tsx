@@ -152,14 +152,6 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
             </strong>
             . Waiting for the other person to respond.
           </p>
-          <VisitDatePicker
-            hostId={hostId}
-            value={match.proposed_date}
-            timeValue={match.proposed_time}
-            onChange={() => undefined}
-            onTimeChange={() => undefined}
-            disabled
-          />
         </>
       )}
 
@@ -172,20 +164,16 @@ export default function MatchDateNegotiation({ match, currentUserId, hostId }: P
             <strong className="text-slate-900">
               {formatVisitDateTime(match.proposed_date!, match.proposed_time)}
             </strong>
-            . Review below, accept it, or pick another slot.
+            . Accept it, or suggest a different slot.
           </p>
-          <VisitDatePicker
-            hostId={hostId}
-            value={match.proposed_date}
-            timeValue={match.proposed_time}
-            onChange={handleCalendarChange}
-            onTimeChange={(time) => {
-              setShowCounter(true);
-              setCounterDate(match.proposed_date);
-              setCounterTime(time);
-            }}
-            disabled={working !== null}
-          />
+          <div className="rounded-2xl border border-[#002FA7]/15 bg-[#002fa7]/5 px-4 py-3">
+            <span className="font-mono text-[9px] uppercase tracking-wider font-bold text-[#002FA7]">
+              Proposed slot
+            </span>
+            <p className="mt-1 font-serif text-base text-slate-900">
+              {formatVisitDateTime(match.proposed_date!, match.proposed_time)}
+            </p>
+          </div>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"

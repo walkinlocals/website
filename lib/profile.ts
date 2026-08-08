@@ -38,6 +38,17 @@ export function isAtLeast18FromDate(dateOfBirth: string | null | undefined): boo
   return age >= 18;
 }
 
+/**
+ * Roughly three lines of prose. Guests and hosts both need enough of a story
+ * for the other side to decide whether to open their door.
+ */
+export const MIN_BIO_CHARS = 180;
+
+/** True when the story is long enough to be a real introduction. */
+export function hasEnoughBio(bio: string | null | undefined): boolean {
+  return (bio?.trim().length ?? 0) >= MIN_BIO_CHARS;
+}
+
 export interface ProfileCompletenessInput {
   role: string | null;
   first_name?: string | null;
@@ -130,16 +141,15 @@ export function isProfileComplete(
 ): boolean {
   const location = resolvedLocation(profile);
   const hasAvatar = Boolean(profile.avatar_url || options?.hasPendingAvatar);
-  const guestIdentityReady = profile.role !== "Guest" || Boolean(profile.id_verified);
 
   return Boolean(
     profile.role &&
       hasDisplayName(profile) &&
-      profile.bio?.trim() &&
+      hasEnoughBio(profile.bio) &&
       location &&
       hasAvatar &&
       isAgeRequirementMet(profile) &&
-      guestIdentityReady,
+      profile.id_verified,
   );
 }
 
@@ -168,13 +178,15 @@ export function profileActivationBlockers(
   const missing: string[] = [];
   if (!profile.role) missing.push("choose Host or Guest");
   if (!hasDisplayName(profile)) missing.push("add your name");
-  if (!profile.bio?.trim()) missing.push("write your story");
+  if (!hasEnoughBio(profile.bio)) {
+    missing.push("write at least three lines about who you are, who you live with, and any pets");
+  }
   if (!resolvedLocation(profile)) {
     missing.push(profile.role === "Host" ? "add your Dublin area" : "add your country");
   }
   if (!profile.avatar_url && !options?.hasPendingAvatar) missing.push("upload a profile photo");
   if (!isAgeRequirementMet(profile)) missing.push("confirm you are 18+ with your date of birth");
-  if (profile.role === "Guest" && !profile.id_verified) {
+  if (!profile.id_verified) {
     missing.push("complete Stripe identity verification");
   }
   return missing;
