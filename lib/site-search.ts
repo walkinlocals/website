@@ -26,7 +26,7 @@ const STATIC_PAGES: Omit<SearchEntry, "terms">[] = [
   { id: "page-home", title: "Home", description: "Discover Dublin hosts and local home visits", href: "/", group: "Pages" },
   { id: "page-about", title: "About us", description: "The story behind WALKINLOCALS", href: "/about-us", group: "Pages" },
   { id: "page-how", title: "How it works", description: "Connect, visit, and get paid as a host", href: "/how-it-works", group: "Pages" },
-  { id: "page-quiz", title: "House quiz", description: "Which Dublin house type are you?", href: "/quiz", group: "Pages" },
+  { id: "page-quiz", title: "House quiz", description: "Which Dublin house type are you?", href: "/#quiz", group: "Pages" },
   { id: "page-pay", title: "Pay", description: "Connection fees for backpackers", href: "/pay", group: "Pages" },
   { id: "page-get-paid", title: "Get paid", description: "Host payouts through Stripe", href: "/get-paid", group: "Pages" },
   { id: "page-matches", title: "Matches", description: "Your connection requests and visits", href: "/matches", group: "App" },
@@ -36,6 +36,7 @@ const STATIC_PAGES: Omit<SearchEntry, "terms">[] = [
   { id: "page-login", title: "Sign in", description: "Log in to WALKINLOCALS", href: "/login", group: "Account" },
   { id: "page-signup", title: "Sign up", description: "Create a host or guest account", href: "/login?mode=signup", group: "Account" },
   { id: "page-terms", title: "Terms of service", description: "Legal terms and liability release", href: "/terms", group: "Legal" },
+  { id: "page-privacy", title: "Privacy policy", description: "How we handle your personal data", href: "/privacy", group: "Legal" },
 ];
 
 function discoveryEntries(

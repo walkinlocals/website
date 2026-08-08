@@ -71,7 +71,8 @@ export default function HouseQuizTeaser() {
   if (started) {
     return (
       <section
-        className={`relative overflow-hidden ${homeSectionBorder} ${homeSectionY}`}
+        id="quiz"
+        className={`relative scroll-mt-24 overflow-hidden ${homeSectionBorder} ${homeSectionY}`}
         style={{ backgroundColor: CREAM }}
       >
         <DoorSketchBackground />
@@ -86,7 +87,8 @@ export default function HouseQuizTeaser() {
 
   return (
     <section
-      className={`relative overflow-hidden ${homeSectionBorder} ${homeSectionY}`}
+      id="quiz"
+      className={`relative scroll-mt-24 overflow-hidden ${homeSectionBorder} ${homeSectionY}`}
       style={{ backgroundColor: CREAM }}
     >
       <DoorSketchBackground />

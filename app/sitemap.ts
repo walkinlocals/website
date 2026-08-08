@@ -9,9 +9,8 @@ const routes = [
   "/get-paid",
   "/login",
   "/pay",
-  "/quiz",
-  "/terms",
   "/privacy",
+  "/terms",
   "/guest-directory",
   "/host-directory",
 ];
