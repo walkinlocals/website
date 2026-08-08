@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { CREAM } from "@/lib/brand";
 import { HOUSE_RESULTS, QUIZ_OPTION_IMAGES } from "@/lib/house-quiz";
 import DoorSketchBackground from "@/components/door-sketch-background";
+import HouseQuiz from "@/components/house-quiz";
+import { createClient } from "@/lib/supabase/client";
+import { quizNextStepForAudience, type QuizNextStep } from "@/lib/quiz-next-step";
+import type { AppRole } from "@/lib/profile-role";
 import {
   homeBody,
   homeContainer,
@@ -37,7 +40,50 @@ function RotatingArchetype() {
   );
 }
 
+const VISITOR_NEXT_STEP = quizNextStepForAudience(false, null);
+
 export default function HouseQuizTeaser() {
+  const [started, setStarted] = useState(false);
+  const [nextStep, setNextStep] = useState<QuizNextStep>(VISITOR_NEXT_STEP);
+
+  useEffect(() => {
+    let active = true;
+    const supabase = createClient();
+
+    async function resolveAudience() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!active) return;
+      if (!user) return;
+
+      const { data } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+      if (!active) return;
+      setNextStep(quizNextStepForAudience(true, data?.role as AppRole | null));
+    }
+
+    void resolveAudience();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (started) {
+    return (
+      <section
+        className={`relative overflow-hidden ${homeSectionBorder} ${homeSectionY}`}
+        style={{ backgroundColor: CREAM }}
+      >
+        <DoorSketchBackground />
+        <div className={`${homeContainer} relative`}>
+          <div className="mx-auto w-full max-w-4xl lg:max-w-5xl">
+            <HouseQuiz nextStep={nextStep} embedded />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       className={`relative overflow-hidden ${homeSectionBorder} ${homeSectionY}`}
@@ -69,9 +115,9 @@ export default function HouseQuizTeaser() {
           ))}
         </div>
 
-        <Link href="/quiz" className={`mt-8 ${homePrimaryButton}`}>
+        <button type="button" onClick={() => setStarted(true)} className={`mt-8 ${homePrimaryButton}`}>
           Take the quiz
-        </Link>
+        </button>
       </div>
     </section>
   );

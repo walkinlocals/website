@@ -890,11 +890,11 @@ function ProfileInner() {
             <h1 className={heroTitle}>
               {isAsleep ? "Restore your profile" : isEditing ? "Edit profile" : "Complete your profile"}
             </h1>
-            <p className="mt-3 text-base leading-relaxed text-slate-600 sm:text-[17px] sm:leading-[1.65]">
-              {isAsleep
-                ? "Your profile has been temporarily hidden. Wake it up to rejoin the directories."
-                : "Add your details below. When you&apos;re ready, activate to show up in the directory."}
-            </p>
+            {isAsleep && (
+              <p className="mt-3 text-base leading-relaxed text-slate-600 sm:text-[17px] sm:leading-[1.65]">
+                Your profile has been temporarily hidden. Wake it up to rejoin the directories.
+              </p>
+            )}
           </div>
         </div>
 
@@ -967,49 +967,66 @@ function ProfileInner() {
               <input ref={fileRef} type="file" onChange={onPhoto} className="hidden" />
               <p className="mt-3 text-sm text-slate-600">Profile photo (max 5MB)</p>
 
-              <div className="mt-6 w-full max-w-md text-center sm:text-left">
-                {form.role === "Host" && (
-                  <p className="mb-4 text-xs text-slate-500 font-light leading-relaxed">
-                    No Stripe payout setup needed to go live. We&apos;ll ask for your bank details only when you accept
-                    a paid visit.
-                  </p>
-                )}
+              <div className="mt-6 w-full max-w-md text-left">
                 {form.idVerified ? (
-                  <p className="flex items-center justify-center gap-2 text-sm text-emerald-700 sm:justify-start">
-                    <ShieldCheck className="h-4 w-4" />
-                    Identity verified
-                  </p>
+                  <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 px-4 py-3.5">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                      <ShieldCheck className="h-4.5 w-4.5" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-emerald-900">Identity verified</p>
+                      <p className="text-xs font-light text-emerald-800/80">Verified with Stripe Identity.</p>
+                    </div>
+                  </div>
                 ) : verificationPolling ? (
-                  <p className="text-sm text-amber-600 font-light flex items-center justify-center gap-2">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    Syncing with Stripe…
-                  </p>
+                  <div className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50/60 px-4 py-3.5">
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin text-amber-600" />
+                    <p className="text-sm font-light text-amber-800">Syncing with Stripe…</p>
+                  </div>
                 ) : (
-                  <>
-                    <p className="text-xs text-slate-500 font-light leading-relaxed">
-                      Required — verify your identity with Stripe before you can activate your profile.
-                    </p>
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#002fa7]/10 text-[#002FA7]">
+                        <ShieldCheck className="h-4.5 w-4.5" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-900">Verify your identity</p>
+                        <p className="mt-1 text-xs font-light leading-relaxed text-slate-500">
+                          Required for hosts and backpackers before your profile can go live. Takes about a minute
+                          with a photo ID.
+                        </p>
+                      </div>
+                    </div>
+
                     <button
                       type="button"
                       onClick={startVerification}
                       disabled={verifying}
-                      className={`mt-3 ${homePrimaryButton} disabled:opacity-50`}
+                      className={`mt-4 w-full justify-center ${homePrimaryButton} disabled:opacity-50`}
                     >
                       {verifying ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
-                      {verifying ? "Loading..." : "Verify Identity"}
+                      {verifying ? "Loading..." : "Verify with Stripe"}
                     </button>
-                    <p className="mt-3 text-[11px] text-slate-400 font-light leading-relaxed">
+
+                    <p className="mt-3 text-center text-[11px] font-light leading-relaxed text-slate-400">
                       Blurry photo or expired document?{" "}
                       <button
                         type="button"
                         onClick={requestManualReview}
                         disabled={requestingManualReview}
-                        className="text-[#002FA7] font-medium hover:underline disabled:opacity-50"
+                        className="font-medium text-[#002FA7] hover:underline disabled:opacity-50"
                       >
                         {requestingManualReview ? "Requesting…" : "Request manual review"}
                       </button>
                     </p>
-                  </>
+                  </div>
+                )}
+
+                {form.role === "Host" && (
+                  <p className="mt-3 text-xs font-light leading-relaxed text-slate-500">
+                    No Stripe payout setup needed to go live. We&apos;ll ask for your bank details only when you accept
+                    a paid visit.
+                  </p>
                 )}
               </div>
             </div>
