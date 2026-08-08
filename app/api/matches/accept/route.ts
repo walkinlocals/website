@@ -83,6 +83,43 @@ export async function POST(request: Request) {
 
   const hostEarningsEur = (partySize * HOST_PAYOUT_CENTS) / 100;
   const isHostAccepting = user.id === match.host_id;
+  const hostId = match.host_id;
+
+  /** Nudge the host by email — the guest is blocked until payouts are ready. */
+  async function emailHostAboutPayoutSetup() {
+    try {
+      const { data: hostContact } = await supabase
+        .from("profiles")
+        .select("contact_email, full_name")
+        .eq("id", hostId)
+        .maybeSingle();
+
+      if (!hostContact?.contact_email) return;
+
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+      await resend.emails.send({
+        from: "WALKINLOCALS <updates@walkinlocals.com>",
+        to: [hostContact.contact_email],
+        subject: `⏳ €${hostEarningsEur} is waiting — add your bank details`,
+        html: `
+          <div style="font-family: serif; color: #0f172a; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <p style="font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #002FA7;">WALKINLOCALS Notification</p>
+            <h2 style="font-weight: normal; font-size: 24px; margin-top: 10px;">A backpacker is waiting to confirm</h2>
+            <p style="font-size: 16px; line-height: 1.6; font-weight: 300;">Hello ${hostContact.full_name ?? "there"},</p>
+            <p style="font-size: 16px; line-height: 1.6; font-weight: 300;">
+              A backpacker just tried to confirm a visit with you, but they can&apos;t pay until your Stripe payout
+              details are set up. You have <strong style="color: #002FA7;">€${hostEarningsEur}</strong> waiting on this visit.
+            </p>
+            <div style="margin-top: 32px;">
+              <a href="${appUrl}/matches" style="background-color: #002FA7; color: white; padding: 14px 28px; text-decoration: none; border-radius: 9999px; font-size: 14px; font-family: sans-serif; font-weight: 600;">Set up payouts</a>
+            </div>
+          </div>
+        `,
+      });
+    } catch (emailErr) {
+      console.error("Host payout setup email failed:", emailErr);
+    }
+  }
 
   function payoutSetupRequiredResponse() {
     if (isHostAccepting) {
@@ -95,9 +132,11 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
+    void emailHostAboutPayoutSetup();
     return NextResponse.json(
       {
-        error: "This host is finishing payout setup. Please try again shortly.",
+        error:
+          "This host hasn't finished their payout setup yet. We've just reminded them — you'll be able to confirm as soon as they do.",
         code: "HOST_PAYOUTS_PENDING",
       },
       { status: 409 },

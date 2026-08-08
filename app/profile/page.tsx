@@ -73,6 +73,9 @@ const fieldLabel = "text-base font-medium text-slate-700 sm:text-lg";
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
+/** Sentinel value for the "not listed" option in the Dublin area select. */
+const OTHER_AREA = "__other__";
+
 export default function ProfilePage() {
   return (
     <Suspense
@@ -107,6 +110,13 @@ function ProfileInner() {
   const [isEditing, setIsEditing] = useState(false);
   const [isAsleep, setIsAsleep] = useState(false);
   const [verificationPolling, setVerificationPolling] = useState(false);
+  const [areaOtherPicked, setAreaOtherPicked] = useState(false);
+
+  // A saved area that is not one of the presets means the host typed their own.
+  const savedAreaIsCustom =
+    !!form.neighborhood.trim() &&
+    !(DUBLIN_AREAS as readonly string[]).includes(form.neighborhood.trim());
+  const showCustomArea = areaOtherPicked || savedAreaIsCustom;
 
   const verificationComplete = searchParams.get("verification") === "complete";
   const connectComplete =
@@ -837,7 +847,7 @@ function ProfileInner() {
               {form.bio && (
                 <div className="border-t border-slate-200/80 pt-8">
                   <p className={fieldLabel}>About you</p>
-                  <p className="mt-3 text-lg leading-relaxed text-slate-950 whitespace-pre-line sm:text-xl sm:leading-[1.65]">
+                  <p className="mt-3 text-lg leading-relaxed text-slate-950 whitespace-pre-line break-words [overflow-wrap:anywhere] sm:text-xl sm:leading-[1.65]">
                     {form.bio}
                   </p>
                 </div>
@@ -1090,20 +1100,43 @@ function ProfileInner() {
                 <label htmlFor="neighborhood" className={fieldLabel}>
                   General Area of your Dublin Home
                 </label>
-                <input
+                <select
                   id="neighborhood"
-                  list="dublin-areas"
-                  required
-                  value={form.neighborhood}
-                  onChange={(e) => setForm((p) => ({ ...p, neighborhood: e.target.value }))}
+                  required={!showCustomArea}
+                  value={showCustomArea ? OTHER_AREA : form.neighborhood}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === OTHER_AREA) {
+                      setAreaOtherPicked(true);
+                      setForm((p) => ({ ...p, neighborhood: "" }));
+                      return;
+                    }
+                    setAreaOtherPicked(false);
+                    setForm((p) => ({ ...p, neighborhood: value }));
+                  }}
                   className={inputClass}
-                  placeholder="Select or type a Dublin area…"
-                />
-                <datalist id="dublin-areas">
+                >
+                  <option value="">Select a Dublin area…</option>
                   {DUBLIN_AREAS.map((area) => (
-                    <option key={area} value={area} />
+                    <option key={area} value={area}>
+                      {area}
+                    </option>
                   ))}
-                </datalist>
+                  <option value={OTHER_AREA}>Other — not listed</option>
+                </select>
+
+                {showCustomArea && (
+                  <input
+                    id="neighborhood-other"
+                    required
+                    autoFocus
+                    value={form.neighborhood}
+                    onChange={(e) => setForm((p) => ({ ...p, neighborhood: e.target.value }))}
+                    className={inputClass}
+                    placeholder="Type your Dublin area…"
+                    aria-label="Your Dublin area"
+                  />
+                )}
               </div>
             ) : form.role === "Guest" ? (
               <div>

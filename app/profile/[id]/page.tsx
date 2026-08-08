@@ -203,7 +203,7 @@ export default async function ProfileDetailPage({
                   The Story
                 </span>
               </div>
-              <p className="text-base leading-relaxed text-slate-950 whitespace-pre-line sm:text-[17px] sm:leading-[1.65]">
+              <p className="text-base leading-relaxed text-slate-950 whitespace-pre-line break-words [overflow-wrap:anywhere] sm:text-[17px] sm:leading-[1.65]">
                 {profile.bio || "This member hasn't written their story yet."}
               </p>
             </div>

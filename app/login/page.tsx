@@ -28,6 +28,7 @@ function LoginInner() {
   const [password, setPassword] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
   const [error, setError] = useState<string | null>(() =>
     params.get("error") === "auth_callback"
       ? "Google sign-in could not be completed. Try again or use email and password."
@@ -86,6 +87,31 @@ function LoginInner() {
     if (!roleToSet) return;
 
     await supabase.from("profiles").update({ role: roleToSet }).eq("id", userId);
+  }
+
+  async function handleForgotPassword() {
+    setError(null);
+    setInfo(null);
+
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setError("Enter your email address first, then tap Forgot password.");
+      return;
+    }
+
+    setSendingReset(true);
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(trimmed, {
+        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+      });
+      if (resetError) {
+        setError(resetError.message);
+        return;
+      }
+      setInfo(`If an account exists for ${trimmed}, we've sent a link to reset your password.`);
+    } finally {
+      setSendingReset(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -176,9 +202,11 @@ function LoginInner() {
             <h1 className={`${heroTitle} !text-[1.625rem] sm:!text-[2.1rem] lg:!text-[2.475rem]`}>
               {mode === "signin" ? "Welcome back" : "Create your account"}
             </h1>
-            <p className="mt-2 text-base text-slate-500 font-light sm:text-[1.1375rem]">
-              {mode === "signin" ? "Sign in to continue your Dublin story." : "Just the basics — you'll customize your profile next."}
-            </p>
+            {mode === "signin" && (
+              <p className="mt-2 text-base text-slate-500 font-light sm:text-[1.1375rem]">
+                Sign in to continue your Dublin story.
+              </p>
+            )}
           </div>
 
           <div className="mt-10 grid grid-cols-2 rounded-full bg-slate-100 p-1.5 text-base font-medium border border-slate-150 sm:text-[1.1375rem]">
@@ -248,7 +276,19 @@ function LoginInner() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-mono tracking-wider uppercase text-slate-600 sm:text-[0.975rem]">Password</label>
+              <div className="flex items-baseline justify-between gap-3">
+                <label htmlFor="password" className="block text-sm font-mono tracking-wider uppercase text-slate-600 sm:text-[0.975rem]">Password</label>
+                {mode === "signin" && (
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={sendingReset || submitting}
+                    className="text-sm font-medium text-[#002FA7] transition hover:underline disabled:opacity-50 sm:text-[0.975rem]"
+                  >
+                    {sendingReset ? "Sending…" : "Forgot password?"}
+                  </button>
+                )}
+              </div>
               <input
                 id="password"
                 type="password"

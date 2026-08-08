@@ -38,7 +38,7 @@ export default async function MatchesPage({
 
   const { data: me } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, payouts_enabled")
     .eq("id", user.id)
     .single();
 
@@ -86,6 +86,7 @@ export default async function MatchesPage({
       <MatchesView
         currentUserId={user.id}
         myRole={(me?.role as "Guest" | "Host") ?? "Guest"}
+        payoutsEnabled={Boolean(me?.payouts_enabled)}
         matches={rows}
         loadError={error?.message ?? null}
         justPaid={paymentConfirmed}

@@ -60,6 +60,7 @@ export interface MatchRow {
 interface Props {
   currentUserId: string;
   myRole: "Guest" | "Host";
+  payoutsEnabled?: boolean;
   matches: MatchRow[];
   loadError: string | null;
   justPaid: boolean;
@@ -79,6 +80,7 @@ const STATUS_STYLE: Record<Status, string> = {
 export default function MatchesView({
   currentUserId,
   myRole,
+  payoutsEnabled = false,
   matches,
   loadError,
   justPaid,
@@ -89,6 +91,36 @@ export default function MatchesView({
   const router = useRouter();
   const [payoutsReady, setPayoutsReady] = useState(false);
   const [paymentSyncing, setPaymentSyncing] = useState(paymentReturnPending);
+  const [startingPayoutSetup, setStartingPayoutSetup] = useState(false);
+  const [payoutSetupError, setPayoutSetupError] = useState<string | null>(null);
+
+  // Hosts are blocked from being accepted until Stripe payouts are ready, so prompt
+  // them up front instead of only after a guest's confirmation fails.
+  const openMatchCount = matches.filter(
+    (m) => m.host_id === currentUserId && m.status !== "Paid" && m.status !== "Denied",
+  ).length;
+  const needsPayoutSetup =
+    myRole === "Host" && !payoutsEnabled && !payoutsReady && openMatchCount > 0;
+
+  async function startPayoutSetup() {
+    setStartingPayoutSetup(true);
+    setPayoutSetupError(null);
+    try {
+      const res = await fetch("/api/stripe/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ returnPath: "/matches" }),
+      });
+      const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !body.url) {
+        setPayoutSetupError(body.error ?? "Could not start payout setup.");
+        return;
+      }
+      window.location.href = body.url;
+    } finally {
+      setStartingPayoutSetup(false);
+    }
+  }
 
   useEffect(() => {
     if (!paymentReturnPending) return;
@@ -143,6 +175,28 @@ export default function MatchesView({
       <p className="mt-5 text-lg leading-relaxed text-slate-950 sm:text-xl sm:leading-relaxed">
         Manage connection requests, respond to invitations, and unlock contact details after payment.
       </p>
+
+      {needsPayoutSetup && (
+        <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50/70 p-5 sm:p-6">
+          <p className="font-serif text-base text-amber-950 sm:text-lg">
+            Add your bank details to accept visits.
+          </p>
+          {payoutSetupError && (
+            <p className="mt-3 text-sm text-rose-600" role="alert">
+              {payoutSetupError}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={startPayoutSetup}
+            disabled={startingPayoutSetup}
+            className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-[#002FA7] px-6 py-3 font-mono text-[9px] font-semibold uppercase tracking-widest text-white shadow-[0_4px_12px_rgba(0,47,167,0.15)] transition hover:bg-[#001e6c] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {startingPayoutSetup ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+            Set up payouts
+          </button>
+        </div>
+      )}
 
       {payoutsReady && (
         <p className="mt-8 flex items-center gap-2 text-base text-emerald-800">
